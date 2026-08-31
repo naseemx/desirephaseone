@@ -12,7 +12,7 @@ export default function Home() {
 
   return (
     <div className="relative min-h-screen bg-[#09090b] text-zinc-100 selection:bg-cyan-500 selection:text-black">
-      {/* SVG Circle Matrix Preloader (Dynamic 0% -> 100% tied to real frame loading) */}
+      {/* SVG Circle Matrix Preloader */}
       <Preloader
         progress={loadingProgress}
         onComplete={() => setIsLoaded(true)}
@@ -21,7 +21,7 @@ export default function Home() {
       {/* Fixed Header Navbar with Brand & Company Logos */}
       <Navbar visible={isLoaded} />
 
-      {/* Fullscreen Hero Scroll Canvas (264 WebP Frames + GSAP Pin Scrub) */}
+      {/* Fullscreen Hero Scroll Canvas (All 264 WebP Frames Preloaded Dynamically) */}
       <HeroCanvas
         onProgress={(pct) => setLoadingProgress((prev) => Math.max(prev, pct))}
         onLoaded={() => setLoadingProgress(100)}

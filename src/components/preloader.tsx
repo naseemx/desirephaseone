@@ -15,25 +15,25 @@ export function Preloader({ progress = 0, onComplete }: PreloaderProps) {
   const [isFinished, setIsFinished] = useState(false);
   const [shouldRender, setShouldRender] = useState(true);
 
-  // Smooth progress animation towards target progress
+  // Smooth progress animation dynamically synchronized to real frame loading
   useEffect(() => {
     const interval = setInterval(() => {
       setDisplayProgress((prev) => {
         if (prev < progress) {
-          const step = Math.max(1, Math.ceil((progress - prev) * 0.18));
+          const step = Math.max(1, Math.ceil((progress - prev) / 5));
           const next = Math.min(progress, prev + step);
           if (next >= 100 && !isFinished) {
             setIsFinished(true);
             setTimeout(() => {
               setShouldRender(false);
               onComplete?.();
-            }, 800);
+            }, 700);
           }
           return next;
         }
         return prev;
       });
-    }, 24);
+    }, 25);
 
     return () => clearInterval(interval);
   }, [progress, isFinished, onComplete]);

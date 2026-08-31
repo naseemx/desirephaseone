@@ -114,15 +114,14 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
   useEffect(() => {
     let isCancelled = false;
     let loadedCount = 0;
-    // Complete preloader dynamically when 75% (~198 frames) of all 264 frames are loaded
-    const TARGET_PRELOAD_COUNT = Math.round(TOTAL_FRAMES * 0.75);
     const images: HTMLImageElement[] = new Array(TOTAL_FRAMES);
 
     const emitProgress = () => {
       loadedCount++;
-      const pct = Math.min(100, Math.round((loadedCount / TARGET_PRELOAD_COUNT) * 100));
+      const pct = Math.min(100, Math.round((loadedCount / TOTAL_FRAMES) * 100));
       onProgress?.(pct);
-      if (loadedCount >= TARGET_PRELOAD_COUNT) {
+      if (loadedCount >= TOTAL_FRAMES) {
+        onProgress?.(100);
         onLoaded?.();
       }
     };
@@ -172,22 +171,22 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
       drawFrame(0);
 
       // 2. Checkpoint keyframes
-      [75, 129, 199, 263].forEach((idx) => loadAndDecodeFrame(idx));
+      const checkpoints = [75, 129, 199, 263];
+      checkpoints.forEach((idx) => loadAndDecodeFrame(idx));
 
-      // 3. Batched remaining frames
+      // 3. Batched remaining frames in concurrent parallel streams
       (async () => {
-        const CHUNK_SIZE = 6;
+        const CHUNK_SIZE = 12;
         for (let i = 1; i < TOTAL_FRAMES; i += CHUNK_SIZE) {
           if (isCancelled) break;
           const chunk = [];
           for (let j = i; j < Math.min(i + CHUNK_SIZE, TOTAL_FRAMES); j++) {
-            chunk.push(loadAndDecodeFrame(j));
+            if (!checkpoints.includes(j)) {
+              chunk.push(loadAndDecodeFrame(j));
+            }
           }
           await Promise.all(chunk);
         }
-        // When all 264 frames are finished
-        onProgress?.(100);
-        onLoaded?.();
       })();
     });
 

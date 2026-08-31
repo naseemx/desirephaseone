@@ -1,26 +1,44 @@
 @import "tailwindcss";
+@import "lenis/dist/lenis.css";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #09090b;
+  --foreground: #f4f4f5;
+
+  /* Brand Colors: CMYK Specifications */
+  /* Cyan (C:70 M:0 Y:0 K:0) -> Electric Tech Cyan #00b5e2 */
+  --brand-cyan: #00b5e2;
+  --brand-cyan-glow: rgba(0, 181, 226, 0.15);
+  --brand-cyan-border: rgba(0, 181, 226, 0.35);
+
+  /* Grey 20 (C:0 M:0 Y:0 K:20) -> #d0d2d3 */
+  --brand-grey-20: #d0d2d3;
+
+  /* Grey 10 (C:0 M:0 Y:0 K:10) -> #e7e8e9 */
+  --brand-grey-10: #e7e8e9;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-varela-round);
+
+  --color-brand-cyan: var(--brand-cyan);
+  --color-brand-grey-20: var(--brand-grey-20);
+  --color-brand-grey-10: var(--brand-grey-10);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: auto !important;
+}
+
+html, body {
+  min-height: 100%;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-varela-round), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow-x: clip;
 }

@@ -114,14 +114,15 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
   useEffect(() => {
     let isCancelled = false;
     let loadedCount = 0;
-    const targetCount = 35; // Target initial batch for 100% readiness
+    // Complete preloader dynamically when 75% (~198 frames) of all 264 frames are loaded
+    const TARGET_PRELOAD_COUNT = Math.round(TOTAL_FRAMES * 0.75);
     const images: HTMLImageElement[] = new Array(TOTAL_FRAMES);
 
     const emitProgress = () => {
       loadedCount++;
-      const pct = Math.min(100, Math.round((loadedCount / targetCount) * 100));
+      const pct = Math.min(100, Math.round((loadedCount / TARGET_PRELOAD_COUNT) * 100));
       onProgress?.(pct);
-      if (loadedCount >= targetCount) {
+      if (loadedCount >= TARGET_PRELOAD_COUNT) {
         onLoaded?.();
       }
     };
@@ -184,7 +185,7 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
           }
           await Promise.all(chunk);
         }
-        // When all frames are finished
+        // When all 264 frames are finished
         onProgress?.(100);
         onLoaded?.();
       })();

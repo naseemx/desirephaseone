@@ -20,7 +20,8 @@ export function Preloader({ progress = 0, onComplete }: PreloaderProps) {
     const interval = setInterval(() => {
       setDisplayProgress((prev) => {
         if (prev < progress) {
-          const next = Math.min(progress, prev + 1);
+          const step = Math.max(1, Math.ceil((progress - prev) * 0.18));
+          const next = Math.min(progress, prev + step);
           if (next >= 100 && !isFinished) {
             setIsFinished(true);
             setTimeout(() => {
@@ -32,7 +33,7 @@ export function Preloader({ progress = 0, onComplete }: PreloaderProps) {
         }
         return prev;
       });
-    }, 28);
+    }, 24);
 
     return () => clearInterval(interval);
   }, [progress, isFinished, onComplete]);

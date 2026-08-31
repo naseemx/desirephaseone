@@ -1,33 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Monitor,
-  ShieldCheck,
-  ArrowUp,
-  ArrowRight,
-  Mail,
-  CheckCircle2,
-  Sparkles,
-  Zap,
-  Globe,
-  Radio,
-  Cpu,
-  Layers,
-} from "lucide-react";
+import React from "react";
+import Image from "next/image";
+import { ArrowUp } from "lucide-react";
 
 export function Footer() {
-  const [email, setEmail] = useState("");
-  const [subscribed, setSubscribed] = useState(false);
-
-  const handleSubscribe = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email.trim()) {
-      setSubscribed(true);
-      setEmail("");
-    }
-  };
-
   const scrollToTop = () => {
     if (typeof window !== "undefined") {
       const lenis = (window as unknown as { lenis?: { scrollTo: (target: number) => void } }).lenis;
@@ -40,262 +17,110 @@ export function Footer() {
   };
 
   return (
-    <footer className="relative border-t border-zinc-800/80 bg-[#09090b] text-[var(--brand-grey-20)] overflow-hidden">
-      {/* Ambient gradient glow using Brand Cyan */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-96 bg-[radial-gradient(ellipse_at_top,rgba(0,181,226,0.15),rgba(208,210,211,0.04),transparent_70%)]" />
-      <div className="pointer-events-none absolute -left-40 top-1/2 h-72 w-72 rounded-full bg-[var(--brand-cyan)]/5 blur-3xl" />
-      <div className="pointer-events-none absolute -right-40 bottom-10 h-72 w-72 rounded-full bg-[var(--brand-cyan)]/5 blur-3xl" />
-
-      <div className="relative mx-auto max-w-7xl px-6 pt-20 pb-12 lg:px-8">
-        {/* Top Feature Banner / CTA Callout */}
-        <div className="relative mb-20 overflow-hidden rounded-3xl border border-zinc-800/90 bg-gradient-to-b from-zinc-900/90 via-zinc-900/50 to-zinc-950/80 p-8 sm:p-12 backdrop-blur-xl shadow-2xl">
-          {/* Subtle grid pattern background */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#27272a15_1px,transparent_1px),linear-gradient(to_bottom,#27272a15_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
-
-          <div className="relative grid gap-8 lg:grid-cols-12 lg:items-center">
-            <div className="lg:col-span-7">
-              <div className="inline-flex items-center gap-2 rounded-full border border-[var(--brand-cyan)]/35 bg-[var(--brand-cyan)]/10 px-3.5 py-1 text-xs font-semibold text-[var(--brand-cyan)] mb-4">
-                <Sparkles className="h-3.5 w-3.5" />
-                <span>Next-Gen Display Architecture</span>
+    <footer className="relative border-t border-white/10 bg-[#09090b] text-zinc-400 select-none">
+      <div className="mx-auto max-w-7xl px-6 py-12 lg:px-10">
+        <div className="flex flex-col items-center justify-between gap-8 md:flex-row">
+          {/* Logo Placeholder (Company & Brand Logos) */}
+          <div className="flex items-center gap-3 sm:gap-4">
+            <a
+              href="#hero"
+              className="flex items-center gap-2.5 sm:gap-3 transition-opacity hover:opacity-90 active:scale-[0.98]"
+              aria-label="Home"
+            >
+              {/* companylogo.png (Desire Advertising) */}
+              <div className="relative h-[22px] sm:h-[26px] w-[57px] sm:w-[67px] shrink-0">
+                <Image
+                  src="/companylogo.png"
+                  alt="Company Logo"
+                  fill
+                  className="object-contain"
+                />
               </div>
-              <h2 className="text-2xl font-bold tracking-tight text-[var(--brand-grey-10)] sm:text-3xl lg:text-4xl">
-                Ready to engineer your next high-impact visual experience?
-              </h2>
-              <p className="mt-3 text-sm sm:text-base text-[var(--brand-grey-20)] max-w-2xl leading-relaxed">
-                From XR virtual production stages to ultra-fine pitch command centers,
-                our engineering team delivers calibrated, zero-latency LED hardware worldwide.
-              </p>
 
-              <div className="mt-6 flex flex-wrap gap-4 text-xs text-[var(--brand-grey-20)]">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-[var(--brand-cyan)]" />
-                  <span>3840Hz – 7680Hz Refresh</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-[var(--brand-cyan)]" />
-                  <span>Brompton & NovaStar Calibrated</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-[var(--brand-cyan)]" />
-                  <span>IP68 Weatherproof Outdoor</span>
-                </div>
-              </div>
-            </div>
+              {/* Subtle vertical divider */}
+              <div className="h-3.5 sm:h-4 w-[1px] bg-white/20 shrink-0" />
 
-            <div className="lg:col-span-5">
-              <div className="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-6 backdrop-blur-md">
-                <h3 className="text-base font-semibold text-[var(--brand-grey-10)]">
-                  Request Specifications & Whitepapers
-                </h3>
-                <p className="mt-1 text-xs text-[var(--brand-grey-20)]/80">
-                  Receive comprehensive architectural diagrams, CAD files, and photometric test logs.
-                </p>
-
-                {subscribed ? (
-                  <div className="mt-4 flex items-center gap-3 rounded-xl border border-[var(--brand-cyan)]/35 bg-[var(--brand-cyan)]/10 p-3.5 text-xs text-[var(--brand-cyan)]">
-                    <CheckCircle2 className="h-4 w-4 text-[var(--brand-cyan)] shrink-0" />
-                    <span>Inquiry logged. Our systems engineering team will be in touch shortly.</span>
-                  </div>
-                ) : (
-                  <form onSubmit={handleSubscribe} className="mt-4 space-y-3">
-                    <div className="relative">
-                      <Mail className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
-                      <input
-                        type="email"
-                        required
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="engineering@company.com"
-                        className="w-full rounded-xl border border-zinc-800 bg-zinc-900/90 py-2.5 pl-10 pr-4 text-xs text-white placeholder-zinc-500 transition-all focus:border-[var(--brand-cyan)] focus:outline-none focus:ring-1 focus:ring-[var(--brand-cyan)]"
-                      />
-                    </div>
-                    <button
-                      type="submit"
-                      className="group flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--brand-cyan)] px-4 py-2.5 text-xs font-semibold text-black shadow-lg shadow-[var(--brand-cyan)]/25 transition-all hover:brightness-110 active:scale-[0.99]"
-                    >
-                      <span>Download Engineering Brief</span>
-                      <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-                    </button>
-                  </form>
-                )}
+              {/* brandlogo.png (dzyr digital) */}
+              <div className="relative h-[14px] sm:h-[16px] w-[80px] sm:w-[92px] shrink-0">
+                <Image
+                  src="/brandlogo.png"
+                  alt="Brand Logo"
+                  fill
+                  className="object-contain"
+                />
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Main Footer Links Grid */}
-        <div className="grid grid-cols-2 gap-8 md:grid-cols-4 lg:grid-cols-5 pb-16">
-          {/* Brand Column */}
-          <div className="col-span-2 lg:col-span-2">
-            <div className="flex items-center gap-2.5 text-white font-bold text-lg tracking-tight">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--brand-cyan)]/40 bg-[var(--brand-cyan)]/15 text-[var(--brand-cyan)] shadow-inner">
-                <Monitor className="h-5 w-5" />
-              </div>
-              <div className="flex flex-col">
-                <span className="leading-tight text-[var(--brand-grey-10)]">LED SCREEN STUDIO</span>
-                <span className="text-[10px] font-mono tracking-widest text-[var(--brand-cyan)] uppercase">
-                  Precision Visuals
-                </span>
-              </div>
-            </div>
-
-            <p className="mt-4 text-xs leading-relaxed text-[var(--brand-grey-20)] max-w-sm">
-              Pioneering next-generation LED wall engineering, modular display mechanics,
-              and real-time camera-calibrated in-camera VFX environments for tier-1 productions.
-            </p>
-
-            {/* Quick telemetry indicators */}
-            <div className="mt-6 flex flex-wrap items-center gap-3">
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[11px] font-medium text-emerald-400">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span>Fabrication & Rigging Active</span>
-              </div>
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-zinc-800 bg-zinc-900/60 px-3 py-1 text-[11px] font-mono text-[var(--brand-grey-20)]">
-                <Radio className="h-3 w-3 text-[var(--brand-cyan)]" />
-                <span>24/7 Deployment</span>
-              </div>
-            </div>
+            </a>
           </div>
 
-          {/* Column 1: Display Solutions */}
-          <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--brand-grey-10)]">
-              Display Solutions
-            </h3>
-            <ul className="mt-4 space-y-2.5 text-xs text-[var(--brand-grey-20)]">
-              <li>
-                <a href="#hero" className="transition-colors hover:text-[var(--brand-cyan)] flex items-center gap-1.5">
-                  <span className="h-1 w-1 rounded-full bg-[var(--brand-cyan)]/60" />
-                  Ultra-Fine Pitch (P0.9 - P1.5)
-                </a>
-              </li>
-              <li>
-                <a href="#hero" className="transition-colors hover:text-[var(--brand-cyan)] flex items-center gap-1.5">
-                  <span className="h-1 w-1 rounded-full bg-[var(--brand-cyan)]/60" />
-                  XR Virtual Production Stages
-                </a>
-              </li>
-              <li>
-                <a href="#hero" className="transition-colors hover:text-[var(--brand-cyan)] flex items-center gap-1.5">
-                  <span className="h-1 w-1 rounded-full bg-[var(--brand-cyan)]/60" />
-                  Concert Touring & Festival Rigs
-                </a>
-              </li>
-              <li>
-                <a href="#hero" className="transition-colors hover:text-[var(--brand-cyan)] flex items-center gap-1.5">
-                  <span className="h-1 w-1 rounded-full bg-[var(--brand-cyan)]/60" />
-                  Curved & Architectural Façades
-                </a>
-              </li>
-              <li>
-                <a href="#hero" className="transition-colors hover:text-[var(--brand-cyan)] flex items-center gap-1.5">
-                  <span className="h-1 w-1 rounded-full bg-[var(--brand-cyan)]/60" />
-                  Transparent Mesh Facades
-                </a>
-              </li>
-            </ul>
+          {/* Social Links */}
+          <div className="flex items-center gap-3.5 sm:gap-4">
+            {/* Instagram */}
+            <a
+              href="https://instagram.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-zinc-400 transition-all hover:border-[var(--brand-cyan)]/50 hover:bg-[var(--brand-cyan)]/10 hover:text-white hover:shadow-[0_0_12px_rgba(0,181,226,0.3)]"
+              aria-label="Instagram"
+            >
+              <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+              </svg>
+            </a>
+
+            {/* LinkedIn */}
+            <a
+              href="https://linkedin.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-zinc-400 transition-all hover:border-[var(--brand-cyan)]/50 hover:bg-[var(--brand-cyan)]/10 hover:text-white hover:shadow-[0_0_12px_rgba(0,181,226,0.3)]"
+              aria-label="LinkedIn"
+            >
+              <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24">
+                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+              </svg>
+            </a>
+
+            {/* X / Twitter */}
+            <a
+              href="https://x.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-zinc-400 transition-all hover:border-[var(--brand-cyan)]/50 hover:bg-[var(--brand-cyan)]/10 hover:text-white hover:shadow-[0_0_12px_rgba(0,181,226,0.3)]"
+              aria-label="X"
+            >
+              <svg className="h-3.5 w-3.5 fill-current" viewBox="0 0 24 24">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+              </svg>
+            </a>
+
+            {/* YouTube */}
+            <a
+              href="https://youtube.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-zinc-400 transition-all hover:border-[var(--brand-cyan)]/50 hover:bg-[var(--brand-cyan)]/10 hover:text-white hover:shadow-[0_0_12px_rgba(0,181,226,0.3)]"
+              aria-label="YouTube"
+            >
+              <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24">
+                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+              </svg>
+            </a>
           </div>
 
-          {/* Column 2: Technology */}
-          <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--brand-grey-10)]">
-              Hardware & Tech
-            </h3>
-            <ul className="mt-4 space-y-2.5 text-xs text-[var(--brand-grey-20)]">
-              <li>
-                <a href="#hero" className="transition-colors hover:text-[var(--brand-cyan)] flex items-center gap-1.5">
-                  <Cpu className="h-3 w-3 text-zinc-500" />
-                  HDR10+ Calibration Tools
-                </a>
-              </li>
-              <li>
-                <a href="#hero" className="transition-colors hover:text-[var(--brand-cyan)] flex items-center gap-1.5">
-                  <Zap className="h-3 w-3 text-zinc-500" />
-                  Brompton SX40 Processors
-                </a>
-              </li>
-              <li>
-                <a href="#hero" className="transition-colors hover:text-[var(--brand-cyan)] flex items-center gap-1.5">
-                  <Layers className="h-3 w-3 text-zinc-500" />
-                  Modular Magnetic Latches
-                </a>
-              </li>
-              <li>
-                <a href="#hero" className="transition-colors hover:text-[var(--brand-cyan)] flex items-center gap-1.5">
-                  <ShieldCheck className="h-3 w-3 text-zinc-500" />
-                  IP68 Dust & Water Ingress
-                </a>
-              </li>
-              <li>
-                <a href="#hero" className="transition-colors hover:text-[var(--brand-cyan)] flex items-center gap-1.5">
-                  <Globe className="h-3 w-3 text-zinc-500" />
-                  Genlock & Frame Sync
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* Column 3: Corporate & Support */}
-          <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--brand-grey-10)]">
-              Global Support
-            </h3>
-            <ul className="mt-4 space-y-2.5 text-xs text-[var(--brand-grey-20)]">
-              <li>
-                <a href="#hero" className="transition-colors hover:text-[var(--brand-cyan)]">
-                  Worldwide Tour Rigging
-                </a>
-              </li>
-              <li>
-                <a href="#hero" className="transition-colors hover:text-[var(--brand-cyan)]">
-                  On-Site Field Engineering
-                </a>
-              </li>
-              <li>
-                <a href="#hero" className="transition-colors hover:text-[var(--brand-cyan)]">
-                  CAD & Rigging Blueprints
-                </a>
-              </li>
-              <li>
-                <a href="#hero" className="transition-colors hover:text-[var(--brand-cyan)]">
-                  LED Calibration Services
-                </a>
-              </li>
-              <li>
-                <a href="#hero" className="transition-colors hover:text-[var(--brand-cyan)]">
-                  Safety & Structural Certs
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div className="border-t border-zinc-800/80 pt-8 mt-2" />
-
-        {/* Bottom Bar */}
-        <div className="flex flex-col items-center justify-between gap-4 text-xs sm:flex-row text-[var(--brand-grey-20)]/70">
-          <div className="flex flex-wrap items-center gap-4">
-            <span>
-              © {new Date().getFullYear()} LED Screen Studio. All rights reserved.
-            </span>
-            <span className="hidden sm:inline text-zinc-700">•</span>
-            <div className="flex items-center gap-3">
-              <a href="#hero" className="hover:text-[var(--brand-grey-10)] transition-colors">Privacy Policy</a>
-              <a href="#hero" className="hover:text-[var(--brand-grey-10)] transition-colors">Terms of Service</a>
-              <a href="#hero" className="hover:text-[var(--brand-grey-10)] transition-colors">Compliance (CE/UL)</a>
-            </div>
-          </div>
-
-          {/* Back to top button */}
+          {/* Back to Top */}
           <button
             onClick={scrollToTop}
-            className="group flex items-center gap-2 rounded-full border border-zinc-800 bg-zinc-900/60 px-3.5 py-1.5 text-xs text-[var(--brand-grey-20)] transition-all hover:border-[var(--brand-cyan)]/50 hover:bg-zinc-800 hover:text-white active:scale-95"
+            className="group flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-xs text-zinc-400 transition-all hover:border-[var(--brand-cyan)]/50 hover:bg-white/[0.06] hover:text-white active:scale-95"
             aria-label="Back to top"
           >
             <span>Back to top</span>
-            <ArrowUp className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 text-[var(--brand-cyan)]" />
+            <ArrowUp className="h-3.5 w-3.5 text-[var(--brand-cyan)] transition-transform group-hover:-translate-y-0.5" />
           </button>
+        </div>
+
+        {/* Minimal Copyright Bottom Note */}
+        <div className="mt-8 border-t border-white/5 pt-6 text-center text-xs text-zinc-500">
+          <p>© {new Date().getFullYear()} Desire Advertising & dzyr digital. All rights reserved.</p>
         </div>
       </div>
     </footer>

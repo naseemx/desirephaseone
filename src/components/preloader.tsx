@@ -88,8 +88,8 @@ export function Preloader({ progress = 0, onComplete }: PreloaderProps) {
 
       {/* Main Logo Preloader Container */}
       <div className="relative flex flex-col items-center">
-        {/* SVG Logo Graphic */}
-        <div className="relative h-44 w-32 sm:h-56 sm:w-40 md:h-64 md:w-44">
+        {/* SVG Logo Graphic (25% smaller) */}
+        <div className="relative h-32 w-24 sm:h-44 sm:w-32 md:h-48 md:w-36">
           <svg
             viewBox="0 0 929 1426"
             className="h-full w-full overflow-visible"
@@ -172,8 +172,8 @@ export function Preloader({ progress = 0, onComplete }: PreloaderProps) {
           </svg>
         </div>
 
-        {/* Loading Progress & Status Information */}
-        <div className="mt-8 flex flex-col items-center gap-2.5">
+        {/* Loading Progress Information */}
+        <div className="mt-6 flex flex-col items-center gap-2">
           {/* Percentage Number */}
           <div className="flex items-baseline gap-1 text-sm font-semibold tracking-wider text-white">
             <span className="font-mono text-base text-[var(--brand-cyan)]">
@@ -183,17 +183,12 @@ export function Preloader({ progress = 0, onComplete }: PreloaderProps) {
           </div>
 
           {/* Minimal hairline progress bar */}
-          <div className="h-[2px] w-36 sm:w-44 rounded-full bg-white/10 overflow-hidden">
+          <div className="h-[2px] w-28 sm:w-36 rounded-full bg-white/10 overflow-hidden">
             <div
               className="h-full bg-gradient-to-r from-[var(--brand-cyan)] to-cyan-300 transition-all duration-200 ease-out"
               style={{ width: `${displayProgress}%` }}
             />
           </div>
-
-          {/* Subtitle Cue */}
-          <span className="mt-1 text-[10px] tracking-[0.25em] uppercase text-zinc-500 font-medium">
-            Loading Display Assets
-          </span>
         </div>
       </div>
     </div>

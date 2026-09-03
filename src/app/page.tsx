@@ -21,7 +21,7 @@ export default function Home() {
       {/* Fixed Header Navbar with Brand & Company Logos */}
       <Navbar visible={isLoaded} />
 
-      {/* Fullscreen Hero Scroll Canvas (All 264 WebP Frames Preloaded Dynamically) */}
+      {/* Fullscreen Hero Scroll Canvas (All 246 WebP Frames Preloaded Dynamically) */}
       <HeroCanvas
         onProgress={(pct) => setLoadingProgress((prev) => Math.max(prev, pct))}
         onLoaded={() => setLoadingProgress(100)}

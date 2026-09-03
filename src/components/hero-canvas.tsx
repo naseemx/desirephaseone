@@ -4,27 +4,36 @@ import { useEffect, useRef, useCallback, useState } from "react";
 import { gsap, Observer, useGSAP } from "@/lib/gsap";
 import { FrostedCard } from "@/components/frosted-card";
 
-const TOTAL_FRAMES = 264;
+const TOTAL_FRAMES = 246;
 const FPS = 24;
 
 // Checkpoint times in seconds (frame index / FPS):
 // Phase 0: Idle at start (0s)
-// Phase 1 pause: Frame 76 (idx 75)   = 75/24 = 3.125s
-// Phase 2 pause: Frame 130 (idx 129) = 129/24 = 5.375s
-// Phase 3 pause: Frame 200 (idx 199) = 199/24 ≈ 8.2917s
-// Phase 4 end:   Frame 264 (idx 263) = 263/24 ≈ 10.9583s
+// Phase 1 pause: Frame 59  (idx 58)  = 58/24 ≈ 2.4167s
+// Phase 2 pause: Frame 118 (idx 117) = 117/24 = 4.8750s
+// Phase 3 pause: Frame 178 (idx 177) = 177/24 = 7.3750s
+// Phase 4 end:   Frame 246 (idx 245) = 245/24 ≈ 10.2083s
 const PAUSE_TIMES = [
   0,                        // Phase 0: start
-  75 / FPS,                 // Phase 1 target
-  129 / FPS,                // Phase 2 target
-  199 / FPS,                // Phase 3 target
-  (TOTAL_FRAMES - 1) / FPS, // Phase 4 target / duration
+  58 / FPS,                 // Phase 1 target (Frame 59)
+  117 / FPS,                // Phase 2 target (Frame 118)
+  177 / FPS,                // Phase 3 target (Frame 178)
+  (TOTAL_FRAMES - 1) / FPS, // Phase 4 target / duration (Frame 246)
 ];
 
 const TOTAL_DURATION = (TOTAL_FRAMES - 1) / FPS;
 
-// 800ms pause cooldown for a snappy, responsive feel while absorbing trackpad momentum
-const PAUSE_COOLDOWN_MS = 800;
+// 200ms (0.2s) pause cooldown for rapid, instant response
+const PAUSE_COOLDOWN_MS = 200;
+
+// Lead-in time in seconds for titles & cards to emerge early before camera comes to a stop
+const LEAD_IN_TIMES = [
+  0,    // Phase 0
+  0.85, // Phase 1 (Ribbon - Frame 59)
+  1.00, // Phase 2 (Kiosk - Frame 118)
+  1.10, // Phase 3 (Wall Display - Frame 178)
+  1.20, // Phase 4 (Glass Cube Studio - Frame 246)
+];
 
 function getFramePath(index: number) {
   const frameNum = String(index + 1).padStart(4, "0");
@@ -171,7 +180,7 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
       drawFrame(0);
 
       // 2. Checkpoint keyframes
-      const checkpoints = [75, 129, 199, 263];
+      const checkpoints = [58, 117, 177, 245];
       checkpoints.forEach((idx) => loadAndDecodeFrame(idx));
 
       // 3. Batched remaining frames in concurrent parallel streams
@@ -343,10 +352,14 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
         // Re-enter at the final frame
         currentPhase = 4;
         virtualTime = TOTAL_DURATION;
+        currentActivePhase = 4;
+        setActivePhase(4);
         render();
 
         observer.enable();
       };
+
+      let currentActivePhase = 0;
 
       // ── GSAP Ticker Loop ────────────────────────────────────────────────
       const tickerFunc = (_time: number, deltaTime: number) => {
@@ -357,11 +370,21 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
           virtualTime += deltaSec;
 
           const targetPauseTime = PAUSE_TIMES[currentPhase];
+          const leadIn = LEAD_IN_TIMES[currentPhase] ?? 1.2;
+
+          // Animate title & cards in earlier before reaching the checkpoint
+          if (virtualTime >= targetPauseTime - leadIn && currentActivePhase !== currentPhase) {
+            currentActivePhase = currentPhase;
+            setActivePhase(currentPhase);
+          }
 
           if (virtualTime >= targetPauseTime) {
             virtualTime = targetPauseTime;
             playState = 0; // go idle, wait for next user action
-            setActivePhase(currentPhase);
+            if (currentActivePhase !== currentPhase) {
+              currentActivePhase = currentPhase;
+              setActivePhase(currentPhase);
+            }
 
             if (currentPhase < 4) {
               triggerCooldown();
@@ -372,13 +395,27 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
           // Reverse scrubbing
           virtualTime -= deltaSec;
 
-          const previousPauseTime = PAUSE_TIMES[Math.max(0, currentPhase - 1)];
+          const targetPhase = Math.max(0, currentPhase - 1);
+          const previousPauseTime = PAUSE_TIMES[targetPhase];
+          const reverseLeadIn = LEAD_IN_TIMES[targetPhase] ?? 1.2;
+
+          // Animate title & cards in earlier before reaching the previous checkpoint in reverse
+          if (virtualTime <= previousPauseTime + reverseLeadIn && currentActivePhase !== targetPhase) {
+            currentActivePhase = targetPhase;
+            setActivePhase(targetPhase);
+            if (targetPhase === 0) {
+              setShowStartCard(true);
+            }
+          }
 
           if (virtualTime <= previousPauseTime) {
             virtualTime = previousPauseTime;
-            currentPhase = Math.max(0, currentPhase - 1);
+            currentPhase = targetPhase;
             playState = 0; // go idle, wait for next user action
-            setActivePhase(currentPhase);
+            if (currentActivePhase !== currentPhase) {
+              currentActivePhase = currentPhase;
+              setActivePhase(currentPhase);
+            }
 
             if (currentPhase === 0) {
               setShowStartCard(true);
@@ -404,12 +441,14 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
         if (currentPhase === 0) {
           // From idle at start, hide start card and advance to Phase 1 (Frame 75)
           setShowStartCard(false);
+          currentActivePhase = -1;
           setActivePhase(-1);
           currentPhase = 1;
           playState = 1;
         } else if (currentPhase >= 1 && currentPhase <= 3) {
           // If idle at a pause checkpoint, advance to next phase
           if (playState === 0 && virtualTime >= PAUSE_TIMES[currentPhase] - 0.1) {
+            currentActivePhase = -1;
             setActivePhase(-1);
             currentPhase += 1;
             playState = 1;
@@ -438,6 +477,7 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
 
         if (currentPhase > 0) {
           // Start reverse scrubbing
+          currentActivePhase = -1;
           setActivePhase(-1);
           playState = -1;
         }
@@ -452,6 +492,7 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
 
         if (currentPhase === 0) {
           setShowStartCard(false);
+          currentActivePhase = -1;
           setActivePhase(-1);
           currentPhase = 1;
           playState = 1;
@@ -462,6 +503,7 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
         if (playState !== 0) return;
 
         if (currentPhase >= 1 && currentPhase <= 3) {
+          currentActivePhase = -1;
           setActivePhase(-1);
           currentPhase += 1;
           playState = 1;
@@ -473,6 +515,7 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
       const handleMobileScrollReverse = () => {
         if (!scrollLocked || playState !== 0) return;
         if (pauseCooldown) return;
+        currentActivePhase = -1;
         setActivePhase(-1);
         handleScrollReverse();
       };

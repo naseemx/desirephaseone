@@ -37,7 +37,7 @@ const LEAD_IN_TIMES = [
 
 function getFramePath(index: number) {
   const frameNum = String(index + 1).padStart(4, "0");
-  return `/frames/frame_${frameNum}.webp`;
+  return `/frames_optimized/frame_${frameNum}.webp`;
 }
 
 interface HeroCanvasProps {
@@ -119,18 +119,20 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
     currentFrameRef.current = -1;
   }, []);
 
-  // ─── Preload all 264 frames with priority strategy ─────────────────────
+  // ─── Preload with 65% fast-entry threshold + background stream ─────────
   useEffect(() => {
     let isCancelled = false;
     let loadedCount = 0;
+    // 65% threshold (~160 frames) completes the preloader for instant entry,
+    // while remaining frames stream in parallel in the background
+    const READY_THRESHOLD = Math.round(TOTAL_FRAMES * 0.65);
     const images: HTMLImageElement[] = new Array(TOTAL_FRAMES);
 
     const emitProgress = () => {
       loadedCount++;
-      const pct = Math.min(100, Math.round((loadedCount / TOTAL_FRAMES) * 100));
+      const pct = Math.min(100, Math.round((loadedCount / READY_THRESHOLD) * 100));
       onProgress?.(pct);
-      if (loadedCount >= TOTAL_FRAMES) {
-        onProgress?.(100);
+      if (loadedCount >= READY_THRESHOLD) {
         onLoaded?.();
       }
     };

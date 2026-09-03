@@ -88,8 +88,8 @@ export function Preloader({ progress = 0, onComplete }: PreloaderProps) {
 
       {/* Main Logo Preloader Container */}
       <div className="relative flex flex-col items-center">
-        {/* SVG Logo Graphic (25% smaller) */}
-        <div className="relative h-32 w-24 sm:h-44 sm:w-32 md:h-48 md:w-36">
+        {/* SVG Logo Graphic (Compact & Minimal) */}
+        <div className="relative h-24 w-16 sm:h-32 sm:w-24 md:h-36 md:w-28">
           <svg
             viewBox="0 0 929 1426"
             className="h-full w-full overflow-visible"
@@ -173,17 +173,17 @@ export function Preloader({ progress = 0, onComplete }: PreloaderProps) {
         </div>
 
         {/* Loading Progress Information */}
-        <div className="mt-6 flex flex-col items-center gap-2">
+        <div className="mt-4 flex flex-col items-center gap-1.5">
           {/* Percentage Number */}
-          <div className="flex items-baseline gap-1 text-sm font-semibold tracking-wider text-white">
-            <span className="font-mono text-base text-[var(--brand-cyan)]">
+          <div className="flex items-baseline gap-1 text-xs sm:text-sm font-semibold tracking-wider text-white">
+            <span className="font-mono text-sm sm:text-base text-[var(--brand-cyan)]">
               {Math.floor(displayProgress)}
             </span>
-            <span className="text-xs text-zinc-500">%</span>
+            <span className="text-[10px] text-zinc-500">%</span>
           </div>
 
           {/* Minimal hairline progress bar */}
-          <div className="h-[2px] w-28 sm:w-36 rounded-full bg-white/10 overflow-hidden">
+          <div className="h-[2px] w-24 sm:w-28 rounded-full bg-white/10 overflow-hidden">
             <div
               className="h-full bg-gradient-to-r from-[var(--brand-cyan)] to-cyan-300 transition-all duration-200 ease-out"
               style={{ width: `${displayProgress}%` }}

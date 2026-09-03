@@ -23,12 +23,12 @@ const PAUSE_TIMES = [
 
 const TOTAL_DURATION = (TOTAL_FRAMES - 1) / FPS;
 
-// 1600ms pause cooldown (as in hero_another_project.md) to completely absorb trackpad momentum
-const PAUSE_COOLDOWN_MS = 1600;
+// 800ms pause cooldown for a snappy, responsive feel while absorbing trackpad momentum
+const PAUSE_COOLDOWN_MS = 800;
 
 function getFramePath(index: number) {
   const frameNum = String(index + 1).padStart(4, "0");
-  return `/frames_ultra/frame_${frameNum}.webp`;
+  return `/frames/frame_${frameNum}.webp`;
 }
 
 interface HeroCanvasProps {

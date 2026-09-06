@@ -119,13 +119,14 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
     currentFrameRef.current = -1;
   }, []);
 
-  // ─── Preload with 65% fast-entry threshold + background stream ─────────
+  // ─── Preload with 16-Worker Sliding-Window Pool + Decoupled Decode ─────────
   useEffect(() => {
     let isCancelled = false;
     let loadedCount = 0;
-    // 65% threshold (~160 frames) completes the preloader for instant entry,
-    // while remaining frames stream in parallel in the background
-    const READY_THRESHOLD = Math.round(TOTAL_FRAMES * 0.65);
+    // 50% threshold (~123 frames) completes the preloader for instant entry,
+    // while remaining frames stream continuously in parallel in the background
+    const READY_THRESHOLD = Math.round(TOTAL_FRAMES * 0.5);
+    const CRITICAL_FRAME_CUTOFF = 58; // Frames 0 to Checkpoint 1
     const images: HTMLImageElement[] = new Array(TOTAL_FRAMES);
 
     const emitProgress = () => {
@@ -137,33 +138,36 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
       }
     };
 
-    const loadAndDecodeFrame = (index: number): Promise<void> => {
+    const loadFrame = (index: number): Promise<void> => {
       return new Promise((resolve) => {
         if (images[index]) return resolve();
 
         const img = new Image();
-        img.src = getFramePath(index);
+        img.decoding = "async";
+
+        if ("fetchPriority" in img) {
+          (img as HTMLImageElement & { fetchPriority: string }).fetchPriority =
+            index <= CRITICAL_FRAME_CUTOFF ? "high" : "auto";
+        }
 
         img.onload = () => {
           if (isCancelled) return resolve();
           images[index] = img;
 
+          // Release the network worker slot IMMEDIATELY upon download
+          emitProgress();
+          resolve();
+
+          // Fire-and-forget background CPU rasterization into GPU texture cache
           if ("decode" in img) {
             img
               .decode()
-              .catch(() => {})
-              .finally(() => {
-                if (!isCancelled) {
-                  if (currentFrameRef.current === index) {
-                    drawFrame(index);
-                  }
-                  emitProgress();
+              .then(() => {
+                if (!isCancelled && currentFrameRef.current === index) {
+                  drawFrame(index);
                 }
-                resolve();
-              });
-          } else {
-            emitProgress();
-            resolve();
+              })
+              .catch(() => {});
           }
         };
 
@@ -171,35 +175,34 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
           emitProgress();
           resolve();
         };
+
+        img.src = getFramePath(index);
       });
     };
 
-    // 1. Initial frame 0
-    loadAndDecodeFrame(0).then(() => {
+    // 1. Initial critical frame 0 — drawn immediately once ready
+    loadFrame(0).then(() => {
       if (isCancelled) return;
       imagesRef.current = images;
       handleResize();
       drawFrame(0);
-
-      // 2. Checkpoint keyframes
-      const checkpoints = [58, 117, 177, 245];
-      checkpoints.forEach((idx) => loadAndDecodeFrame(idx));
-
-      // 3. Batched remaining frames in concurrent parallel streams
-      (async () => {
-        const CHUNK_SIZE = 12;
-        for (let i = 1; i < TOTAL_FRAMES; i += CHUNK_SIZE) {
-          if (isCancelled) break;
-          const chunk = [];
-          for (let j = i; j < Math.min(i + CHUNK_SIZE, TOTAL_FRAMES); j++) {
-            if (!checkpoints.includes(j)) {
-              chunk.push(loadAndDecodeFrame(j));
-            }
-          }
-          await Promise.all(chunk);
-        }
-      })();
     });
+
+    // 2. 16-worker sliding pool (zero idle time, zero barrier stalls)
+    const CONCURRENCY = 16;
+    let nextIndex = 1;
+
+    const worker = async (): Promise<void> => {
+      while (!isCancelled) {
+        const idx = nextIndex++;
+        if (idx >= TOTAL_FRAMES) break;
+        await loadFrame(idx);
+      }
+    };
+
+    Promise.all(
+      Array.from({ length: CONCURRENCY }, () => worker())
+    );
 
     imagesRef.current = images;
     window.addEventListener("resize", handleResize);

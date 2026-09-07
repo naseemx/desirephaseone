@@ -4,41 +4,58 @@ import { useEffect, useRef, useCallback, useState } from "react";
 import { gsap, Observer, useGSAP } from "@/lib/gsap";
 import { FrostedCard } from "@/components/frosted-card";
 
-const TOTAL_FRAMES = 246;
-const FPS = 24;
-
-// Checkpoint times in seconds (frame index / FPS):
-// Phase 0: Idle at start (0s)
-// Phase 1 pause: Frame 59  (idx 58)  = 58/24 ≈ 2.4167s
-// Phase 2 pause: Frame 118 (idx 117) = 117/24 = 4.8750s
-// Phase 3 pause: Frame 178 (idx 177) = 177/24 = 7.3750s
-// Phase 4 end:   Frame 246 (idx 245) = 245/24 ≈ 10.2083s
-const PAUSE_TIMES = [
-  0,                        // Phase 0: start
-  58 / FPS,                 // Phase 1 target (Frame 59)
-  117 / FPS,                // Phase 2 target (Frame 118)
-  177 / FPS,                // Phase 3 target (Frame 178)
-  (TOTAL_FRAMES - 1) / FPS, // Phase 4 target / duration (Frame 246)
-];
-
-const TOTAL_DURATION = (TOTAL_FRAMES - 1) / FPS;
-
-// 200ms (0.2s) pause cooldown for rapid, instant response
-const PAUSE_COOLDOWN_MS = 200;
-
-// Lead-in time in seconds for titles & cards to emerge early before camera comes to a stop
-const LEAD_IN_TIMES = [
-  0,    // Phase 0
-  0.85, // Phase 1 (Ribbon - Frame 59)
-  1.00, // Phase 2 (Kiosk - Frame 118)
-  1.10, // Phase 3 (Wall Display - Frame 178)
-  1.20, // Phase 4 (Glass Cube Studio - Frame 246)
-];
-
-function getFramePath(index: number) {
-  const frameNum = String(index + 1).padStart(4, "0");
-  return `/frames_optimized/frame_${frameNum}.webp`;
+interface HeroSequenceConfig {
+  totalFrames: number;
+  fps: number;
+  folder: string;
+  pauseTimes: number[];
+  leadInTimes: number[];
+  criticalCutoff: number;
+  totalDuration: number;
 }
+
+const DESKTOP_CONFIG: HeroSequenceConfig = {
+  totalFrames: 246,
+  fps: 24,
+  folder: "/frames_optimized",
+  pauseTimes: [
+    0,
+    58 / 24,   // Phase 1 (Frame 59)
+    117 / 24,  // Phase 2 (Frame 118)
+    177 / 24,  // Phase 3 (Frame 178)
+    245 / 24,  // Phase 4 (Frame 246)
+  ],
+  leadInTimes: [0, 0.85, 1.00, 1.10, 1.20],
+  criticalCutoff: 58,
+  totalDuration: (246 - 1) / 24,
+};
+
+const MOBILE_CONFIG: HeroSequenceConfig = {
+  totalFrames: 170,
+  fps: 24,
+  folder: "/frames_mob",
+  pauseTimes: [
+    0,
+    37 / 24,   // Phase 1 (Frame 38)
+    81 / 24,   // Phase 2 (Frame 82)
+    123 / 24,  // Phase 3 (Frame 124)
+    169 / 24,  // Phase 4 (Frame 170)
+  ],
+  leadInTimes: [0, 0.60, 0.75, 0.85, 0.95],
+  criticalCutoff: 37,
+  totalDuration: (170 - 1) / 24,
+};
+
+// 700ms cooldown to absorb residual trackpad / swipe momentum at checkpoints
+const PAUSE_COOLDOWN_MS = 700;
+
+const checkIsMobileViewport = () => {
+  if (typeof window === "undefined") return false;
+  return (
+    window.innerWidth < 768 ||
+    (window.innerWidth < 1024 && window.innerHeight > window.innerWidth)
+  );
+};
 
 interface HeroCanvasProps {
   onProgress?: (progress: number) => void;
@@ -51,6 +68,20 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
   const imagesRef = useRef<HTMLImageElement[]>([]);
   const currentFrameRef = useRef<number>(-1);
+
+  // Mobile / portrait viewport detection
+  const [isMobile, setIsMobile] = useState<boolean>(() => {
+    return checkIsMobileViewport();
+  });
+
+  useEffect(() => {
+    const handleViewportChange = () => {
+      const mob = checkIsMobileViewport();
+      setIsMobile((prev) => (prev !== mob ? mob : prev));
+    };
+    window.addEventListener("resize", handleViewportChange);
+    return () => window.removeEventListener("resize", handleViewportChange);
+  }, []);
 
   // Card visibility state at checkpoints
   const [showStartCard, setShowStartCard] = useState(true);
@@ -103,7 +134,7 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
     currentFrameRef.current = frameIndex;
   }, []);
 
-  // ─── Resize canvas to fit viewport, capped at 1920x1080 ─────────────────
+  // ─── Resize canvas to fit viewport, capped at 1920x1920 ─────────────────
   const handleResize = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -113,21 +144,20 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
       1.5
     );
     canvas.width = Math.min(Math.round(window.innerWidth * dpr), 1920);
-    canvas.height = Math.min(Math.round(window.innerHeight * dpr), 1080);
+    canvas.height = Math.min(Math.round(window.innerHeight * dpr), 1920);
 
     ctxRef.current = null;
     currentFrameRef.current = -1;
   }, []);
 
-  // ─── Preload with 16-Worker Sliding-Window Pool + Decoupled Decode ─────────
+  // ─── Preload with 16-Worker Sliding Pool + Parallel In-Worker Decode ────
   useEffect(() => {
     let isCancelled = false;
     let loadedCount = 0;
-    // 50% threshold (~123 frames) completes the preloader for instant entry,
-    // while remaining frames stream continuously in parallel in the background
-    const READY_THRESHOLD = Math.round(TOTAL_FRAMES * 0.5);
-    const CRITICAL_FRAME_CUTOFF = 58; // Frames 0 to Checkpoint 1
-    const images: HTMLImageElement[] = new Array(TOTAL_FRAMES);
+    const config = isMobile ? MOBILE_CONFIG : DESKTOP_CONFIG;
+    const { totalFrames, folder, criticalCutoff } = config;
+    const READY_THRESHOLD = Math.round(totalFrames * 0.5);
+    const images: HTMLImageElement[] = new Array(totalFrames);
 
     const emitProgress = () => {
       loadedCount++;
@@ -143,31 +173,34 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
         if (images[index]) return resolve();
 
         const img = new Image();
-        img.decoding = "async";
 
         if ("fetchPriority" in img) {
           (img as HTMLImageElement & { fetchPriority: string }).fetchPriority =
-            index <= CRITICAL_FRAME_CUTOFF ? "high" : "auto";
+            index <= criticalCutoff ? "high" : "auto";
         }
 
         img.onload = () => {
           if (isCancelled) return resolve();
           images[index] = img;
 
-          // Release the network worker slot IMMEDIATELY upon download
-          emitProgress();
-          resolve();
-
-          // Fire-and-forget background CPU rasterization into GPU texture cache
+          // Parallel in-worker decode await:
+          // Guarantees bitmap is rasterized in GPU texture memory before resolving & counting
           if ("decode" in img) {
             img
               .decode()
-              .then(() => {
-                if (!isCancelled && currentFrameRef.current === index) {
-                  drawFrame(index);
+              .catch(() => {})
+              .finally(() => {
+                if (!isCancelled) {
+                  if (currentFrameRef.current === index) {
+                    drawFrame(index);
+                  }
+                  emitProgress();
                 }
-              })
-              .catch(() => {});
+                resolve();
+              });
+          } else {
+            emitProgress();
+            resolve();
           }
         };
 
@@ -176,7 +209,8 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
           resolve();
         };
 
-        img.src = getFramePath(index);
+        const frameNum = String(index + 1).padStart(4, "0");
+        img.src = `${folder}/frame_${frameNum}.webp`;
       });
     };
 
@@ -195,7 +229,7 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
     const worker = async (): Promise<void> => {
       while (!isCancelled) {
         const idx = nextIndex++;
-        if (idx >= TOTAL_FRAMES) break;
+        if (idx >= totalFrames) break;
         await loadFrame(idx);
       }
     };
@@ -211,19 +245,23 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
       isCancelled = true;
       window.removeEventListener("resize", handleResize);
     };
-  }, [drawFrame, handleResize, onProgress, onLoaded]);
+  }, [isMobile, drawFrame, handleResize, onProgress, onLoaded]);
 
   // ─── Phase-Based GSAP Engine (Adopted from hero_another_project.md) ──────
   useGSAP(
     () => {
       if (typeof window === "undefined") return;
 
+      const config = isMobile ? MOBILE_CONFIG : DESKTOP_CONFIG;
+      const { totalFrames, fps, totalDuration, pauseTimes, leadInTimes } = config;
+      const LAST_PHASE = pauseTimes.length - 1;
+
       // currentPhase:
       // 0 = at frame 0 (start)
-      // 1 = scrubbing from 0 up to frame 75 (Checkpoint 1)
-      // 2 = scrubbing from frame 75 up to frame 129 (Checkpoint 2)
-      // 3 = scrubbing from frame 129 up to frame 199 (Checkpoint 3)
-      // 4 = scrubbing from frame 199 up to frame 264 (Final frame)
+      // 1 = Checkpoint 1
+      // 2 = Checkpoint 2
+      // 3 = Checkpoint 3
+      // 4 = Final frame (LAST_PHASE)
       let currentPhase = 0;
 
       // playState:
@@ -233,6 +271,8 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
       let playState = 0;
       let scrollLocked = true;
       let virtualTime = 0;
+      let hasScrolledPastHero = false;
+      let unlockTimestamp = 0;
 
       let pauseCooldown = false;
       let cooldownTimer: ReturnType<typeof setTimeout> | null = null;
@@ -246,21 +286,22 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
         }, PAUSE_COOLDOWN_MS);
       };
 
-      // Initial scroll lock
+      // Initial scroll lock (World 1)
       document.body.style.overflow = "hidden";
       document.documentElement.style.overflow = "hidden";
       (window as unknown as { heroScrollLocked?: boolean }).heroScrollLocked = true;
       (window as unknown as { lenis?: { stop: () => void } }).lenis?.stop();
 
       const render = () => {
-        let frameIndex = Math.floor(virtualTime * FPS);
+        let frameIndex = Math.floor(virtualTime * fps);
         if (frameIndex < 0) frameIndex = 0;
-        if (frameIndex >= TOTAL_FRAMES) frameIndex = TOTAL_FRAMES - 1;
+        if (frameIndex >= totalFrames) frameIndex = totalFrames - 1;
         drawFrame(frameIndex);
       };
 
-      // ── Touch Re-Entry for Mobile (detect swipe-down at scrollY <= 0) ──
+      // ── Touch Re-Entry Engine (detect downward pull at scrollY <= 0) ──
       let reentryTouchStartY = 0;
+
       const onReentryTouchStart = (e: TouchEvent) => {
         if (e.touches?.[0]) {
           reentryTouchStartY = e.touches[0].clientY;
@@ -268,33 +309,44 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
       };
 
       const onReentryTouchMove = (e: TouchEvent) => {
-        if (window.scrollY <= 0 && e.touches?.[0]) {
+        // 1. Guard against re-entry if still locked, not scrolled past hero, or within 800ms cooldown
+        if (scrollLocked || !hasScrolledPastHero || Date.now() - unlockTimestamp < 800) {
+          return;
+        }
+
+        // 2. Check if at absolute top of document with valid touch start
+        if (window.scrollY <= 0 && e.touches?.[0] && reentryTouchStartY > 0) {
           const deltaY = e.touches[0].clientY - reentryTouchStartY;
-          if (deltaY > 20) {
-            // Dragged finger down at top of page -> user wants to scroll back into hero
-            if (e.cancelable) e.preventDefault();
+
+          // 3. Threshold check: Downward swipe of > 50px
+          if (deltaY > 50) {
+            if (e.cancelable) e.preventDefault(); // Stop native rubber-band overscroll
+            hasScrolledPastHero = false;
+            reentryTouchStartY = 0;
             removeReentryListeners();
             lockScroll();
-            currentPhase = 4;
-            playState = 0;
-            handleScrollReverse();
           }
         }
       };
 
       const addReentryListeners = () => {
+        reentryTouchStartY = 0;
         window.addEventListener("touchstart", onReentryTouchStart, { passive: true });
         window.addEventListener("touchmove", onReentryTouchMove, { passive: false });
       };
 
       const removeReentryListeners = () => {
+        reentryTouchStartY = 0;
         window.removeEventListener("touchstart", onReentryTouchStart);
         window.removeEventListener("touchmove", onReentryTouchMove);
       };
 
-      // ── Unlock & Lock Methods (Height Pinning + Input Decoupling) ──
+      // ── Step-by-Step Execution of unlockScroll() ───────────────────────
       const unlockScroll = () => {
+        if (!scrollLocked) return;
         scrollLocked = false;
+        hasScrolledPastHero = false;
+        unlockTimestamp = Date.now();
         observer.disable();
 
         if (cooldownTimer) {
@@ -303,70 +355,85 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
         }
         pauseCooldown = false;
 
-        // Pin the hero container to its exact rendered pixel height before unlocking,
-        // preventing 100dvh recalculation jumps
+        // 1. PIN PIXEL HEIGHT: Prevent mobile 100dvh layout jumps
         const container = containerRef.current;
+        let heroHeight = window.innerHeight;
         if (container) {
           const currentHeight = container.getBoundingClientRect().height;
           container.style.height = `${currentHeight}px`;
+          heroHeight = currentHeight;
         }
 
-        // Release document overflow
+        // 2. RELEASE BODY OVERFLOW (World 2)
         document.body.style.overflow = "auto";
         document.documentElement.style.overflow = "auto";
 
-        // Release Lenis
+        // 3. WAKE UP LENIS
         (window as unknown as { heroScrollLocked?: boolean }).heroScrollLocked = false;
-        const lenis = (window as unknown as { lenis?: { start: () => void; scrollTo: (t: number, o?: object) => void } }).lenis;
+        const lenis = (window as unknown as { lenis?: { start: () => void; scrollTo: (t: number | HTMLElement, o?: object) => void } }).lenis;
         lenis?.start();
 
+        // 4. ATTACH TOUCH RE-ENTRY LISTENERS
         addReentryListeners();
 
-        // Smoothly transition down into the next section (Footer)
+        // 5. SMOOTH SCROLL TO NEXT SECTION (Footer)
         requestAnimationFrame(() => {
+          const footer = document.getElementById("footer") || document.querySelector("footer");
           if (lenis) {
-            lenis.scrollTo(window.innerHeight, { duration: 1.2 });
+            if (footer) {
+              lenis.scrollTo(footer, { duration: 0.9 });
+            } else {
+              lenis.scrollTo(heroHeight, { duration: 0.9 });
+            }
           } else {
-            window.scrollTo({ top: window.innerHeight, behavior: "smooth" });
+            const targetY = footer ? (footer as HTMLElement).offsetTop : heroHeight;
+            window.scrollTo({ top: targetY, behavior: "smooth" });
           }
         });
       };
 
+      // ── Step-by-Step Execution of lockScroll() ─────────────────────────
       const lockScroll = () => {
         scrollLocked = true;
+        hasScrolledPastHero = false;
 
-        // Stop Lenis
+        // 1. STOP LENIS
         (window as unknown as { heroScrollLocked?: boolean }).heroScrollLocked = true;
         (window as unknown as { lenis?: { stop: () => void } }).lenis?.stop();
 
+        // 2. LOCK BODY & DOCUMENT OVERFLOW (World 1)
         document.body.style.overflow = "hidden";
         document.documentElement.style.overflow = "hidden";
 
-        // Restore dynamic viewport sizing
+        // 3. UNPIN HEIGHT (Restore dynamic viewport sizing for hero canvas)
         const container = containerRef.current;
         if (container) {
           container.style.height = "";
         }
 
+        // 4. INSTANTLY PIN WINDOW TO ABSOLUTE TOP
         if (window.scrollY > 0) {
           window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
         }
 
+        // 5. TEAR DOWN RE-ENTRY LISTENERS
         removeReentryListeners();
 
-        // Re-enter at the final frame
-        currentPhase = 4;
-        virtualTime = TOTAL_DURATION;
-        currentActivePhase = 4;
-        setActivePhase(4);
+        // 6. RESTORE HERO STATE MACHINE DIRECTLY AT FINAL FRAME
+        currentPhase = LAST_PHASE;
+        playState = 0;
+        virtualTime = totalDuration;
+        currentActivePhase = LAST_PHASE;
+        setActivePhase(LAST_PHASE);
         render();
 
+        // 7. RE-ARM GSAP OBSERVER
         observer.enable();
       };
 
       let currentActivePhase = 0;
 
-      // ── GSAP Ticker Loop ────────────────────────────────────────────────
+      // ── GSAP Ticker Loop (virtualTime accumulator) ──────────────────────
       const tickerFunc = (_time: number, deltaTime: number) => {
         const deltaSec = deltaTime / 1000;
 
@@ -374,8 +441,8 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
           // Forward scrubbing
           virtualTime += deltaSec;
 
-          const targetPauseTime = PAUSE_TIMES[currentPhase];
-          const leadIn = LEAD_IN_TIMES[currentPhase] ?? 1.2;
+          const targetPauseTime = pauseTimes[currentPhase];
+          const leadIn = leadInTimes[currentPhase] ?? 1.2;
 
           // Animate title & cards in earlier before reaching the checkpoint
           if (virtualTime >= targetPauseTime - leadIn && currentActivePhase !== currentPhase) {
@@ -391,7 +458,7 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
               setActivePhase(currentPhase);
             }
 
-            if (currentPhase < 4) {
+            if (currentPhase < LAST_PHASE) {
               triggerCooldown();
             }
           }
@@ -401,8 +468,8 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
           virtualTime -= deltaSec;
 
           const targetPhase = Math.max(0, currentPhase - 1);
-          const previousPauseTime = PAUSE_TIMES[targetPhase];
-          const reverseLeadIn = LEAD_IN_TIMES[targetPhase] ?? 1.2;
+          const previousPauseTime = pauseTimes[targetPhase];
+          const reverseLeadIn = leadInTimes[targetPhase] ?? 1.2;
 
           // Animate title & cards in earlier before reaching the previous checkpoint in reverse
           if (virtualTime <= previousPauseTime + reverseLeadIn && currentActivePhase !== targetPhase) {
@@ -444,15 +511,15 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
         if (pauseCooldown) return;
 
         if (currentPhase === 0) {
-          // From idle at start, hide start card and advance to Phase 1 (Frame 75)
+          // From idle at start, hide start card and advance to Phase 1
           setShowStartCard(false);
           currentActivePhase = -1;
           setActivePhase(-1);
           currentPhase = 1;
           playState = 1;
-        } else if (currentPhase >= 1 && currentPhase <= 3) {
+        } else if (currentPhase >= 1 && currentPhase < LAST_PHASE) {
           // If idle at a pause checkpoint, advance to next phase
-          if (playState === 0 && virtualTime >= PAUSE_TIMES[currentPhase] - 0.1) {
+          if (playState === 0 && virtualTime >= pauseTimes[currentPhase] - 0.1) {
             currentActivePhase = -1;
             setActivePhase(-1);
             currentPhase += 1;
@@ -460,13 +527,9 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
           } else {
             playState = 1;
           }
-        } else if (currentPhase === 4) {
-          // Already at final frame — user wants to continue to next section (Footer)!
-          if (playState === 0) {
-            unlockScroll();
-          } else {
-            playState = 1;
-          }
+        } else if (currentPhase === LAST_PHASE) {
+          // Already at final frame — transition to footer
+          unlockScroll();
         }
       };
 
@@ -488,12 +551,13 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
         }
       };
 
-      // ── Mobile Touch Click / Tap Mappings ───────────────────────────────
-      const isMobileDevice = window.innerWidth < 768;
-
+      // ── Mobile Touch Scroll Handlers ────────────────────────────────────
       const handleMobileScrollForward = () => {
         if (!scrollLocked) return;
         if (pauseCooldown) return;
+
+        // On mobile, ignore rapid gesture spamming during active playback
+        if (playState !== 0) return;
 
         if (currentPhase === 0) {
           setShowStartCard(false);
@@ -501,28 +565,26 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
           setActivePhase(-1);
           currentPhase = 1;
           playState = 1;
-          return;
-        }
-
-        // On mobile, ignore rapid gesture spamming during active playback
-        if (playState !== 0) return;
-
-        if (currentPhase >= 1 && currentPhase <= 3) {
+        } else if (currentPhase >= 1 && currentPhase < LAST_PHASE) {
           currentActivePhase = -1;
           setActivePhase(-1);
           currentPhase += 1;
           playState = 1;
-        } else if (currentPhase === 4) {
+        } else if (currentPhase === LAST_PHASE) {
+          // GATE TRIGGER: We are at the final frame, unlock into next section!
           unlockScroll();
         }
       };
 
       const handleMobileScrollReverse = () => {
-        if (!scrollLocked || playState !== 0) return;
+        if (!scrollLocked) return;
         if (pauseCooldown) return;
-        currentActivePhase = -1;
-        setActivePhase(-1);
-        handleScrollReverse();
+
+        if (currentPhase > 0) {
+          currentActivePhase = -1;
+          setActivePhase(-1);
+          handleScrollReverse();
+        }
       };
 
       // ── GSAP Observer (Input Virtualization) ─────────────────────────────
@@ -533,7 +595,7 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
       const observer = Observer.create({
         target: window,
         type: "wheel,touch,pointer",
-        preventDefault: !isMobileDevice,
+        preventDefault: !checkIsMobileViewport(),
         onDown: (self) => {
           const isTouch = Boolean(
             Observer.isTouch === 1 ||
@@ -564,16 +626,25 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
 
       // ── Native Re-Entry Listener (when user scrolls back to Y <= 0) ─────
       const onNativeScroll = () => {
-        if (!scrollLocked && window.scrollY <= 0) {
+        if (scrollLocked) return;
+
+        // Mark that user has genuinely scrolled down into the page content below hero
+        if (window.scrollY > 80) {
+          hasScrolledPastHero = true;
+        }
+
+        // Only re-lock if user genuinely scrolled down first, and now scrolled all the way back up
+        if (hasScrolledPastHero && window.scrollY <= 0 && Date.now() - unlockTimestamp > 800) {
+          hasScrolledPastHero = false;
           lockScroll();
         }
       };
 
       // Desktop wheel re-entry at scrollY <= 0
       const onWindowWheel = (e: WheelEvent) => {
-        if (!scrollLocked && window.scrollY <= 0 && e.deltaY < 0) {
+        if (!scrollLocked && hasScrolledPastHero && window.scrollY <= 0 && e.deltaY < 0 && Date.now() - unlockTimestamp > 800) {
+          hasScrolledPastHero = false;
           lockScroll();
-          handleScrollReverse();
         }
       };
 
@@ -599,8 +670,10 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
       const checkScrollPosition = () => {
         if (window.scrollY > 50) {
           scrollLocked = false;
+          hasScrolledPastHero = true;
           (window as unknown as { heroScrollLocked?: boolean }).heroScrollLocked = false;
-          (window as unknown as { lenis?: { start: () => void } }).lenis?.start();
+          const lenis = (window as unknown as { lenis?: { start: () => void } }).lenis;
+          lenis?.start();
           document.body.style.overflow = "auto";
           document.documentElement.style.overflow = "auto";
           observer.disable();
@@ -611,9 +684,11 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
             container.style.height = `${currentHeight}px`;
           }
 
-          currentPhase = 4;
-          virtualTime = TOTAL_DURATION;
+          currentPhase = LAST_PHASE;
+          virtualTime = totalDuration;
           playState = 0;
+          currentActivePhase = LAST_PHASE;
+          setActivePhase(LAST_PHASE);
           render();
           addReentryListeners();
         }
@@ -648,7 +723,7 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
         }
       };
     },
-    { scope: containerRef }
+    { scope: containerRef, dependencies: [isMobile] }
   );
 
   return (

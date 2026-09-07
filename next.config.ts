@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: "/:folder(frames_optimized|frames)/:file*",
+        source: "/:folder(frames_optimized|frames|frames_mob)/:file*",
         headers: [
           {
             key: "Cache-Control",

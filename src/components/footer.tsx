@@ -17,7 +17,7 @@ export function Footer() {
   };
 
   return (
-    <footer className="relative border-t border-white/10 bg-[#09090b] text-zinc-400 select-none">
+    <footer id="footer" className="relative border-t border-white/10 bg-[#09090b] text-zinc-400 select-none">
       <div className="mx-auto max-w-7xl px-6 py-12 lg:px-10">
         <div className="flex flex-col items-center justify-between gap-8 md:flex-row">
           {/* Logo Placeholder (Company & Brand Logos) */}

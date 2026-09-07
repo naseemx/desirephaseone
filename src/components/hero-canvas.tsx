@@ -46,16 +46,8 @@ const MOBILE_CONFIG: HeroSequenceConfig = {
   totalDuration: (170 - 1) / 24,
 };
 
-// 700ms cooldown to absorb residual trackpad / swipe momentum at checkpoints
-const PAUSE_COOLDOWN_MS = 700;
-
-const checkIsMobileViewport = () => {
-  if (typeof window === "undefined") return false;
-  return (
-    window.innerWidth < 768 ||
-    (window.innerWidth < 1024 && window.innerHeight > window.innerWidth)
-  );
-};
+// 200ms (0.2s) pause cooldown for rapid, instant response
+const PAUSE_COOLDOWN_MS = 200;
 
 interface HeroCanvasProps {
   onProgress?: (progress: number) => void;
@@ -71,12 +63,13 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
 
   // Mobile / portrait viewport detection
   const [isMobile, setIsMobile] = useState<boolean>(() => {
-    return checkIsMobileViewport();
+    if (typeof window === "undefined") return false;
+    return window.innerWidth < 768 || window.innerHeight > window.innerWidth;
   });
 
   useEffect(() => {
     const handleViewportChange = () => {
-      const mob = checkIsMobileViewport();
+      const mob = window.innerWidth < 768 || window.innerHeight > window.innerWidth;
       setIsMobile((prev) => (prev !== mob ? mob : prev));
     };
     window.addEventListener("resize", handleViewportChange);
@@ -254,14 +247,13 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
 
       const config = isMobile ? MOBILE_CONFIG : DESKTOP_CONFIG;
       const { totalFrames, fps, totalDuration, pauseTimes, leadInTimes } = config;
-      const LAST_PHASE = pauseTimes.length - 1;
 
       // currentPhase:
       // 0 = at frame 0 (start)
-      // 1 = Checkpoint 1
-      // 2 = Checkpoint 2
-      // 3 = Checkpoint 3
-      // 4 = Final frame (LAST_PHASE)
+      // 1 = scrubbing from 0 up to Checkpoint 1
+      // 2 = scrubbing from Checkpoint 1 up to Checkpoint 2
+      // 3 = scrubbing from Checkpoint 2 up to Checkpoint 3
+      // 4 = scrubbing from Checkpoint 3 up to Final frame
       let currentPhase = 0;
 
       // playState:
@@ -271,8 +263,6 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
       let playState = 0;
       let scrollLocked = true;
       let virtualTime = 0;
-      let hasScrolledPastHero = false;
-      let unlockTimestamp = 0;
 
       let pauseCooldown = false;
       let cooldownTimer: ReturnType<typeof setTimeout> | null = null;
@@ -286,7 +276,7 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
         }, PAUSE_COOLDOWN_MS);
       };
 
-      // Initial scroll lock (World 1)
+      // Initial scroll lock
       document.body.style.overflow = "hidden";
       document.documentElement.style.overflow = "hidden";
       (window as unknown as { heroScrollLocked?: boolean }).heroScrollLocked = true;
@@ -299,9 +289,8 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
         drawFrame(frameIndex);
       };
 
-      // ── Touch Re-Entry Engine (detect downward pull at scrollY <= 0) ──
+      // ── Touch Re-Entry for Mobile (detect swipe-down at scrollY <= 0) ──
       let reentryTouchStartY = 0;
-
       const onReentryTouchStart = (e: TouchEvent) => {
         if (e.touches?.[0]) {
           reentryTouchStartY = e.touches[0].clientY;
@@ -309,44 +298,33 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
       };
 
       const onReentryTouchMove = (e: TouchEvent) => {
-        // 1. Guard against re-entry if still locked, not scrolled past hero, or within 800ms cooldown
-        if (scrollLocked || !hasScrolledPastHero || Date.now() - unlockTimestamp < 800) {
-          return;
-        }
-
-        // 2. Check if at absolute top of document with valid touch start
-        if (window.scrollY <= 0 && e.touches?.[0] && reentryTouchStartY > 0) {
+        if (window.scrollY <= 0 && e.touches?.[0]) {
           const deltaY = e.touches[0].clientY - reentryTouchStartY;
-
-          // 3. Threshold check: Downward swipe of > 50px
-          if (deltaY > 50) {
-            if (e.cancelable) e.preventDefault(); // Stop native rubber-band overscroll
-            hasScrolledPastHero = false;
-            reentryTouchStartY = 0;
+          if (deltaY > 20) {
+            // Dragged finger down at top of page -> user wants to scroll back into hero
+            if (e.cancelable) e.preventDefault();
             removeReentryListeners();
             lockScroll();
+            currentPhase = 4;
+            playState = 0;
+            handleScrollReverse();
           }
         }
       };
 
       const addReentryListeners = () => {
-        reentryTouchStartY = 0;
         window.addEventListener("touchstart", onReentryTouchStart, { passive: true });
         window.addEventListener("touchmove", onReentryTouchMove, { passive: false });
       };
 
       const removeReentryListeners = () => {
-        reentryTouchStartY = 0;
         window.removeEventListener("touchstart", onReentryTouchStart);
         window.removeEventListener("touchmove", onReentryTouchMove);
       };
 
-      // ── Step-by-Step Execution of unlockScroll() ───────────────────────
+      // ── Unlock & Lock Methods (Height Pinning + Input Decoupling) ──
       const unlockScroll = () => {
-        if (!scrollLocked) return;
         scrollLocked = false;
-        hasScrolledPastHero = false;
-        unlockTimestamp = Date.now();
         observer.disable();
 
         if (cooldownTimer) {
@@ -355,85 +333,70 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
         }
         pauseCooldown = false;
 
-        // 1. PIN PIXEL HEIGHT: Prevent mobile 100dvh layout jumps
+        // Pin the hero container to its exact rendered pixel height before unlocking,
+        // preventing 100dvh recalculation jumps
         const container = containerRef.current;
-        let heroHeight = window.innerHeight;
         if (container) {
           const currentHeight = container.getBoundingClientRect().height;
           container.style.height = `${currentHeight}px`;
-          heroHeight = currentHeight;
         }
 
-        // 2. RELEASE BODY OVERFLOW (World 2)
+        // Release document overflow
         document.body.style.overflow = "auto";
         document.documentElement.style.overflow = "auto";
 
-        // 3. WAKE UP LENIS
+        // Release Lenis
         (window as unknown as { heroScrollLocked?: boolean }).heroScrollLocked = false;
-        const lenis = (window as unknown as { lenis?: { start: () => void; scrollTo: (t: number | HTMLElement, o?: object) => void } }).lenis;
+        const lenis = (window as unknown as { lenis?: { start: () => void; scrollTo: (t: number, o?: object) => void } }).lenis;
         lenis?.start();
 
-        // 4. ATTACH TOUCH RE-ENTRY LISTENERS
         addReentryListeners();
 
-        // 5. SMOOTH SCROLL TO NEXT SECTION (Footer)
+        // Smoothly transition down into the next section (Footer)
         requestAnimationFrame(() => {
-          const footer = document.getElementById("footer") || document.querySelector("footer");
           if (lenis) {
-            if (footer) {
-              lenis.scrollTo(footer, { duration: 0.9 });
-            } else {
-              lenis.scrollTo(heroHeight, { duration: 0.9 });
-            }
+            lenis.scrollTo(window.innerHeight, { duration: 1.2 });
           } else {
-            const targetY = footer ? (footer as HTMLElement).offsetTop : heroHeight;
-            window.scrollTo({ top: targetY, behavior: "smooth" });
+            window.scrollTo({ top: window.innerHeight, behavior: "smooth" });
           }
         });
       };
 
-      // ── Step-by-Step Execution of lockScroll() ─────────────────────────
       const lockScroll = () => {
         scrollLocked = true;
-        hasScrolledPastHero = false;
 
-        // 1. STOP LENIS
+        // Stop Lenis
         (window as unknown as { heroScrollLocked?: boolean }).heroScrollLocked = true;
         (window as unknown as { lenis?: { stop: () => void } }).lenis?.stop();
 
-        // 2. LOCK BODY & DOCUMENT OVERFLOW (World 1)
         document.body.style.overflow = "hidden";
         document.documentElement.style.overflow = "hidden";
 
-        // 3. UNPIN HEIGHT (Restore dynamic viewport sizing for hero canvas)
+        // Restore dynamic viewport sizing
         const container = containerRef.current;
         if (container) {
           container.style.height = "";
         }
 
-        // 4. INSTANTLY PIN WINDOW TO ABSOLUTE TOP
         if (window.scrollY > 0) {
           window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
         }
 
-        // 5. TEAR DOWN RE-ENTRY LISTENERS
         removeReentryListeners();
 
-        // 6. RESTORE HERO STATE MACHINE DIRECTLY AT FINAL FRAME
-        currentPhase = LAST_PHASE;
-        playState = 0;
+        // Re-enter at the final frame
+        currentPhase = 4;
         virtualTime = totalDuration;
-        currentActivePhase = LAST_PHASE;
-        setActivePhase(LAST_PHASE);
+        currentActivePhase = 4;
+        setActivePhase(4);
         render();
 
-        // 7. RE-ARM GSAP OBSERVER
         observer.enable();
       };
 
       let currentActivePhase = 0;
 
-      // ── GSAP Ticker Loop (virtualTime accumulator) ──────────────────────
+      // ── GSAP Ticker Loop ────────────────────────────────────────────────
       const tickerFunc = (_time: number, deltaTime: number) => {
         const deltaSec = deltaTime / 1000;
 
@@ -458,7 +421,7 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
               setActivePhase(currentPhase);
             }
 
-            if (currentPhase < LAST_PHASE) {
+            if (currentPhase < 4) {
               triggerCooldown();
             }
           }
@@ -511,13 +474,13 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
         if (pauseCooldown) return;
 
         if (currentPhase === 0) {
-          // From idle at start, hide start card and advance to Phase 1
+          // From idle at start, hide start card and advance to Phase 1 (Frame 75)
           setShowStartCard(false);
           currentActivePhase = -1;
           setActivePhase(-1);
           currentPhase = 1;
           playState = 1;
-        } else if (currentPhase >= 1 && currentPhase < LAST_PHASE) {
+        } else if (currentPhase >= 1 && currentPhase <= 3) {
           // If idle at a pause checkpoint, advance to next phase
           if (playState === 0 && virtualTime >= pauseTimes[currentPhase] - 0.1) {
             currentActivePhase = -1;
@@ -527,9 +490,13 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
           } else {
             playState = 1;
           }
-        } else if (currentPhase === LAST_PHASE) {
-          // Already at final frame — transition to footer
-          unlockScroll();
+        } else if (currentPhase === 4) {
+          // Already at final frame — user wants to continue to next section (Footer)!
+          if (playState === 0) {
+            unlockScroll();
+          } else {
+            playState = 1;
+          }
         }
       };
 
@@ -551,13 +518,12 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
         }
       };
 
-      // ── Mobile Touch Scroll Handlers ────────────────────────────────────
+      // ── Mobile Touch Click / Tap Mappings ───────────────────────────────
+      const isMobileDevice = window.innerWidth < 768;
+
       const handleMobileScrollForward = () => {
         if (!scrollLocked) return;
         if (pauseCooldown) return;
-
-        // On mobile, ignore rapid gesture spamming during active playback
-        if (playState !== 0) return;
 
         if (currentPhase === 0) {
           setShowStartCard(false);
@@ -565,26 +531,28 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
           setActivePhase(-1);
           currentPhase = 1;
           playState = 1;
-        } else if (currentPhase >= 1 && currentPhase < LAST_PHASE) {
+          return;
+        }
+
+        // On mobile, ignore rapid gesture spamming during active playback
+        if (playState !== 0) return;
+
+        if (currentPhase >= 1 && currentPhase <= 3) {
           currentActivePhase = -1;
           setActivePhase(-1);
           currentPhase += 1;
           playState = 1;
-        } else if (currentPhase === LAST_PHASE) {
-          // GATE TRIGGER: We are at the final frame, unlock into next section!
+        } else if (currentPhase === 4) {
           unlockScroll();
         }
       };
 
       const handleMobileScrollReverse = () => {
-        if (!scrollLocked) return;
+        if (!scrollLocked || playState !== 0) return;
         if (pauseCooldown) return;
-
-        if (currentPhase > 0) {
-          currentActivePhase = -1;
-          setActivePhase(-1);
-          handleScrollReverse();
-        }
+        currentActivePhase = -1;
+        setActivePhase(-1);
+        handleScrollReverse();
       };
 
       // ── GSAP Observer (Input Virtualization) ─────────────────────────────
@@ -595,7 +563,7 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
       const observer = Observer.create({
         target: window,
         type: "wheel,touch,pointer",
-        preventDefault: !checkIsMobileViewport(),
+        preventDefault: !isMobileDevice,
         onDown: (self) => {
           const isTouch = Boolean(
             Observer.isTouch === 1 ||
@@ -626,25 +594,16 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
 
       // ── Native Re-Entry Listener (when user scrolls back to Y <= 0) ─────
       const onNativeScroll = () => {
-        if (scrollLocked) return;
-
-        // Mark that user has genuinely scrolled down into the page content below hero
-        if (window.scrollY > 80) {
-          hasScrolledPastHero = true;
-        }
-
-        // Only re-lock if user genuinely scrolled down first, and now scrolled all the way back up
-        if (hasScrolledPastHero && window.scrollY <= 0 && Date.now() - unlockTimestamp > 800) {
-          hasScrolledPastHero = false;
+        if (!scrollLocked && window.scrollY <= 0) {
           lockScroll();
         }
       };
 
       // Desktop wheel re-entry at scrollY <= 0
       const onWindowWheel = (e: WheelEvent) => {
-        if (!scrollLocked && hasScrolledPastHero && window.scrollY <= 0 && e.deltaY < 0 && Date.now() - unlockTimestamp > 800) {
-          hasScrolledPastHero = false;
+        if (!scrollLocked && window.scrollY <= 0 && e.deltaY < 0) {
           lockScroll();
+          handleScrollReverse();
         }
       };
 
@@ -670,10 +629,8 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
       const checkScrollPosition = () => {
         if (window.scrollY > 50) {
           scrollLocked = false;
-          hasScrolledPastHero = true;
           (window as unknown as { heroScrollLocked?: boolean }).heroScrollLocked = false;
-          const lenis = (window as unknown as { lenis?: { start: () => void } }).lenis;
-          lenis?.start();
+          (window as unknown as { lenis?: { start: () => void } }).lenis?.start();
           document.body.style.overflow = "auto";
           document.documentElement.style.overflow = "auto";
           observer.disable();
@@ -684,11 +641,9 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
             container.style.height = `${currentHeight}px`;
           }
 
-          currentPhase = LAST_PHASE;
+          currentPhase = 4;
           virtualTime = totalDuration;
           playState = 0;
-          currentActivePhase = LAST_PHASE;
-          setActivePhase(LAST_PHASE);
           render();
           addReentryListeners();
         }

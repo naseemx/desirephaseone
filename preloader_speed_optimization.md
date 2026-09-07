@@ -281,7 +281,7 @@ After the initial speed optimizations, immediately after the preloader dismissed
 
 The hero canvas dynamically detects screen orientation and viewport dimensions on mount and resize:
 - **Desktop Viewport:** Serves `/frames_optimized/` (246 frames, 1920×1080 landscape, 23.1 MB) across 4 choreography phases.
-- **Mobile Viewport (`window.innerWidth < 768` or portrait):** Serves `/frames_mob/` (170 frames, 1080×1920 vertical, 17.8 MB) with proportionally mapped pause checkpoints (Frame 41, 82, 123, 170).
+- **Mobile Viewport (`window.innerWidth < 768` or portrait):** Serves `/frames_mob/` (170 frames, 1080×1920 vertical, 17.8 MB) with pause checkpoints at Frame 38, 82, 124, and 170.
 
 ---
 

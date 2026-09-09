@@ -24,20 +24,26 @@ export function FrostedCard({
       className={`pointer-events-none transition-all duration-700 ease-out select-none ${
         visible
           ? "opacity-100 translate-y-0 scale-100"
-          : "opacity-0 translate-y-4 scale-[0.98]"
+          : "opacity-0 translate-y-4 scale-[0.98] invisible pointer-events-none"
       } ${className}`}
+      style={{
+        transform: "translateZ(0)",
+        WebkitTransform: "translateZ(0)",
+        willChange: visible ? "transform, opacity" : "auto",
+      }}
     >
       <div
-        className={`pointer-events-auto relative overflow-hidden rounded-t-2xl rounded-b-none border-t border-x border-white/10 border-b-0 bg-black/45 px-3 pt-2.5 pb-6 sm:px-5 sm:pt-4 sm:pb-10 backdrop-blur-md ${
+        className={`pointer-events-auto relative overflow-hidden rounded-t-2xl rounded-b-none border-t border-x border-white/10 border-b-0 bg-black/55 px-3 pt-2.5 pb-6 sm:px-5 sm:pt-4 sm:pb-10 backdrop-blur-md ${
           !visible ? "pointer-events-none" : ""
         }`}
         style={{
-          WebkitBackdropFilter: "blur(16px)",
-          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(12px)",
+          backdropFilter: "blur(12px)",
+          isolation: "isolate",
           WebkitMaskImage:
-            "linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) 50%, rgba(0, 0, 0, 0) 100%)",
+            "linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 1) 55%, rgba(0, 0, 0, 0) 100%)",
           maskImage:
-            "linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) 50%, rgba(0, 0, 0, 0) 100%)",
+            "linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 1) 55%, rgba(0, 0, 0, 0) 100%)",
         }}
       >
         {/* Subtle top edge glass hairline highlight */}

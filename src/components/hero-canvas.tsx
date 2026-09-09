@@ -91,11 +91,10 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
     if (!ctxRef.current) {
       ctxRef.current = canvas.getContext("2d", {
         alpha: false,
-        desynchronized: true,
       });
       if (ctxRef.current) {
         ctxRef.current.imageSmoothingEnabled = true;
-        ctxRef.current.imageSmoothingQuality = "medium";
+        ctxRef.current.imageSmoothingQuality = "high";
       }
     }
     const ctx = ctxRef.current;
@@ -118,10 +117,10 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
     const ih = img.naturalHeight;
 
     const scale = Math.max(cw / iw, ch / ih);
-    const nw = iw * scale;
-    const nh = ih * scale;
-    const nx = (cw - nw) / 2;
-    const ny = (ch - nh) / 2;
+    const nw = Math.ceil(iw * scale);
+    const nh = Math.ceil(ih * scale);
+    const nx = Math.floor((cw - nw) / 2);
+    const ny = Math.floor((ch - nh) / 2);
 
     ctx.drawImage(img, nx, ny, nw, nh);
     currentFrameRef.current = frameIndex;
@@ -709,7 +708,13 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
       {/* 24FPS Pre-rendered Frame Sequence Canvas */}
       <canvas
         ref={canvasRef}
-        className="absolute inset-0 h-full w-full object-cover block"
+        className="absolute inset-0 h-full w-full block"
+        style={{
+          transform: "translateZ(0)",
+          WebkitTransform: "translateZ(0)",
+          backfaceVisibility: "hidden",
+          WebkitBackfaceVisibility: "hidden",
+        }}
       />
 
       {/* Starting Checkpoint (Frame 0) Right-most Center Heading, Description & Content */}

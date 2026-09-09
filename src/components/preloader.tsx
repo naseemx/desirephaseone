@@ -94,7 +94,8 @@ export function Preloader({ progress = 0, onComplete }: PreloaderProps) {
     let H = 0;
     let cols = 0;
     let rows = 0;
-    const cell = 18; // Smaller compact pixel grid size as requested
+    let cell = 18;
+    let gap = 2;
     let cellsState: { v: number; target: number; speed: number; isPurple?: boolean }[] = [];
     let animId: number;
     let triggerTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -103,6 +104,9 @@ export function Preloader({ progress = 0, onComplete }: PreloaderProps) {
     const resize = () => {
       W = canvas.width = window.innerWidth;
       H = canvas.height = window.innerHeight;
+      const isMobile = W < 768;
+      cell = isMobile ? 10 : 18;
+      gap = isMobile ? 1.5 : 2;
       cols = Math.ceil(W / cell) + 1;
       rows = Math.ceil(H / cell) + 1;
       cellsState = new Array(cols * rows).fill(0).map(() => ({
@@ -152,7 +156,7 @@ export function Preloader({ progress = 0, onComplete }: PreloaderProps) {
                 ? `rgba(51, 224, 255, ${alpha.toFixed(3)})`
                 : `rgba(47, 107, 255, ${alpha.toFixed(3)})`;
             }
-            ctx.fillRect(c * cell + 2, r * cell + 2, cell - 4, cell - 4);
+            ctx.fillRect(c * cell + gap, r * cell + gap, cell - gap * 2, cell - gap * 2);
           }
         }
       }

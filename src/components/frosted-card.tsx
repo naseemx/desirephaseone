@@ -28,7 +28,7 @@ export function FrostedCard({
       } ${className}`}
     >
       <div
-        className={`pointer-events-auto relative overflow-hidden rounded-t-2xl rounded-b-none border-t border-x border-white/10 border-b-0 bg-black/55 px-3.5 pt-3 pb-6 sm:px-5 sm:pt-4 sm:pb-10 backdrop-blur-md ${
+        className={`pointer-events-auto relative overflow-hidden rounded-t-2xl rounded-b-none border-t border-x border-white/10 border-b-0 bg-black/45 px-3 pt-2.5 pb-6 sm:px-5 sm:pt-4 sm:pb-10 backdrop-blur-md ${
           !visible ? "pointer-events-none" : ""
         }`}
         style={{
@@ -45,21 +45,21 @@ export function FrostedCard({
 
         {/* Title */}
         {title && (
-          <h3 className="text-xs sm:text-sm font-bold tracking-tight text-white uppercase leading-snug">
+          <h2 className="text-[9px] sm:text-sm font-bold tracking-tight text-white uppercase">
             {title}
-          </h3>
+          </h2>
         )}
 
         {/* Subtitle */}
         {subtitle && (
-          <p className={`mt-0.5 sm:mt-1 text-[11px] sm:text-xs text-zinc-300 font-normal leading-snug ${subtitleClassName}`}>
+          <p className={`mt-0.5 sm:mt-1 text-[8px] sm:text-xs text-zinc-300 font-normal leading-snug ${subtitleClassName}`}>
             {subtitle}
           </p>
         )}
 
         {/* Description Body */}
         {description && (
-          <p className="mt-1 sm:mt-1.5 text-[10px] sm:text-[11px] text-zinc-300 sm:text-zinc-400 font-normal leading-relaxed">
+          <p className="mt-1 sm:mt-1.5 text-[8px] sm:text-[11px] text-zinc-400 font-normal leading-relaxed">
             {description}
           </p>
         )}

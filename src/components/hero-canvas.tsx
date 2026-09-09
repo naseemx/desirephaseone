@@ -33,7 +33,7 @@ const DESKTOP_CONFIG: HeroSequenceConfig = {
 const MOBILE_CONFIG: HeroSequenceConfig = {
   totalFrames: 170,
   fps: 24,
-  folder: "/frames_mob",
+  folder: "/frames_mob_v2",
   pauseTimes: [
     0,
     37 / 24,   // Phase 1 (Frame 38)

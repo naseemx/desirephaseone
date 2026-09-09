@@ -8,6 +8,7 @@ interface FrostedCardProps {
   subtitle?: string;
   description?: string;
   className?: string;
+  subtitleClassName?: string;
 }
 
 export function FrostedCard({
@@ -16,6 +17,7 @@ export function FrostedCard({
   subtitle = "Visual effects that feel impossible — and run in the browser.",
   description = "Custom GLSL shaders for transitions, distortions, particle systems, and post-processing effects. The kind of visual layer that separates a good site from one people send to each other.",
   className = "",
+  subtitleClassName = "",
 }: FrostedCardProps) {
   return (
     <div
@@ -42,19 +44,25 @@ export function FrostedCard({
         <div className="pointer-events-none absolute inset-x-5 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/25 to-transparent" />
 
         {/* Title */}
-        <h2 className="text-xs sm:text-sm font-bold tracking-tight text-white uppercase">
-          {title}
-        </h2>
+        {title && (
+          <h2 className="text-xs sm:text-sm font-bold tracking-tight text-white uppercase">
+            {title}
+          </h2>
+        )}
 
         {/* Subtitle */}
-        <p className="mt-1 text-[11px] sm:text-xs text-zinc-300 font-normal leading-snug">
-          {subtitle}
-        </p>
+        {subtitle && (
+          <p className={`mt-1 text-[11px] sm:text-xs text-zinc-300 font-normal leading-snug ${subtitleClassName}`}>
+            {subtitle}
+          </p>
+        )}
 
         {/* Description Body */}
-        <p className="mt-1.5 text-[10px] sm:text-[11px] text-zinc-400 font-normal leading-relaxed">
-          {description}
-        </p>
+        {description && (
+          <p className="mt-1.5 text-[10px] sm:text-[11px] text-zinc-400 font-normal leading-relaxed">
+            {description}
+          </p>
+        )}
       </div>
     </div>
   );

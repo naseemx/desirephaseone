@@ -181,7 +181,7 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
           if ("decode" in img) {
             img
               .decode()
-              .catch(() => {})
+              .catch(() => { })
               .finally(() => {
                 if (!isCancelled) {
                   if (currentFrameRef.current === index) {
@@ -567,9 +567,9 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
         onDown: (self) => {
           const isTouch = Boolean(
             Observer.isTouch === 1 ||
-              (self as unknown as { isTouch?: boolean }).isTouch ||
-              self?.event?.type?.startsWith("touch") ||
-              (self.event as PointerEvent)?.pointerType === "touch"
+            (self as unknown as { isTouch?: boolean }).isTouch ||
+            self?.event?.type?.startsWith("touch") ||
+            (self.event as PointerEvent)?.pointerType === "touch"
           );
           if (isTouch) {
             handleMobileScrollReverse();
@@ -580,9 +580,9 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
         onUp: (self) => {
           const isTouch = Boolean(
             Observer.isTouch === 1 ||
-              (self as unknown as { isTouch?: boolean }).isTouch ||
-              self?.event?.type?.startsWith("touch") ||
-              (self.event as PointerEvent)?.pointerType === "touch"
+            (self as unknown as { isTouch?: boolean }).isTouch ||
+            self?.event?.type?.startsWith("touch") ||
+            (self.event as PointerEvent)?.pointerType === "touch"
           );
           if (isTouch) {
             handleMobileScrollForward();
@@ -693,119 +693,117 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
         className="absolute inset-0 h-full w-full object-cover block"
       />
 
-      {/* Starting Checkpoint (Frame 0) Frosted Card Overlay (Bottom Left) */}
-      <div className="absolute left-5 sm:left-8 lg:left-12 bottom-6 sm:bottom-10 z-30 pointer-events-none">
-        <FrostedCard
-          visible={showStartCard}
-          title="WEBGL & SHADER EFFECTS"
-          subtitle="Visual effects that feel impossible — and run in the browser."
-          description="Custom GLSL shaders for transitions, distortions, particle systems, and post-processing effects. The kind of visual layer that separates a good site from one people send to each other."
-          className="w-full max-w-xs sm:max-w-sm"
-        />
-      </div>
-
-      {/* Starting Checkpoint (Frame 0) Right-most Center Heading & Title */}
+      {/* Starting Checkpoint (Frame 0) Right-most Center Heading, Description & Content */}
       <div
-        className={`absolute right-5 sm:right-8 lg:right-12 top-1/2 -translate-y-1/2 z-30 pointer-events-none hidden sm:flex flex-col items-end text-right transition-all duration-700 ease-out select-none max-w-xs sm:max-w-sm lg:max-w-md ${
-          showStartCard
-            ? "opacity-100 translate-y-[-50%]"
-            : "opacity-0 translate-y-[-45%] pointer-events-none"
-        }`}
+        className={`absolute right-5 sm:right-8 lg:right-12 bottom-6 sm:bottom-auto sm:top-1/2 sm:-translate-y-1/2 z-30 pointer-events-none flex flex-col items-start sm:items-end text-left sm:text-right transition-all duration-700 ease-out select-none max-w-sm sm:max-w-md lg:max-w-xl ${showStartCard
+          ? "opacity-100 translate-y-0 sm:translate-y-[-50%]"
+          : "opacity-0 translate-y-4 sm:translate-y-[-45%] pointer-events-none"
+          }`}
       >
         <span className="text-[11px] font-medium tracking-widest text-[var(--brand-cyan)] uppercase">
-          IMMERSIVE LED ARCHITECTURE
+          DOMINATING OUTDOOR SPACES
         </span>
         <h1 className="mt-1.5 text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
-          <span className="block">ENGINEERED FOR</span>
-          <span className="block">VISUAL DOMINANCE</span>
+          <span className="block">CUSTOM DYNAMIC</span>
+          <span className="block">OUTDOOR LED SCREENS</span>
         </h1>
         <p className="mt-2 text-xs sm:text-sm text-zinc-300 font-normal leading-relaxed">
-          Ultra-fine pixel pitch and real-time virtual production display ecosystems.
+          We engineer high-brightness, weatherproof display screens designed to command maximum commercial visibility in any environment.
         </p>
+
+        {/* Content placed below the current title with the same design element */}
+        <div className="mt-6 sm:mt-8 flex flex-col items-start sm:items-end text-left sm:text-right">
+          <span className="text-[11px] font-medium tracking-widest text-[var(--brand-cyan)] uppercase">
+            Sign into the future
+          </span>
+          <h2 className="mt-1.5 text-lg sm:text-xl lg:text-2xl font-bold tracking-tight text-white leading-tight whitespace-normal sm:whitespace-nowrap">
+            Trusted partner for advertising and LED display in UAE
+          </h2>
+          <p className="mt-2 text-xs sm:text-sm text-zinc-300 font-normal leading-relaxed max-w-md sm:max-w-lg">
+            The UAE’s destination for custom indoor and outdoor LED displays, digital kiosks, AV integration, signage, exhibits, branding, and precision structural fabrication.
+          </p>
+        </div>
       </div>
 
       {/* Checkpoint 1 (Curved Ribbon LED) Left-most Center Heading & Title */}
       <div
-        className={`absolute left-5 sm:left-8 lg:left-12 top-[42%] -translate-y-1/2 z-30 pointer-events-none hidden sm:flex flex-col items-start text-left transition-all duration-700 ease-out select-none max-w-xs sm:max-w-sm lg:max-w-md ${
-          activePhase === 1
-            ? "opacity-100 translate-y-[-50%]"
-            : "opacity-0 translate-y-[-45%] pointer-events-none"
-        }`}
+        className={`absolute left-5 sm:left-8 lg:left-12 top-[42%] -translate-y-1/2 z-30 pointer-events-none hidden sm:flex flex-col items-start text-left transition-all duration-700 ease-out select-none max-w-xs sm:max-w-sm lg:max-w-md ${activePhase === 1
+          ? "opacity-100 translate-y-[-50%]"
+          : "opacity-0 translate-y-[-45%] pointer-events-none"
+          }`}
       >
         <span className="text-[11px] font-medium tracking-widest text-[var(--brand-cyan)] uppercase">
-          IMMERSIVE LED ARCHITECTURE
+          Engineered for impact
         </span>
         <h2 className="mt-1.5 text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
-          <span className="block">ENGINEERED FOR</span>
-          <span className="block">VISUAL DOMINANCE</span>
+          <span className="block">SPECIALIZED IN</span>
+          <span className="block">CUSTOM LED DISPLAY</span>
         </h2>
         <p className="mt-2 text-xs sm:text-sm text-zinc-300 font-normal leading-relaxed">
-          Ultra-fine pixel pitch and real-time virtual production display ecosystems.
+          Turning your display dreams into reality with customized indoor and outdoor screens, interactive kiosks, and signature audiovisual solutions designed for your brand.
         </p>
       </div>
 
       {/* Checkpoint 1 (Curved Ribbon LED) Overlays at Bottom (Three Cards) */}
       <div
-        className={`absolute inset-x-0 bottom-6 sm:bottom-10 z-30 pointer-events-none px-5 sm:px-8 lg:px-12 grid grid-cols-1 md:grid-cols-3 gap-3.5 lg:gap-4 transition-all duration-700 ease-out select-none ${
-          activePhase === 1
-            ? "opacity-100 translate-y-0"
-            : "opacity-0 translate-y-4 pointer-events-none"
-        }`}
+        className={`absolute inset-x-0 bottom-6 sm:bottom-10 z-30 pointer-events-none px-5 sm:px-8 lg:px-12 grid grid-cols-1 md:grid-cols-3 gap-3.5 lg:gap-4 transition-all duration-700 ease-out select-none ${activePhase === 1
+          ? "opacity-100 translate-y-0"
+          : "opacity-0 translate-y-4 pointer-events-none"
+          }`}
       >
         {/* Card 1 */}
         <FrostedCard
           visible={activePhase === 1}
-          title="ORGANIC RIBBON ARCHITECTURE"
-          subtitle="Seamless continuous-twist structural LED curves."
-          description="Engineered flexible sub-millimeter modules forming continuous free-form ribbons that wrap architectural atrium columns."
+          title="Structures for Every Screen Concept"
+          subtitle="Engineered Without Limits"
+          description="We design and fabricate custom mounting structures to bring any complex visual idea to life."
           className="w-full"
         />
 
         {/* Card 2 */}
         <FrostedCard
           visible={activePhase === 1}
-          title="HIGH-DENSITY CHROMATICS"
-          subtitle="True HDR10+ calibrated deep gamut immersion."
-          description="Synchronized multi-angle color accuracy and 7680Hz refresh rate engineered for broadcast and high-speed motion capture."
+          title="Straight and Curved Displays"
+          subtitle="Unlimited Shape Flexibility"
+          description="Build high-impact displays with limitless dimension options, including smooth curved or flat screen configurations."
           className="w-full"
         />
 
         {/* Card 3 */}
         <FrostedCard
           visible={activePhase === 1}
-          title="DYNAMIC AMBIENT LUMINANCE"
-          subtitle="Adaptive real-time environment luminance synchronization."
-          description="Integrated light sensor feedback arrays dynamically adjusting nit output for crystal clarity day and night."
+          title="Portable Screens for Dynamic Multi-Events"
+          subtitle="Transportable Visual Power"
+          description="Compact, foldable LED systems offer effortless transportation, rapid assembly, and setup for flexible event deployment."
           className="w-full"
         />
       </div>
 
       {/* Checkpoint 2 (Free-standing Kiosk) Left-most Center Heading, Description & Frosted Card */}
       <div
-        className={`absolute left-5 sm:left-8 lg:left-12 top-[42%] -translate-y-1/2 z-30 pointer-events-none hidden sm:flex flex-col items-start text-left transition-all duration-700 ease-out select-none max-w-xs sm:max-w-sm lg:max-w-md ${
-          activePhase === 2
-            ? "opacity-100 translate-y-[-50%]"
-            : "opacity-0 translate-y-[-45%] pointer-events-none"
-        }`}
+        className={`absolute left-5 sm:left-8 lg:left-12 top-[56%] -translate-y-1/2 z-30 pointer-events-none flex flex-col items-start text-left transition-all duration-700 ease-out select-none max-w-xs sm:max-w-sm lg:max-w-md ${activePhase === 2
+          ? "opacity-100 translate-y-[-50%]"
+          : "opacity-0 translate-y-[-45%] pointer-events-none"
+          }`}
       >
         <span className="text-[11px] font-medium tracking-widest text-[var(--brand-cyan)] uppercase">
-          IMMERSIVE LED ARCHITECTURE
+          INTERACTIVE DIGITAL INNOVATION
         </span>
         <h2 className="mt-1.5 text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
-          <span className="block">ENGINEERED FOR</span>
-          <span className="block">VISUAL DOMINANCE</span>
+          <span className="block">SPECIALIZED CREATORS</span>
+          <span className="block">OF CUSTOM BUILT KIOSKS</span>
         </h2>
         <p className="mt-2 text-xs sm:text-sm text-zinc-300 font-normal leading-relaxed">
-          Ultra-fine pixel pitch and real-time virtual production display ecosystems.
+          We engineer tailored interactive kiosks with high-resolution LED screens designed to elevate modern brand engagement.
         </p>
 
         {/* Frosted Card directly below heading and description */}
-        <div className="mt-5 w-full">
+        <div className="mt-12 sm:mt-16 lg:mt-20 w-full">
           <FrostedCard
             visible={activePhase === 2}
-            title="AUTONOMOUS KIOSK INTERFACE"
-            subtitle="Precision touch-glass edge calibration."
-            description="High-frequency capacitive interaction paired with architectural warm-glow perimeter accent lighting."
+            title="Custom Exhibition Booths, Mall Counters, & Digital Kiosks"
+            subtitle=""
+            description="We bring your vision to life by crafting custom exhibition booths, mall counters, and kiosks in any material, fully integrated with customizable, interactive LED and LCD displays designed to captivate and engage your audience."
             className="w-full"
           />
         </div>
@@ -813,30 +811,29 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
 
       {/* Checkpoint 3 (Large Scale Lobby Wall Display) Left-most Center Heading, Description & Frosted Card */}
       <div
-        className={`absolute left-5 sm:left-8 lg:left-12 top-[42%] -translate-y-1/2 z-30 pointer-events-none hidden sm:flex flex-col items-start text-left transition-all duration-700 ease-out select-none max-w-xs sm:max-w-sm lg:max-w-md ${
-          activePhase === 3
-            ? "opacity-100 translate-y-[-50%]"
-            : "opacity-0 translate-y-[-45%] pointer-events-none"
-        }`}
+        className={`absolute left-5 sm:left-8 lg:left-12 top-[56%] -translate-y-1/2 z-30 pointer-events-none flex flex-col items-start text-left transition-all duration-700 ease-out select-none max-w-xs sm:max-w-sm lg:max-w-md ${activePhase === 3
+          ? "opacity-100 translate-y-[-50%]"
+          : "opacity-0 translate-y-[-45%] pointer-events-none"
+          }`}
       >
         <span className="text-[11px] font-medium tracking-widest text-[var(--brand-cyan)] uppercase">
-          IMMERSIVE LED ARCHITECTURE
+          Vibrant. Seamless. Unmatched.
         </span>
         <h2 className="mt-1.5 text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
-          <span className="block">ENGINEERED FOR</span>
-          <span className="block">VISUAL DOMINANCE</span>
+          <span className="block">Ultra clear indoor</span>
+          <span className="block">LED screen displays.</span>
         </h2>
         <p className="mt-2 text-xs sm:text-sm text-zinc-300 font-normal leading-relaxed">
-          Ultra-fine pixel pitch and real-time virtual production display ecosystems.
+          We create dynamic indoor screens delivering vibrant high-resolution visuals tailored for modern spaces and environments.
         </p>
 
         {/* Frosted Card directly below heading and description */}
-        <div className="mt-5 w-full">
+        <div className="mt-12 sm:mt-16 lg:mt-20 w-full">
           <FrostedCard
             visible={activePhase === 3}
-            title="CINEMATIC WALL DISPLAY"
-            subtitle="Ultra-fine seamless monolithic canvas."
-            description="Micro-LED surface planar alignment delivering infinite contrast ratios and zero-bezel expansive field of view."
+            title="Your One-Stop Destination for Display Solutions"
+            subtitle=""
+            description="From traditional flexface, high-impact banners, and precision vinyl graphics to cutting-edge LED walls and interactive LCD screens, we provide end-to-end indoor advertising and media display solutions tailored to showcase your brand with maximum visual power."
             className="w-full"
           />
         </div>
@@ -844,30 +841,29 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
 
       {/* Checkpoint 4 (Transparent Glass Cube Studio) Left-most Center Heading, Description & Frosted Card */}
       <div
-        className={`absolute left-5 sm:left-8 lg:left-12 top-[42%] -translate-y-1/2 z-30 pointer-events-none hidden sm:flex flex-col items-start text-left transition-all duration-700 ease-out select-none max-w-xs sm:max-w-sm lg:max-w-md ${
-          activePhase === 4
-            ? "opacity-100 translate-y-[-50%]"
-            : "opacity-0 translate-y-[-45%] pointer-events-none"
-        }`}
+        className={`absolute left-5 sm:left-8 lg:left-12 top-[56%] -translate-y-1/2 z-30 pointer-events-none flex flex-col items-start text-left transition-all duration-700 ease-out select-none max-w-xs sm:max-w-sm lg:max-w-md ${activePhase === 4
+          ? "opacity-100 translate-y-[-50%]"
+          : "opacity-0 translate-y-[-45%] pointer-events-none"
+          }`}
       >
         <span className="text-[11px] font-medium tracking-widest text-[var(--brand-cyan)] uppercase">
-          IMMERSIVE LED ARCHITECTURE
+          See through innovation.
         </span>
         <h2 className="mt-1.5 text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
-          <span className="block">ENGINEERED FOR</span>
-          <span className="block">VISUAL DOMINANCE</span>
+          <span className="block">High-impact indoor and</span>
+          <span className="block"> outdoor mesh displays</span>
         </h2>
         <p className="mt-2 text-xs sm:text-sm text-zinc-300 font-normal leading-relaxed">
-          Ultra-fine pixel pitch and real-time virtual production display ecosystems.
+          Engineered for ultimate transparency and brightness, our mesh screens turn glass facades into vibrant dynamic visuals.
         </p>
 
         {/* Frosted Card directly below heading and description */}
-        <div className="mt-5 w-full">
+        <div className="mt-12 sm:mt-16 lg:mt-20 w-full">
           <FrostedCard
             visible={activePhase === 4}
-            title="HOLOGRAPHIC TRANSPARENT CUBE"
-            subtitle="High-transparency film with 3D depth illusion."
-            description="Over 85% light transmittance allowing ambient interior light while projecting ultra-vivid floating volumetric visuals."
+            title="Complete Audio-Visual Solutions for Modern Spaces"
+            subtitle=""
+            description="We design, supply, and integrate high-performance audio-visual systems—combining immersive sound, high-definition video, and seamless control setup to deliver clear, dynamic, and high-impact multimedia experiences tailored precisely to your commercial or corporate environment"
             className="w-full"
           />
         </div>

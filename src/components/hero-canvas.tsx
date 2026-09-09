@@ -135,12 +135,32 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
       typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1,
       1.5
     );
-    canvas.width = Math.min(Math.round(window.innerWidth * dpr), 1920);
-    canvas.height = Math.min(Math.round(window.innerHeight * dpr), 1920);
+    const newWidth = Math.min(Math.round(window.innerWidth * dpr), 1920);
+    const newHeight = Math.min(Math.round(window.innerHeight * dpr), 1920);
+
+    // On mobile devices, vertical scrolling causes the browser address bar to show/hide,
+    // firing window 'resize' with minor height fluctuations while width stays identical.
+    // Never re-dimension or clear the canvas for these toolbar changes!
+    const heightDiff = Math.abs(canvas.height - newHeight);
+    if (
+      canvas.width === newWidth &&
+      (canvas.height === newHeight || heightDiff < 150) &&
+      ctxRef.current
+    ) {
+      return;
+    }
+
+    const frameToRestore = currentFrameRef.current >= 0 ? currentFrameRef.current : 0;
+
+    canvas.width = newWidth;
+    canvas.height = newHeight;
 
     ctxRef.current = null;
     currentFrameRef.current = -1;
-  }, []);
+
+    // Immediately restore and draw the frame so the canvas never flashes black or goes dark!
+    drawFrame(frameToRestore);
+  }, [drawFrame]);
 
   // ─── Preload with 16-Worker Sliding Pool + Parallel In-Worker Decode ────
   useEffect(() => {

@@ -49,6 +49,27 @@ const MOBILE_CONFIG: HeroSequenceConfig = {
 // 200ms (0.2s) pause cooldown for rapid, instant response
 const PAUSE_COOLDOWN_MS = 200;
 
+const CP1_CARDS = [
+  {
+    tab: "Structures",
+    title: "Structures for Every Screen Concept",
+    subtitle: "Engineered Without Limits",
+    description: "We design and fabricate custom mounting structures to bring any complex visual idea to life.",
+  },
+  {
+    tab: "Curved & Flat",
+    title: "Straight and Curved Displays",
+    subtitle: "Unlimited Shape Flexibility",
+    description: "Build high-impact displays with limitless dimension options, including smooth curved or flat screen configurations.",
+  },
+  {
+    tab: "Portable",
+    title: "Portable Screens for Dynamic Multi-Events",
+    subtitle: "Transportable Visual Power",
+    description: "Compact, foldable LED systems offer effortless transportation, rapid assembly, and setup for flexible event deployment.",
+  },
+];
+
 interface HeroCanvasProps {
   onProgress?: (progress: number) => void;
   onLoaded?: () => void;
@@ -80,6 +101,18 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
   const [showStartCard, setShowStartCard] = useState(true);
   const [activePhase, setActivePhase] = useState(0);
   const forwardTriggerRef = useRef<(() => void) | null>(null);
+
+  // Checkpoint 1 card tab state on mobile
+  const [cp1Index, setCp1Index] = useState(0);
+  const cp1TouchStartX = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (activePhase !== 1) return;
+    const timer = setInterval(() => {
+      setCp1Index((prev) => (prev + 1) % 3);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, [activePhase]);
 
   // ─── Draw a single frame to the canvas (cover mode) ─────────────────────
   const drawFrame = useCallback((frameIndex: number) => {
@@ -714,31 +747,31 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
 
       {/* Starting Checkpoint (Frame 0) Right-most Center Heading, Description & Content */}
       <div
-        className={`absolute left-4 right-4 sm:left-auto sm:right-8 lg:right-12 bottom-8 sm:bottom-auto sm:top-1/2 sm:-translate-y-1/2 z-30 pointer-events-none flex flex-col items-start sm:items-end text-left sm:text-right transition-all duration-700 ease-out select-none max-w-none sm:max-w-md lg:max-w-xl ${showStartCard
+        className={`absolute left-4 right-4 sm:left-auto sm:right-8 lg:right-12 bottom-6 sm:bottom-auto sm:top-1/2 sm:-translate-y-1/2 z-30 pointer-events-none flex flex-col items-start sm:items-end text-left sm:text-right transition-all duration-700 ease-out select-none max-w-none sm:max-w-md lg:max-w-xl ${showStartCard
           ? "opacity-100 translate-y-0 sm:translate-y-[-50%]"
           : "opacity-0 translate-y-4 sm:translate-y-[-45%] pointer-events-none"
           }`}
       >
-        <span className="text-[9px] sm:text-[11px] font-medium tracking-widest text-[var(--brand-cyan)] uppercase">
+        <span className="text-[10px] sm:text-[11px] font-semibold tracking-widest text-[var(--brand-cyan)] uppercase">
           DOMINATING OUTDOOR SPACES
         </span>
-        <h1 className="mt-1 sm:mt-1.5 text-lg sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
+        <h1 className="mt-1 sm:mt-1.5 text-xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
           <span className="block">CUSTOM DYNAMIC</span>
           <span className="block">OUTDOOR LED SCREENS</span>
         </h1>
-        <p className="mt-1.5 sm:mt-2 text-[10px] sm:text-sm text-zinc-300 font-normal leading-relaxed">
+        <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-zinc-300 font-normal leading-relaxed max-w-sm sm:max-w-none">
           We engineer high-brightness, weatherproof display screens designed to command maximum commercial visibility in any environment.
         </p>
 
         {/* Content placed below the current title with the same design element */}
-        <div className="mt-4 sm:mt-8 flex flex-col items-start sm:items-end text-left sm:text-right">
-          <span className="text-[9px] sm:text-[11px] font-medium tracking-widest text-[var(--brand-cyan)] uppercase">
+        <div className="mt-3.5 sm:mt-8 flex flex-col items-start sm:items-end text-left sm:text-right">
+          <span className="text-[10px] sm:text-[11px] font-semibold tracking-widest text-[var(--brand-cyan)] uppercase">
             Sign into the future
           </span>
-          <h2 className="mt-1 sm:mt-1.5 text-sm sm:text-xl lg:text-2xl font-bold tracking-tight text-white leading-tight whitespace-normal sm:whitespace-nowrap">
+          <h2 className="mt-0.5 sm:mt-1.5 text-sm sm:text-xl lg:text-2xl font-bold tracking-tight text-white leading-tight whitespace-normal sm:whitespace-nowrap">
             Trusted partner for advertising and LED display in UAE
           </h2>
-          <p className="mt-1.5 sm:mt-2 text-[10px] sm:text-sm text-zinc-300 font-normal leading-relaxed max-w-none sm:max-w-lg">
+          <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-zinc-300 font-normal leading-relaxed max-w-sm sm:max-w-lg">
             The UAE&apos;s destination for custom indoor and outdoor LED displays, digital kiosks, AV integration, signage, exhibits, branding, and precision structural fabrication.
           </p>
         </div>
@@ -746,78 +779,107 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
 
       {/* Checkpoint 1 (Curved Ribbon LED) Left-most Center Heading & Title */}
       <div
-        className={`absolute left-4 right-4 sm:left-8 sm:right-auto lg:left-12 top-[22%] sm:top-[42%] -translate-y-1/2 z-30 pointer-events-none flex flex-col items-start text-left transition-all duration-700 ease-out select-none max-w-none sm:max-w-sm lg:max-w-md ${activePhase === 1
-          ? "opacity-100 translate-y-[-50%]"
-          : "opacity-0 translate-y-[-45%] pointer-events-none"
+        className={`absolute left-4 right-4 sm:left-8 sm:right-auto lg:left-12 top-20 sm:top-[42%] sm:-translate-y-1/2 z-30 pointer-events-none flex flex-col items-start text-left transition-all duration-700 ease-out select-none max-w-none sm:max-w-sm lg:max-w-md ${activePhase === 1
+          ? "opacity-100 translate-y-0 sm:translate-y-[-50%]"
+          : "opacity-0 -translate-y-2 sm:translate-y-[-45%] pointer-events-none"
           }`}
       >
-        <span className="text-[9px] sm:text-[11px] font-medium tracking-widest text-[var(--brand-cyan)] uppercase">
+        <span className="text-[10px] sm:text-[11px] font-semibold tracking-widest text-[var(--brand-cyan)] uppercase">
           Engineered for impact
         </span>
-        <h2 className="mt-1 sm:mt-1.5 text-base sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
+        <h2 className="mt-1 sm:mt-1.5 text-xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
           <span className="block">SPECIALIZED IN</span>
           <span className="block">CUSTOM LED DISPLAY</span>
         </h2>
-        <p className="mt-1.5 sm:mt-2 text-[10px] sm:text-sm text-zinc-300 font-normal leading-relaxed">
+        <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-zinc-300 font-normal leading-relaxed">
           Turning your display dreams into reality with customized indoor and outdoor screens, interactive kiosks, and signature audiovisual solutions designed for your brand.
         </p>
       </div>
 
-      {/* Checkpoint 1 (Curved Ribbon LED) Overlays at Bottom (Three Cards) */}
+      {/* Checkpoint 1 (Curved Ribbon LED) Overlays at Bottom (Three Cards on Desktop, Interactive Tabbed Card on Mobile) */}
       <div
-        className={`absolute inset-x-0 bottom-4 sm:bottom-10 z-30 pointer-events-none px-4 sm:px-8 lg:px-12 grid grid-cols-3 gap-1.5 sm:gap-3.5 lg:gap-4 transition-all duration-700 ease-out select-none ${activePhase === 1
+        className={`absolute inset-x-0 bottom-4 sm:bottom-10 z-30 pointer-events-none px-4 sm:px-8 lg:px-12 transition-all duration-700 ease-out select-none ${activePhase === 1
           ? "opacity-100 translate-y-0"
           : "opacity-0 translate-y-4 pointer-events-none"
           }`}
       >
-        {/* Card 1 */}
-        <FrostedCard
-          visible={activePhase === 1}
-          title="Structures for Every Screen Concept"
-          subtitle="Engineered Without Limits"
-          description="We design and fabricate custom mounting structures to bring any complex visual idea to life."
-          className="w-full"
-        />
+        {/* Mobile View: Interactive Pill Tabs + Single Responsive Card */}
+        <div
+          className="flex sm:hidden flex-col w-full pointer-events-auto"
+          onTouchStart={(e) => {
+            cp1TouchStartX.current = e.touches[0].clientX;
+          }}
+          onTouchEnd={(e) => {
+            if (cp1TouchStartX.current === null) return;
+            const diff = cp1TouchStartX.current - e.changedTouches[0].clientX;
+            if (diff > 40) {
+              setCp1Index((prev) => (prev + 1) % 3);
+            } else if (diff < -40) {
+              setCp1Index((prev) => (prev - 1 + 3) % 3);
+            }
+            cp1TouchStartX.current = null;
+          }}
+        >
+          <div className="flex items-center gap-1.5 mb-2 pointer-events-auto">
+            {CP1_CARDS.map((card, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => setCp1Index(idx)}
+                className={`px-3 py-1 rounded-full text-[10px] font-semibold tracking-wide uppercase transition-all duration-300 ${
+                  cp1Index === idx
+                    ? "bg-[var(--brand-cyan)] text-black shadow-[0_0_10px_rgba(6,182,212,0.4)]"
+                    : "bg-black/60 text-zinc-400 border border-white/10"
+                }`}
+              >
+                {card.tab}
+              </button>
+            ))}
+          </div>
+          <FrostedCard
+            visible={activePhase === 1}
+            title={CP1_CARDS[cp1Index].title}
+            subtitle={CP1_CARDS[cp1Index].subtitle}
+            description={CP1_CARDS[cp1Index].description}
+            className="w-full"
+          />
+        </div>
 
-        {/* Card 2 */}
-        <FrostedCard
-          visible={activePhase === 1}
-          title="Straight and Curved Displays"
-          subtitle="Unlimited Shape Flexibility"
-          description="Build high-impact displays with limitless dimension options, including smooth curved or flat screen configurations."
-          className="w-full"
-        />
-
-        {/* Card 3 */}
-        <FrostedCard
-          visible={activePhase === 1}
-          title="Portable Screens for Dynamic Multi-Events"
-          subtitle="Transportable Visual Power"
-          description="Compact, foldable LED systems offer effortless transportation, rapid assembly, and setup for flexible event deployment."
-          className="w-full"
-        />
+        {/* Desktop View: Three Cards Grid */}
+        <div className="hidden sm:grid sm:grid-cols-3 gap-3.5 lg:gap-4 w-full">
+          {CP1_CARDS.map((card, idx) => (
+            <FrostedCard
+              key={idx}
+              visible={activePhase === 1}
+              title={card.title}
+              subtitle={card.subtitle}
+              description={card.description}
+              className="w-full"
+            />
+          ))}
+        </div>
       </div>
 
       {/* Checkpoint 2 (Free-standing Kiosk) Left-most Center Heading, Description & Frosted Card */}
       <div
-        className={`absolute left-4 right-4 sm:left-8 sm:right-auto lg:left-12 top-[38%] sm:top-[56%] -translate-y-1/2 z-30 pointer-events-none flex flex-col items-start text-left transition-all duration-700 ease-out select-none max-w-none sm:max-w-sm lg:max-w-md ${activePhase === 2
-          ? "opacity-100 translate-y-[-50%]"
-          : "opacity-0 translate-y-[-45%] pointer-events-none"
+        className={`absolute left-4 right-4 sm:left-8 sm:right-auto lg:left-12 top-20 sm:top-[56%] sm:-translate-y-1/2 z-30 pointer-events-none flex flex-col items-start text-left transition-all duration-700 ease-out select-none max-w-none sm:max-w-sm lg:max-w-md ${activePhase === 2
+          ? "opacity-100 translate-y-0 sm:translate-y-[-50%]"
+          : "opacity-0 -translate-y-2 sm:translate-y-[-45%] pointer-events-none"
           }`}
       >
-        <span className="text-[9px] sm:text-[11px] font-medium tracking-widest text-[var(--brand-cyan)] uppercase">
+        <span className="text-[10px] sm:text-[11px] font-semibold tracking-widest text-[var(--brand-cyan)] uppercase">
           INTERACTIVE DIGITAL INNOVATION
         </span>
-        <h2 className="mt-1 sm:mt-1.5 text-base sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
+        <h2 className="mt-1 sm:mt-1.5 text-xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
           <span className="block">SPECIALIZED CREATORS</span>
           <span className="block">OF CUSTOM BUILT KIOSKS</span>
         </h2>
-        <p className="mt-1.5 sm:mt-2 text-[10px] sm:text-sm text-zinc-300 font-normal leading-relaxed">
+        <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-zinc-300 font-normal leading-relaxed">
           We engineer tailored interactive kiosks with high-resolution LED screens designed to elevate modern brand engagement.
         </p>
 
-        {/* Frosted Card directly below heading and description */}
-        <div className="mt-4 sm:mt-16 lg:mt-20 w-full">
+        {/* Desktop only: card directly below heading */}
+        <div className="hidden sm:block sm:mt-16 lg:mt-20 w-full">
           <FrostedCard
             visible={activePhase === 2}
             title="Custom Exhibition Booths, Mall Counters, & Digital Kiosks"
@@ -828,26 +890,42 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
         </div>
       </div>
 
-      {/* Checkpoint 3 (Large Scale Lobby Wall Display) Left-most Center Heading, Description & Frosted Card */}
+      {/* Checkpoint 2 Mobile Only: Frosted Card placed at bottom */}
       <div
-        className={`absolute left-4 right-4 sm:left-8 sm:right-auto lg:left-12 top-[38%] sm:top-[56%] -translate-y-1/2 z-30 pointer-events-none flex flex-col items-start text-left transition-all duration-700 ease-out select-none max-w-none sm:max-w-sm lg:max-w-md ${activePhase === 3
-          ? "opacity-100 translate-y-[-50%]"
-          : "opacity-0 translate-y-[-45%] pointer-events-none"
+        className={`sm:hidden absolute inset-x-0 bottom-4 z-30 pointer-events-none px-4 transition-all duration-700 ease-out select-none ${activePhase === 2
+          ? "opacity-100 translate-y-0"
+          : "opacity-0 translate-y-4 pointer-events-none"
           }`}
       >
-        <span className="text-[9px] sm:text-[11px] font-medium tracking-widest text-[var(--brand-cyan)] uppercase">
+        <FrostedCard
+          visible={activePhase === 2}
+          title="Custom Exhibition Booths, Mall Counters, & Digital Kiosks"
+          subtitle=""
+          description="We bring your vision to life by crafting custom exhibition booths, mall counters, and kiosks in any material, fully integrated with customizable, interactive LED and LCD displays designed to captivate and engage your audience."
+          className="w-full"
+        />
+      </div>
+
+      {/* Checkpoint 3 (Large Scale Lobby Wall Display) Left-most Center Heading, Description & Frosted Card */}
+      <div
+        className={`absolute left-4 right-4 sm:left-8 sm:right-auto lg:left-12 top-20 sm:top-[56%] sm:-translate-y-1/2 z-30 pointer-events-none flex flex-col items-start text-left transition-all duration-700 ease-out select-none max-w-none sm:max-w-sm lg:max-w-md ${activePhase === 3
+          ? "opacity-100 translate-y-0 sm:translate-y-[-50%]"
+          : "opacity-0 -translate-y-2 sm:translate-y-[-45%] pointer-events-none"
+          }`}
+      >
+        <span className="text-[10px] sm:text-[11px] font-semibold tracking-widest text-[var(--brand-cyan)] uppercase">
           Vibrant. Seamless. Unmatched.
         </span>
-        <h2 className="mt-1 sm:mt-1.5 text-base sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
+        <h2 className="mt-1 sm:mt-1.5 text-xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
           <span className="block">Ultra clear indoor</span>
           <span className="block">LED screen displays.</span>
         </h2>
-        <p className="mt-1.5 sm:mt-2 text-[10px] sm:text-sm text-zinc-300 font-normal leading-relaxed">
+        <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-zinc-300 font-normal leading-relaxed">
           We create dynamic indoor screens delivering vibrant high-resolution visuals tailored for modern spaces and environments.
         </p>
 
-        {/* Frosted Card directly below heading and description */}
-        <div className="mt-4 sm:mt-16 lg:mt-20 w-full">
+        {/* Desktop only: card directly below heading */}
+        <div className="hidden sm:block sm:mt-16 lg:mt-20 w-full">
           <FrostedCard
             visible={activePhase === 3}
             title="Your One-Stop Destination for Display Solutions"
@@ -858,26 +936,42 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
         </div>
       </div>
 
-      {/* Checkpoint 4 (Transparent Glass Cube Studio) Left-most Center Heading, Description & Frosted Card */}
+      {/* Checkpoint 3 Mobile Only: Frosted Card placed at bottom */}
       <div
-        className={`absolute left-4 right-4 sm:left-8 sm:right-auto lg:left-12 top-[38%] sm:top-[56%] -translate-y-1/2 z-30 pointer-events-none flex flex-col items-start text-left transition-all duration-700 ease-out select-none max-w-none sm:max-w-sm lg:max-w-md ${activePhase === 4
-          ? "opacity-100 translate-y-[-50%]"
-          : "opacity-0 translate-y-[-45%] pointer-events-none"
+        className={`sm:hidden absolute inset-x-0 bottom-4 z-30 pointer-events-none px-4 transition-all duration-700 ease-out select-none ${activePhase === 3
+          ? "opacity-100 translate-y-0"
+          : "opacity-0 translate-y-4 pointer-events-none"
           }`}
       >
-        <span className="text-[9px] sm:text-[11px] font-medium tracking-widest text-[var(--brand-cyan)] uppercase">
+        <FrostedCard
+          visible={activePhase === 3}
+          title="Your One-Stop Destination for Display Solutions"
+          subtitle=""
+          description="From traditional flexface, high-impact banners, and precision vinyl graphics to cutting-edge LED walls and interactive LCD screens, we provide end-to-end indoor advertising and media display solutions tailored to showcase your brand with maximum visual power."
+          className="w-full"
+        />
+      </div>
+
+      {/* Checkpoint 4 (Transparent Glass Cube Studio) Left-most Center Heading, Description & Frosted Card */}
+      <div
+        className={`absolute left-4 right-4 sm:left-8 sm:right-auto lg:left-12 top-20 sm:top-[56%] sm:-translate-y-1/2 z-30 pointer-events-none flex flex-col items-start text-left transition-all duration-700 ease-out select-none max-w-none sm:max-w-sm lg:max-w-md ${activePhase === 4
+          ? "opacity-100 translate-y-0 sm:translate-y-[-50%]"
+          : "opacity-0 -translate-y-2 sm:translate-y-[-45%] pointer-events-none"
+          }`}
+      >
+        <span className="text-[10px] sm:text-[11px] font-semibold tracking-widest text-[var(--brand-cyan)] uppercase">
           See through innovation.
         </span>
-        <h2 className="mt-1 sm:mt-1.5 text-base sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
+        <h2 className="mt-1 sm:mt-1.5 text-xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
           <span className="block">High-impact indoor and</span>
           <span className="block"> outdoor mesh displays</span>
         </h2>
-        <p className="mt-1.5 sm:mt-2 text-[10px] sm:text-sm text-zinc-300 font-normal leading-relaxed">
+        <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-zinc-300 font-normal leading-relaxed">
           Engineered for ultimate transparency and brightness, our mesh screens turn glass facades into vibrant dynamic visuals.
         </p>
 
-        {/* Frosted Card directly below heading and description */}
-        <div className="mt-4 sm:mt-16 lg:mt-20 w-full">
+        {/* Desktop only: card directly below heading */}
+        <div className="hidden sm:block sm:mt-16 lg:mt-20 w-full">
           <FrostedCard
             visible={activePhase === 4}
             title="Complete Audio-Visual Solutions for Modern Spaces"
@@ -886,6 +980,22 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
             className="w-full"
           />
         </div>
+      </div>
+
+      {/* Checkpoint 4 Mobile Only: Frosted Card placed at bottom */}
+      <div
+        className={`sm:hidden absolute inset-x-0 bottom-4 z-30 pointer-events-none px-4 transition-all duration-700 ease-out select-none ${activePhase === 4
+          ? "opacity-100 translate-y-0"
+          : "opacity-0 translate-y-4 pointer-events-none"
+          }`}
+      >
+        <FrostedCard
+          visible={activePhase === 4}
+          title="Complete Audio-Visual Solutions for Modern Spaces"
+          subtitle=""
+          description="We design, supply, and integrate high-performance audio-visual systems—combining immersive sound, high-definition video, and seamless control setup to deliver clear, dynamic, and high-impact multimedia experiences tailored precisely to your commercial or corporate environment"
+          className="w-full"
+        />
       </div>
     </div>
   );

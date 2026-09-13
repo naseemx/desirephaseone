@@ -11,9 +11,19 @@ interface FrostedCardProps {
   subtitleClassName?: string;
 }
 
+function toSentenceCase(text: string): string {
+  if (!text) return "";
+  const lower = text.toLowerCase();
+  const withAcronyms = lower
+    .replace(/\bled\b/g, "LED")
+    .replace(/\blcd\b/g, "LCD")
+    .replace(/\bav\b/g, "AV");
+  return withAcronyms.charAt(0).toUpperCase() + withAcronyms.slice(1);
+}
+
 export function FrostedCard({
   visible = true,
-  title = "WEBGL & SHADER EFFECTS",
+  title = "WebGL & shader effects",
   subtitle = "Visual effects that feel impossible — and run in the browser.",
   description = "Custom GLSL shaders for transitions, distortions, particle systems, and post-processing effects. The kind of visual layer that separates a good site from one people send to each other.",
   className = "",
@@ -51,8 +61,8 @@ export function FrostedCard({
 
         {/* Title */}
         {title && (
-          <h2 className="text-[9px] sm:text-sm font-bold tracking-tight text-white uppercase">
-            {title}
+          <h2 className="text-xs sm:text-base lg:text-lg font-bold tracking-tight text-white leading-tight sm:leading-snug">
+            {toSentenceCase(title)}
           </h2>
         )}
 

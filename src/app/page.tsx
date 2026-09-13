@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Navbar } from "@/components/navbar";
 import { HeroCanvas } from "@/components/hero-canvas";
+import { ContactForm } from "@/components/contact-form";
 import { Footer } from "@/components/footer";
 import { Preloader } from "@/components/preloader";
 
@@ -26,6 +27,9 @@ export default function Home() {
         onProgress={(pct) => setLoadingProgress((prev) => Math.max(prev, pct))}
         onLoaded={() => setLoadingProgress(100)}
       />
+
+      {/* Modern Responsive Contact Form */}
+      <ContactForm />
 
       {/* Modern High-Performance Footer placed immediately after Hero */}
       <Footer />

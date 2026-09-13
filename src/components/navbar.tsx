@@ -27,7 +27,7 @@ export function Navbar({ visible = true }: NavbarProps) {
             aria-label="Home"
           >
             {/* companylogo.png (Desire Advertising) */}
-            <div className="relative h-[22px] sm:h-[26px] w-[57px] sm:w-[67px] shrink-0">
+            <div className="relative h-[28px] sm:h-[33px] w-[71px] sm:w-[84px] shrink-0">
               <Image
                 src="/companylogo.png"
                 alt="Company Logo"
@@ -38,10 +38,10 @@ export function Navbar({ visible = true }: NavbarProps) {
             </div>
 
             {/* Subtle vertical divider */}
-            <div className="h-3.5 sm:h-4 w-[1px] bg-white/25 shrink-0" />
+            <div className="h-[18px] sm:h-[20px] w-[1px] bg-white/25 shrink-0" />
 
             {/* brandlogo.png (dzyr digital) */}
-            <div className="relative h-[14px] sm:h-[16px] w-[80px] sm:w-[92px] shrink-0">
+            <div className="relative h-[18px] sm:h-[20px] w-[100px] sm:w-[115px] shrink-0">
               <Image
                 src="/brandlogo.png"
                 alt="Brand Logo"
@@ -53,8 +53,24 @@ export function Navbar({ visible = true }: NavbarProps) {
           </a>
         </div>
 
-        {/* Right: Hamburger Menu Icon */}
-        <div className="flex items-center">
+        {/* Desktop: Text Links with Drop Shadow at the right-most side */}
+        <div className="hidden sm:flex items-center gap-7 lg:gap-9">
+          <a
+            href="#hero"
+            className="text-sm lg:text-[15px] font-medium text-white/90 transition-colors hover:text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)] tracking-wide"
+          >
+            Home
+          </a>
+          <a
+            href="#contact"
+            className="text-sm lg:text-[15px] font-medium text-white/90 transition-colors hover:text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)] tracking-wide"
+          >
+            Contact
+          </a>
+        </div>
+
+        {/* Mobile: Hamburger Menu Button (hidden on desktop) */}
+        <div className="sm:hidden flex items-center">
           {/* Minimal Hamburger Menu Button (2 clean horizontal lines matching design) */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
@@ -77,16 +93,16 @@ export function Navbar({ visible = true }: NavbarProps) {
         </div>
       </nav>
 
-      {/* Expanded Menu Drawer matching exact screenshot design */}
+      {/* Mobile Drawer (hidden on desktop) */}
       <div
-        className={`absolute top-3 sm:top-4 right-4 sm:right-8 lg:right-10 transition-all duration-300 ease-out origin-top-right ${
+        className={`sm:hidden absolute top-3 right-4 transition-all duration-300 ease-out origin-top-right ${
           menuOpen
             ? "opacity-100 scale-100 pointer-events-auto"
             : "opacity-0 scale-95 pointer-events-none"
         }`}
       >
         <div
-          className="relative w-44 sm:w-48 overflow-hidden rounded-2xl border border-white/10 bg-[#06060c]/90 px-6 pt-5 pb-6 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.85)]"
+          className="relative w-44 overflow-hidden rounded-2xl border border-white/10 bg-[#06060c]/90 px-6 pt-5 pb-6 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.85)]"
           style={{
             WebkitBackdropFilter: "blur(24px)",
           }}
@@ -116,30 +132,7 @@ export function Navbar({ visible = true }: NavbarProps) {
               Home
             </a>
             <a
-              href="#hero"
-              onClick={() => setMenuOpen(false)}
-              className="text-sm font-normal text-zinc-300 transition-colors hover:text-white"
-            >
-              About
-            </a>
-
-            {/* Active / Highlighted 'Work' link with underline accent */}
-            <div className="flex flex-col items-end">
-              <a
-                href="#hero"
-                onClick={() => setMenuOpen(false)}
-                className="text-sm font-bold text-white transition-colors"
-              >
-                Work
-              </a>
-              <div className="mt-1 flex gap-1">
-                <span className="h-[2px] w-2 rounded-full bg-white" />
-                <span className="h-[2px] w-2 rounded-full bg-white" />
-              </div>
-            </div>
-
-            <a
-              href="#footer"
+              href="#contact"
               onClick={() => setMenuOpen(false)}
               className="text-sm font-normal text-zinc-300 transition-colors hover:text-white"
             >

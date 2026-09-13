@@ -10,8 +10,47 @@ const varelaRound = Varela_Round({
 });
 
 export const metadata: Metadata = {
-  title: "LED Screen Studio | High-Performance Visuals",
-  description: "Modern web experience powered by Next.js, Lenis, GSAP, Framer Motion, and Lucide Icons.",
+  title: "Desire | Custom LED Displays, Digital Kiosks & Signage UAE",
+  description:
+    "The UAE's destination for custom indoor and outdoor LED displays, digital kiosks, AV integration, signage, exhibits, branding, and precision structural fabrication.",
+  keywords: [
+    "Desire",
+    "Desire Advertising",
+    "Desire Digital",
+    "LED screens UAE",
+    "LED display Dubai",
+    "digital kiosks UAE",
+    "custom exhibition booths Dubai",
+    "outdoor LED screens",
+    "indoor LED screens",
+    "transparent mesh displays",
+    "curved LED display",
+    "audio-visual solutions UAE",
+  ],
+  authors: [{ name: "Desire Advertising LLC" }],
+  creator: "Desire Advertising LLC",
+  publisher: "Desire Advertising LLC",
+  openGraph: {
+    title: "Desire | Custom LED Displays, Digital Kiosks & Signage UAE",
+    description:
+      "The UAE's destination for custom indoor and outdoor LED displays, digital kiosks, AV integration, signage, and exhibits.",
+    siteName: "Desire",
+    locale: "en_AE",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Desire | Custom LED Displays, Digital Kiosks & Signage UAE",
+    description:
+      "The UAE's destination for custom indoor and outdoor LED displays, digital kiosks, AV integration, signage, and exhibits.",
+  },
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/icon.png", type: "image/png" },
+    ],
+    apple: "/apple-icon.png",
+  },
 };
 
 export default function RootLayout({

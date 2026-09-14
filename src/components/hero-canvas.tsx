@@ -82,25 +82,7 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
   const [activePhase, setActivePhase] = useState(0);
   const forwardTriggerRef = useRef<(() => void) | null>(null);
 
-  // Measure 'outdoor LED screens' text width to align description on desktop
-  const outdoorRef = useRef<HTMLSpanElement>(null);
-  const [outdoorWidth, setOutdoorWidth] = useState<number | null>(null);
 
-  useEffect(() => {
-    const updateWidth = () => {
-      if (outdoorRef.current && window.innerWidth >= 640) {
-        setOutdoorWidth(outdoorRef.current.offsetWidth);
-      } else {
-        setOutdoorWidth(null);
-      }
-    };
-    updateWidth();
-    if (typeof document !== "undefined" && document.fonts?.ready) {
-      document.fonts.ready.then(updateWidth);
-    }
-    window.addEventListener("resize", updateWidth);
-    return () => window.removeEventListener("resize", updateWidth);
-  }, []);
 
   // ─── Draw a single frame to the canvas (cover mode) ─────────────────────
   const drawFrame = useCallback((frameIndex: number) => {
@@ -768,17 +750,16 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
         <span className="text-[9px] sm:text-[11px] font-medium tracking-widest text-[var(--brand-cyan)] uppercase">
           DOMINATING OUTDOOR SPACES
         </span>
-        <h1 className="mt-1 sm:mt-1.5 text-base sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
-          <span className="block">Custom dynamic</span>
-          <span ref={outdoorRef} className="block w-fit ml-auto">outdoor LED screens</span>
-        </h1>
-        <div
-          className="mt-1.5 sm:mt-2 w-full flex flex-col items-end max-w-xs sm:max-w-[400px] lg:max-w-[430px]"
-          style={outdoorWidth ? { maxWidth: `${outdoorWidth}px` } : undefined}
-        >
-          <p className="text-[10px] sm:text-sm text-zinc-300 font-normal leading-relaxed text-right sm:text-left drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)]">
-            We engineer high-brightness, weatherproof display screens designed to command maximum commercial visibility in any environment.
-          </p>
+        <div className="table w-0 ml-auto">
+          <h1 className="mt-1 sm:mt-1.5 text-base sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
+            <span className="block text-right">Custom dynamic</span>
+            <span className="block whitespace-nowrap">outdoor LED screens</span>
+          </h1>
+          <div className="mt-1.5 sm:mt-2 w-full">
+            <p className="text-[10px] sm:text-sm text-zinc-300 font-normal leading-relaxed text-left drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)]">
+              We engineer high-brightness, weatherproof display screens designed to command maximum commercial visibility in any environment.
+            </p>
+          </div>
         </div>
       </div>
 
@@ -792,13 +773,15 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
         <span className="text-[9px] sm:text-[11px] font-medium tracking-widest text-[var(--brand-cyan)] uppercase">
           SIGN INTO THE FUTURE
         </span>
-        <h2 className="mt-1 sm:mt-1.5 text-base sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
-          <span className="block">Trusted partner for advertising</span>
-          <span className="block">and LED display in UAE</span>
-        </h2>
-        <p className="mt-1.5 sm:mt-2 text-[10px] sm:text-sm text-zinc-300 font-normal leading-relaxed max-w-none sm:max-w-lg drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)]">
-          The UAE&apos;s destination for custom indoor and outdoor LED displays, digital kiosks, AV integration, signage, exhibits, branding, and precision structural fabrication.
-        </p>
+        <div className="table w-0 sm:block sm:w-auto">
+          <h2 className="mt-1 sm:mt-1.5 text-base sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
+            <span className="block whitespace-nowrap">Trusted partner for advertising</span>
+            <span className="block">and LED display in UAE</span>
+          </h2>
+          <p className="mt-1.5 sm:mt-2 text-[10px] sm:text-sm text-zinc-300 font-normal leading-relaxed max-w-none sm:max-w-lg drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)]">
+            The UAE&apos;s destination for custom indoor and outdoor LED displays, digital kiosks, AV integration, signage, exhibits, branding, and precision structural fabrication.
+          </p>
+        </div>
       </div>
 
       {/* Checkpoint 1 (Curved Ribbon LED) Left-most Center Heading & Title */}
@@ -811,15 +794,33 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
         <span className="text-[9px] sm:text-[11px] font-medium tracking-widest text-[var(--brand-cyan)] uppercase">
           Engineered for impact
         </span>
-        <h2 className="mt-1 sm:mt-1.5 text-base sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
-          <span className="block">Specialized in</span>
-          <span className="block">custom LED display</span>
+        <h2 className="mt-1 sm:mt-1.5 text-base sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight whitespace-nowrap sm:whitespace-normal">
+          <span className="sm:block">Specialized in</span>{" "}
+          <span className="sm:block">custom LED display</span>
         </h2>
-        <p className="mt-1.5 sm:mt-2 text-[10px] sm:text-sm text-zinc-300 font-normal leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)]">
-          <span className="sm:block">Turning your display dreams into reality with</span>{" "}
-          <span className="sm:block">customized indoor and outdoor screens,</span>{" "}
-          <span className="sm:block">interactive kiosks, and signature audiovisual</span>{" "}
-          <span className="sm:block">solutions designed for your brand.</span>
+        <p className="table w-0 sm:block sm:w-auto mt-1.5 sm:mt-2 text-[10px] sm:text-sm text-zinc-300 font-normal leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)]">
+          {/* Mobile line 1: strictly ends after 'customized' */}
+          <span className="block whitespace-nowrap sm:hidden">
+            Turning your display dreams into reality with customized
+          </span>
+          {/* Desktop lines 1 & 2 */}
+          <span className="hidden sm:block">
+            Turning your display dreams into reality with
+          </span>
+          <span className="hidden sm:block">
+            customized indoor and outdoor screens,
+          </span>
+          {/* Mobile remaining lines: wrap within the width of line 1 */}
+          <span className="sm:hidden">
+            indoor and outdoor screens, interactive kiosks, and signature audiovisual solutions designed for your brand.
+          </span>
+          {/* Desktop lines 3 & 4 */}
+          <span className="hidden sm:block">
+            interactive kiosks, and signature audiovisual
+          </span>
+          <span className="hidden sm:block">
+            solutions designed for your brand.
+          </span>
         </p>
       </div>
 
@@ -868,12 +869,17 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
         <span className="text-[9px] sm:text-[11px] font-medium tracking-widest text-[var(--brand-cyan)] uppercase">
           INTERACTIVE DIGITAL INNOVATION
         </span>
-        <h2 className="mt-1 sm:mt-1.5 text-base sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
-          <span className="block">Specialized creators</span>
-          <span className="block">of custom built Kiosks</span>
+        <h2 className="mt-1 sm:mt-1.5 text-base sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight whitespace-nowrap sm:whitespace-normal">
+          <span className="sm:block">Specialized creators</span>{" "}
+          <span className="sm:block">of custom built Kiosks</span>
         </h2>
         <p className="mt-1.5 sm:mt-2 text-[10px] sm:text-sm text-zinc-300 font-normal leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)]">
-          We engineer tailored interactive kiosks with high-resolution LED screens designed to elevate modern brand engagement.
+          <span className="block sm:inline lg:block">
+            We engineer tailored interactive kiosks with high-resolution LED
+          </span>{" "}
+          <span className="block sm:inline lg:block">
+            screens designed to elevate modern brand engagement.
+          </span>
         </p>
       </div>
 
@@ -898,16 +904,15 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
           : "opacity-0 translate-y-[-45%] pointer-events-none"
           }`}
       >
-        <span className="text-[9px] sm:text-[11px] font-medium tracking-widest text-[var(--brand-cyan)] uppercase">
-          <span className="block">Vibrant.</span>
-          <span className="block">Seamless. Unmatched.</span>
+        <span className="text-[9px] sm:text-[11px] font-medium tracking-widest text-[var(--brand-cyan)] uppercase whitespace-nowrap">
+          Vibrant. Seamless. Unmatched.
         </span>
-        <h2 className="mt-1 sm:mt-1.5 text-base sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
-          <span className="block">Ultra clear indoor</span>
-          <span className="block">LED screen displays.</span>
+        <h2 className="mt-1 sm:mt-1.5 text-base sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight whitespace-nowrap sm:whitespace-normal">
+          <span className="sm:block">Ultra clear indoor</span>{" "}
+          <span className="sm:block">LED screen displays.</span>
         </h2>
         <p className="mt-1.5 sm:mt-2 text-[10px] sm:text-sm text-zinc-300 font-normal leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)]">
-          <span className="sm:block">We create dynamic indoor screens delivering vibrant</span>{" "}
+          <span className="block">We create dynamic indoor screens delivering vibrant</span>
           <span className="sm:block">high-resolution visuals tailored for modern spaces</span>{" "}
           <span className="sm:block">and environments.</span>
         </p>
@@ -922,10 +927,11 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
       >
         <KioskFeature
           visible={activePhase === 3}
+          titleClassName="whitespace-nowrap sm:whitespace-normal text-sm min-[390px]:text-base sm:text-2xl lg:text-3xl"
           title={
             <>
-              <span className="block">Your one-stop destination</span>
-              <span className="block">for display solutions</span>
+              <span className="sm:block">Your one-stop destination</span>{" "}
+              <span className="sm:block">for display solutions</span>
             </>
           }
           description="From traditional flexface, high-impact banners, and precision vinyl graphics to cutting-edge LED walls and interactive LCD screens, we provide end-to-end indoor advertising and media display solutions tailored to showcase your brand with maximum visual power."
@@ -942,14 +948,28 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
         <span className="text-[9px] sm:text-[11px] font-medium tracking-widest text-[var(--brand-cyan)] uppercase">
           See through innovation.
         </span>
-        <h2 className="mt-1 sm:mt-1.5 text-base sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
-          <span className="block">High-impact indoor and</span>
-          <span className="block">outdoor mesh displays</span>
+        <h2 className="mt-1 sm:mt-1.5 text-[15px] min-[375px]:text-base sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight whitespace-nowrap sm:whitespace-normal">
+          <span className="sm:block">High-impact indoor and</span>{" "}
+          <span className="sm:block">outdoor mesh displays</span>
         </h2>
         <p className="mt-1.5 sm:mt-2 text-[10px] sm:text-sm text-zinc-300 font-normal leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)]">
-          <span className="sm:block">Engineered for ultimate transparency and brightness,</span>{" "}
-          <span className="sm:block">our mesh screens turn glass facades into vibrant</span>{" "}
-          <span className="sm:block">dynamic visuals.</span>
+          {/* Mobile: breaks after 'our mesh' */}
+          <span className="block sm:hidden">
+            Engineered for ultimate transparency and brightness, our mesh
+          </span>
+          <span className="block sm:hidden">
+            screens turn glass facades into vibrant dynamic visuals.
+          </span>
+          {/* Desktop */}
+          <span className="hidden sm:block">
+            Engineered for ultimate transparency and brightness,
+          </span>
+          <span className="hidden sm:block">
+            our mesh screens turn glass facades into vibrant
+          </span>
+          <span className="hidden sm:block">
+            dynamic visuals.
+          </span>
         </p>
       </div>
 

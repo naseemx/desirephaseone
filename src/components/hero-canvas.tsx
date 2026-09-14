@@ -198,24 +198,20 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
           if (isCancelled) return resolve();
           images[index] = img;
 
-          // Parallel in-worker decode await:
-          // Guarantees bitmap is rasterized in GPU texture memory before resolving & counting
+          // Release the network worker slot IMMEDIATELY upon download
+          emitProgress();
+          resolve();
+
+          // Fire-and-forget background CPU rasterization into GPU texture cache
           if ("decode" in img) {
             img
               .decode()
-              .catch(() => { })
-              .finally(() => {
-                if (!isCancelled) {
-                  if (currentFrameRef.current === index) {
-                    drawFrame(index);
-                  }
-                  emitProgress();
+              .then(() => {
+                if (!isCancelled && currentFrameRef.current === index) {
+                  drawFrame(index);
                 }
-                resolve();
-              });
-          } else {
-            emitProgress();
-            resolve();
+              })
+              .catch(() => {});
           }
         };
 

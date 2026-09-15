@@ -66,6 +66,16 @@ export function ProcessSection() {
   const ctaTextRef = useRef<HTMLSpanElement>(null);
   const rectBorderRef = useRef<SVGRectElement>(null);
 
+  // Mobile narrative refs
+  const mobileNarrativeRef = useRef<HTMLDivElement>(null);
+  const mobileBadgeRef = useRef<HTMLDivElement>(null);
+  const mobileHeadingRef = useRef<HTMLHeadingElement>(null);
+  const mobileDescriptionRef = useRef<HTMLDivElement>(null);
+  const mobileDescLinesRef = useRef<(HTMLDivElement | null)[]>([]);
+  const mobileCtaRef = useRef<HTMLAnchorElement>(null);
+  const mobileCtaTextRef = useRef<HTMLSpanElement>(null);
+  const mobileRectBorderRef = useRef<SVGRectElement>(null);
+
   // Right side track and steps (desktop)
   const rightTrackRef = useRef<HTMLDivElement>(null);
   const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -369,6 +379,147 @@ export function ProcessSection() {
       // Dynamic illumination as each step passes the sticky glowing center star
       // ─────────────────────────────────────────────────────────────────────────
       mm.add("(max-width: 767px)", () => {
+        const narrative = mobileNarrativeRef.current;
+        const heading = mobileHeadingRef.current;
+        const badge = mobileBadgeRef.current;
+        const cta = mobileCtaRef.current;
+        const ctaText = mobileCtaTextRef.current;
+        const rectBorder = mobileRectBorderRef.current;
+        const descLines = mobileDescLinesRef.current.filter(Boolean) as HTMLDivElement[];
+
+        const titleChars = heading
+          ? Array.from(heading.querySelectorAll<HTMLSpanElement>(".char-item"))
+          : [];
+
+        // Set initial states for mobile narrative
+        if (badge) {
+          gsap.set(badge, { opacity: 0, y: 12 });
+        }
+        if (titleChars.length > 0) {
+          gsap.set(titleChars, { opacity: 0 });
+        }
+        if (descLines.length > 0) {
+          gsap.set(descLines, {
+            yPercent: 140,
+            opacity: 0,
+            force3D: true,
+          });
+        }
+        if (rectBorder) {
+          gsap.set(rectBorder, {
+            strokeDasharray: 100,
+            strokeDashoffset: 100,
+          });
+        }
+        if (cta) {
+          gsap.set(cta, { backgroundColor: "rgba(0, 181, 226, 0)" });
+        }
+        if (ctaText) {
+          gsap.set(ctaText, {
+            opacity: 0.4,
+            y: 4,
+          });
+        }
+
+        // Master intro timeline for mobile narrative
+        const introTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: narrative || sectionRef.current,
+            start: "top 85%",
+            toggleActions: "play none none none",
+            once: true,
+          },
+        });
+
+        // 1. Eyebrow badge
+        if (badge) {
+          introTl.to(
+            badge,
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.4,
+              ease: "power2.out",
+            },
+            0
+          );
+        }
+
+        // 2. Headline typewriter character reveal
+        if (titleChars.length > 0) {
+          introTl.fromTo(
+            titleChars,
+            { opacity: 0 },
+            {
+              opacity: 1,
+              stagger: 0.024,
+              duration: 0.35,
+              ease: "power1.inOut",
+            },
+            0.15
+          );
+        }
+
+        // 3. Description lines rising from mask
+        if (descLines.length > 0) {
+          introTl.fromTo(
+            descLines,
+            { yPercent: 140, opacity: 0 },
+            {
+              yPercent: 0,
+              opacity: 1,
+              stagger: 0.12,
+              duration: 0.55,
+              ease: "power2.out",
+              force3D: true,
+            },
+            0.4
+          );
+        }
+
+        // 4. CTA button border draw & text illumination
+        if (rectBorder) {
+          introTl.fromTo(
+            rectBorder,
+            { strokeDashoffset: 100 },
+            {
+              strokeDashoffset: 0,
+              duration: 0.65,
+              ease: "power2.out",
+            },
+            0.55
+          );
+        }
+
+        if (cta) {
+          introTl.fromTo(
+            cta,
+            { backgroundColor: "rgba(0, 181, 226, 0)" },
+            {
+              backgroundColor: "rgba(0, 181, 226, 0.08)",
+              duration: 0.65,
+              ease: "power2.out",
+            },
+            0.55
+          );
+        }
+
+        if (ctaText) {
+          introTl.fromTo(
+            ctaText,
+            { opacity: 0.4, y: 4 },
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.65,
+              ease: "power2.out",
+              clearProps: "transform",
+            },
+            0.55
+          );
+        }
+
+        // Mobile steps illumination
         const mobileSteps =
           sectionRef.current?.querySelectorAll<HTMLDivElement>(
             ".mobile-step-item"
@@ -529,32 +680,47 @@ export function ProcessSection() {
       {/* ─────────────────────────────────────────────────────────────────── */}
       <div className="block md:hidden relative z-10 w-full px-6 sm:px-10 py-16 sm:py-24 max-w-2xl mx-auto">
         {/* Top Narrative Block */}
-        <div className="flex flex-col items-start text-left mb-16 sm:mb-24">
+        <div
+          ref={mobileNarrativeRef}
+          className="flex flex-col items-start text-left mb-16 sm:mb-24"
+        >
           {/* Eyebrow badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 mb-4">
+          <div
+            ref={mobileBadgeRef}
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 mb-4"
+          >
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--brand-cyan)] animate-pulse" />
             <span className="text-[11px] uppercase tracking-widest text-zinc-300 font-semibold">
               Our Process
             </span>
           </div>
 
-          {/* Headline */}
-          <h2 className="text-3xl sm:text-4xl text-zinc-100 font-bold leading-[1.15] tracking-tight">
-            A process built around<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-100 via-zinc-200 to-[var(--brand-cyan)]">
-              clarity and craft.
-            </span>
-          </h2>
+          {/* Headline with Character Reveal */}
+          <CharacterReveal
+            ref={mobileHeadingRef}
+            lines={TITLE_LINES}
+            className="text-3xl sm:text-4xl font-bold leading-[1.15] text-zinc-100 tracking-tight"
+          />
 
-          {/* Description */}
-          <p className="text-sm sm:text-base text-zinc-400 font-normal leading-relaxed mt-3.5 max-w-md">
-            No surprises, no handoff chaos. Just a clear path from the first
-            conversation to a product that works.
-          </p>
+          {/* Description with Masked Lines Reveal */}
+          <MaskedLinesReveal
+            ref={mobileDescriptionRef}
+            lines={DESC_LINES}
+            className="text-sm sm:text-base text-zinc-400 font-normal leading-relaxed mt-3.5 max-w-md"
+            setLineRef={(el, idx) => {
+              mobileDescLinesRef.current[idx] = el;
+            }}
+          />
 
-          {/* CTA */}
+          {/* Animated Stroke CTA Button */}
           <div className="mt-6">
-            <StrokeButton href="#footer" text="Let's build something" />
+            <StrokeButton
+              ref={mobileCtaRef}
+              rectRef={mobileRectBorderRef}
+              textRef={mobileCtaTextRef}
+              href="#footer"
+              text="Let's build something"
+            />
           </div>
         </div>
 

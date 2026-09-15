@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { AmbientStars } from "@/components/ui/ambient-stars";
 import { SERVICES, ServiceItem } from "@/data/service";
-import { X, MoveHorizontal } from "lucide-react";
+import { MoveHorizontal } from "lucide-react";
 
 export type { ServiceItem };
 
@@ -146,21 +148,23 @@ export function ServiceHome() {
     };
   }, []);
 
-  const topCardRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const bottomCardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const topCardRefs = useRef<(HTMLElement | null)[]>([]);
+  const bottomCardRefs = useRef<(HTMLElement | null)[]>([]);
 
   // Physics & Animation State
   const offsetRef = useRef(0);
   const velocityRef = useRef(0);
   const isDraggingRef = useRef(false);
   const isVerticalScrollRef = useRef(false);
+  const isDragMovedRef = useRef(false);
+  const dragDistanceRef = useRef(0);
   const dragStartXRef = useRef(0);
   const dragStartYRef = useRef(0);
+  const router = useRouter();
   const lastPointerXRef = useRef(0);
   const lastPointerTimeRef = useRef(0);
   const isHoveredRef = useRef(false);
 
-  const [selectedCard, setSelectedCard] = useState<ServiceItem | null>(null);
   const [hoveredCardId, setHoveredCardId] = useState<string | null>(null);
 
   // Auto-scroll speed configuration
@@ -318,17 +322,15 @@ export function ServiceHome() {
 
     isDraggingRef.current = true;
     isVerticalScrollRef.current = false;
+    isDragMovedRef.current = false;
+    dragDistanceRef.current = 0;
     dragStartXRef.current = e.clientX;
     dragStartYRef.current = e.clientY;
     lastPointerXRef.current = e.clientX;
     lastPointerTimeRef.current = performance.now();
     velocityRef.current = 0;
-
-    if (e.pointerType !== "touch") {
-      try {
-        (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-      } catch {}
-    }
+    // NOTE: We do NOT call setPointerCapture here on pointerdown.
+    // Calling setPointerCapture before any drag movement intercepts and destroys child click events.
   }, []);
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
@@ -337,6 +339,20 @@ export function ServiceHome() {
     const dx = e.clientX - lastPointerXRef.current;
     const dy = e.clientY - dragStartYRef.current;
     const totalDx = e.clientX - dragStartXRef.current;
+    const totalDist = Math.hypot(totalDx, dy);
+    dragDistanceRef.current = totalDist;
+
+    // Only flag as a drag movement if the pointer has actually moved more than 6 pixels!
+    if (totalDist > 6) {
+      isDragMovedRef.current = true;
+      if (e.pointerType !== "touch") {
+        try {
+          if (!(e.currentTarget as HTMLElement).hasPointerCapture(e.pointerId)) {
+            (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+          }
+        } catch {}
+      }
+    }
 
     // Disambiguate vertical page scrolling from horizontal carousel drag
     if (e.pointerType === "touch" && !isVerticalScrollRef.current) {
@@ -368,11 +384,19 @@ export function ServiceHome() {
         (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
       }
     } catch {}
+
+    // Reset isDragMovedRef after a brief window to allow click events to evaluate
+    setTimeout(() => {
+      isDragMovedRef.current = false;
+      dragDistanceRef.current = 0;
+    }, 120);
   }, []);
 
   const handlePointerCancel = useCallback(() => {
     isDraggingRef.current = false;
     isVerticalScrollRef.current = false;
+    isDragMovedRef.current = false;
+    dragDistanceRef.current = 0;
   }, []);
 
   // Wheel Horizontal Scrubbing
@@ -384,9 +408,13 @@ export function ServiceHome() {
     }
   }, []);
 
-  const handleCardClick = (card: ServiceItem) => {
-    if (Math.abs(velocityRef.current) > 2) return;
-    setSelectedCard(card);
+  const handleCardClick = (e: React.MouseEvent, card: ServiceItem) => {
+    if (isDragMovedRef.current || dragDistanceRef.current > 6) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    router.push(`/servicepage/${card.id}`);
   };
 
   return (
@@ -482,13 +510,14 @@ export function ServiceHome() {
         >
           {/* TOP ROW CARDS (Line 1: 8 Primary Services) */}
           {topRowCards.map((card, idx) => (
-            <div
+            <Link
               key={`top-${card.id}-${idx}`}
+              href={`/servicepage/${card.id}`}
               data-cursor="card"
               ref={(el) => {
                 topCardRefs.current[idx] = el;
               }}
-              className="absolute pointer-events-auto will-change-transform touch-manipulation"
+              className="absolute pointer-events-auto will-change-transform touch-manipulation cursor-pointer block select-none"
               style={{
                 width: `${layout.cardWidth}px`,
                 height: `${layout.cardHeight}px`,
@@ -496,7 +525,7 @@ export function ServiceHome() {
                 top: `${-layout.cardHeight / 2}px`,
                 transformStyle: "preserve-3d",
               }}
-              onClick={() => handleCardClick(card)}
+              onClick={(e) => handleCardClick(e, card)}
               onPointerEnter={() => setHoveredCardId(card.id)}
               onPointerLeave={() => {
                 setHoveredCardId((current) =>
@@ -508,18 +537,19 @@ export function ServiceHome() {
                 card={card}
                 isHovered={hoveredCardId === card.id}
               />
-            </div>
+            </Link>
           ))}
 
           {/* BOTTOM ROW CARDS (Line 2: 8 Exhibition, Branding & Fabrication Services) */}
           {bottomRowCards.map((card, idx) => (
-            <div
+            <Link
               key={`bottom-${card.id}-${idx}`}
+              href={`/servicepage/${card.id}`}
               data-cursor="card"
               ref={(el) => {
                 bottomCardRefs.current[idx] = el;
               }}
-              className="absolute pointer-events-auto will-change-transform touch-manipulation"
+              className="absolute pointer-events-auto will-change-transform touch-manipulation cursor-pointer block select-none"
               style={{
                 width: `${layout.cardWidth}px`,
                 height: `${layout.cardHeight}px`,
@@ -527,7 +557,7 @@ export function ServiceHome() {
                 top: `${-layout.cardHeight / 2}px`,
                 transformStyle: "preserve-3d",
               }}
-              onClick={() => handleCardClick(card)}
+              onClick={(e) => handleCardClick(e, card)}
               onPointerEnter={() => setHoveredCardId(card.id)}
               onPointerLeave={() => {
                 setHoveredCardId((current) =>
@@ -539,103 +569,10 @@ export function ServiceHome() {
                 card={card}
                 isHovered={hoveredCardId === card.id}
               />
-            </div>
+            </Link>
           ))}
         </div>
       </div>
-
-      {/* SERVICE DETAIL MODAL (Responsive on both desktop and mobile) */}
-      {selectedCard && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md transition-opacity duration-300"
-          onClick={() => setSelectedCard(null)}
-        >
-          <div
-            className="relative w-full max-w-2xl max-h-[90vh] sm:max-h-[85vh] overflow-y-auto rounded-[14px] sm:rounded-[16px] border border-[#00b5e2]/30 bg-[#0a1218] text-zinc-100 p-5 sm:p-8 shadow-2xl transition-all transform animate-in fade-in zoom-in-95 duration-200"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Close button */}
-            <button
-              onClick={() => setSelectedCard(null)}
-              className="absolute top-3.5 right-3.5 sm:top-5 sm:right-5 p-1.5 sm:p-2 rounded-full bg-white/10 hover:bg-white/20 text-zinc-300 hover:text-white transition-colors cursor-pointer"
-              aria-label="Close modal"
-            >
-              <X className="w-4 h-4 sm:w-5 sm:h-5" />
-            </button>
-
-            {/* Tags / Category */}
-            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-3 sm:mb-4 pr-8">
-              {selectedCard.category && (
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] tracking-wider uppercase bg-[#00b5e2]/15 text-[#00b5e2] border border-[#00b5e2]/30 font-semibold">
-                  {selectedCard.category}
-                </span>
-              )}
-              {selectedCard.tag?.map((t, idx) => (
-                <span
-                  key={idx}
-                  className="px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] tracking-wider uppercase bg-white/5 text-zinc-300 border border-white/10 font-medium"
-                >
-                  {t}
-                </span>
-              ))}
-            </div>
-
-            {/* Title in Project Font */}
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl text-white font-bold leading-snug mb-4 sm:mb-6">
-              {selectedCard.title}
-            </h2>
-
-            {/* Image */}
-            {selectedCard.image && (
-              <div className="relative aspect-[16/10] w-full rounded-[10px] overflow-hidden mb-5 sm:mb-6 bg-black/40 border border-white/10">
-                <img
-                  src={selectedCard.image}
-                  alt={selectedCard.title}
-                  className="w-full h-full object-cover object-center"
-                />
-              </div>
-            )}
-
-            {/* Description in Project Font */}
-            {selectedCard.description && (
-              <p className="text-zinc-300 text-sm sm:text-base leading-relaxed mb-6">
-                {selectedCard.description}
-              </p>
-            )}
-
-            {/* Features / Capabilities in Project Font */}
-            {selectedCard.features && selectedCard.features.length > 0 && (
-              <div className="p-4 sm:p-5 rounded-[10px] bg-white/[0.03] border border-white/10 mb-6">
-                <h4 className="text-[11px] sm:text-xs uppercase tracking-widest text-[#00b5e2] font-semibold mb-3">
-                  Key Capabilities & Specifications
-                </h4>
-                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs sm:text-sm text-zinc-300">
-                  {selectedCard.features.map((feat, idx) => (
-                    <li key={idx} className="flex items-start gap-2">
-                      <span className="text-[#00b5e2] text-xs mt-0.5">✦</span>
-                      <span>{feat}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {/* Footer action */}
-            <div className="pt-4 border-t border-white/10 flex items-center justify-between">
-              <span className="text-xs text-zinc-400 tracking-wider font-semibold">
-                DESIRE DIGITAL
-              </span>
-              <a
-                href="#footer"
-                onClick={() => setSelectedCard(null)}
-                className="px-5 py-2.5 rounded-full bg-[#00b5e2] hover:bg-[#00b5e2]/90 text-black font-medium text-xs sm:text-sm transition-transform active:scale-95 cursor-pointer shadow-[0_0_15px_rgba(0,181,226,0.4)]"
-              >
-                Inquire about this service
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
     </section>
   );
 }
@@ -722,12 +659,13 @@ function CardContent({
       />
 
       {/* Media Frame (Image) */}
-      <div className="relative z-10 w-full aspect-[16/10] max-h-[90px] sm:max-h-none rounded-[6px] sm:rounded-[8px] overflow-hidden bg-black/40 shrink-0 border border-white/5">
+      <div className="relative z-10 w-full aspect-[16/10] max-h-[90px] sm:max-h-none rounded-[6px] sm:rounded-[8px] overflow-hidden bg-black/40 shrink-0 border border-white/5 pointer-events-none">
         {hasImage ? (
           <img
             src={card.image}
             alt={card.title}
-            className={`w-full h-full object-cover object-center transition-all duration-500 ease-out ${
+            draggable={false}
+            className={`w-full h-full object-cover object-center pointer-events-none transition-all duration-500 ease-out ${
               isHovered
                 ? "grayscale-0 scale-[1.04]"
                 : "grayscale-0 sm:grayscale sm:group-hover:grayscale-0"
@@ -736,20 +674,20 @@ function CardContent({
             decoding="async"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-zinc-900/60 text-zinc-600 text-xs font-medium">
+          <div className="w-full h-full flex items-center justify-center bg-zinc-900/60 text-zinc-600 text-xs font-medium pointer-events-none">
             SERVICE
           </div>
         )}
       </div>
 
       {/* Service Title & Category Container in Project Font */}
-      <div className="relative z-10 flex flex-col justify-end mt-1 sm:mt-3 flex-1 min-h-0 overflow-hidden">
+      <div className="relative z-10 flex flex-col justify-end mt-1 sm:mt-3 flex-1 min-h-0 overflow-hidden pointer-events-none">
         {card.category && (
-          <span className="text-[8px] sm:text-[10px] tracking-wider uppercase text-[#00b5e2]/80 font-semibold mb-0.5 sm:mb-1 truncate">
+          <span className="text-[8px] sm:text-[10px] tracking-wider uppercase text-[#00b5e2]/80 font-semibold mb-0.5 sm:mb-1 truncate pointer-events-none">
             {card.category}
           </span>
         )}
-        <h3 className="text-[11.5px] sm:text-[16px] font-bold leading-tight sm:leading-snug tracking-normal text-white line-clamp-2 group-hover:text-cyan-100 transition-colors duration-300">
+        <h3 className="text-[11.5px] sm:text-[16px] font-bold leading-tight sm:leading-snug tracking-normal text-white line-clamp-2 group-hover:text-cyan-100 transition-colors duration-300 pointer-events-none">
           {card.title}
         </h3>
       </div>

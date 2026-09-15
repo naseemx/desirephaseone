@@ -8,12 +8,17 @@
 
 export interface ServiceItem {
   id: string;
+  slug?: string;
   title: string;
   image: string;
   category?: string;
   tag?: string[];
   description?: string;
   features?: string[];
+  subtitle?: string;
+  stats?: { label: string; value: string }[];
+  applications?: string[];
+  specifications?: { key: string; value: string }[];
 }
 
 export const DEFAULT_SERVICE_IMAGE = "/servicehome/service_card.jpg";
@@ -266,5 +271,35 @@ export const SERVICES: ServiceItem[] = [
 
 // Alias for convenience
 export const SERVICE_CARDS = SERVICES;
+
+/**
+ * Find service by slug or id
+ */
+export function getServiceBySlug(slug: string): ServiceItem | undefined {
+  return SERVICES.find((s) => s.id === slug || s.slug === slug);
+}
+
+/**
+ * Return all services
+ */
+export function getAllServices(): ServiceItem[] {
+  return SERVICES;
+}
+
+/**
+ * Return adjacent services (previous and next) for circular navigation
+ */
+export function getAdjacentServices(slug: string): {
+  prev: ServiceItem;
+  next: ServiceItem;
+} {
+  const index = SERVICES.findIndex((s) => s.id === slug || s.slug === slug);
+  if (index === -1) {
+    return { prev: SERVICES[SERVICES.length - 1], next: SERVICES[1] };
+  }
+  const prev = SERVICES[(index - 1 + SERVICES.length) % SERVICES.length];
+  const next = SERVICES[(index + 1) % SERVICES.length];
+  return { prev, next };
+}
 
 export default SERVICES;

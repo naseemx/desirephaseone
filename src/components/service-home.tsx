@@ -71,39 +71,70 @@ export function ServiceHome() {
   // Compute carousel dimensions matching decompiled nk.studio computeCarouselLayout
   const layout = useMemo(() => {
     const w = dimensions.width;
+    const h = dimensions.height;
     const isMobile = w < 768;
 
-    // Mobile (2 rows): cards sized 150-175px (compact dual ribbon)
-    // Desktop (2 rows): cards sized 200-236px
-    const cardWidth = isMobile
-      ? Math.max(150, Math.min(175, Math.round(w * 0.42)))
-      : Math.min(236, Math.max(200, 200 + ((w - 768) / 600) * 26));
+    // Desktop (2 rows): cards sized 200-236px width
+    if (!isMobile) {
+      const cardWidth = Math.min(236, Math.max(200, 200 + ((w - 768) / 600) * 26));
+      const cardHeight = Math.round(cardWidth * 1.16);
+      const gap = 36;
+      const pitch = cardWidth + gap;
+      const rowGap = 40;
+      const p = w >= 1280 ? 1 : Math.pow((w - 768) / 512, 2);
 
-    // Card height proportioned for 16:10 image + category + title
-    const cardHeight = isMobile
-      ? Math.round(cardWidth * 1.15)
-      : Math.round(cardWidth * 1.16);
+      return {
+        isMobile: false,
+        cardWidth,
+        cardHeight,
+        gap,
+        pitch,
+        rowGap,
+        viewportHalfWidth: Math.max(w, 1) / 2,
+        curveAmount: 10 + 54 * p,
+        curveMaxTiltRad: 0.11 + 0.25 * p,
+        curveRotationMul: 0.62 + 0.38 * p,
+      };
+    }
 
-    const gap = isMobile ? 14 : 36;
+    // Mobile (2 rows): dynamically size cards based on BOTH width and height
+    // to guarantee two rows never overlap on any screen size.
+    const widthBasedCardW = Math.max(130, Math.min(170, Math.round(w * 0.40)));
+
+    // The viewport ribbon area on mobile has a usable height.
+    // We need: 2 * cardHeight + rowGap to fit inside the ribbon viewport.
+    // Ribbon viewport on mobile = ~420px (leaving space for header + section padding).
+    // Use the actual viewport height to compute the budget.
+    const ribbonBudget = Math.min(420, Math.round(h * 0.52));
+    const mobileRowGap = 24;
+    const maxCardHeight = Math.floor((ribbonBudget - mobileRowGap) / 2);
+
+    // Card height from width would be widthBasedCardW * 1.1
+    const idealCardHeight = Math.round(widthBasedCardW * 1.1);
+    // Cap the card height to what the viewport can fit
+    const cardHeight = Math.min(idealCardHeight, maxCardHeight);
+    // Derive final card width from the (possibly capped) height
+    const cardWidth = cardHeight < idealCardHeight
+      ? Math.round(cardHeight / 1.1)
+      : widthBasedCardW;
+
+    const gap = 12;
     const pitch = cardWidth + gap;
-    // Guaranteed vertical clearance buffer to completely eliminate row overlap
-    const rowGap = isMobile ? 32 : 40;
-    const p = w <= 768 ? 0 : w >= 1280 ? 1 : Math.pow((w - 768) / 512, 2);
 
     return {
-      isMobile,
+      isMobile: true,
       cardWidth,
       cardHeight,
       gap,
       pitch,
-      rowGap,
+      rowGap: mobileRowGap,
       viewportHalfWidth: Math.max(w, 1) / 2,
-      // On mobile, keep parallel horizontal ribbons (0 curve distortion) to prevent vertical collision
-      curveAmount: isMobile ? 0 : 10 + 54 * p,
-      curveMaxTiltRad: isMobile ? 0 : 0.11 + 0.25 * p,
-      curveRotationMul: isMobile ? 0 : 0.62 + 0.38 * p,
+      // Zero curve on mobile to prevent vertical displacement that causes overlap
+      curveAmount: 0,
+      curveMaxTiltRad: 0,
+      curveRotationMul: 0,
     };
-  }, [dimensions.width]);
+  }, [dimensions.width, dimensions.height]);
 
   // Card distribution: 2 rows across all screen sizes (mobile & desktop)
   // Row 1 (top): 8 primary services
@@ -218,8 +249,8 @@ export function ServiceHome() {
         const x = wrappedX;
         const y = -cardHeight * 0.5 - rowGap * 0.5 - curveY + (isMobile ? 0 : floatY);
         const rotZ = isMobile ? 0 : tiltRad * (180 / Math.PI);
-        const rotY = isMobile ? normX * 3 : normX * 12;
-        const scale = 1 - Math.abs(normX) * (isMobile ? 0.03 : 0.08);
+        const rotY = isMobile ? normX * 4 : normX * 12;
+        const scale = 1 - Math.abs(normX) * (isMobile ? 0.04 : 0.08);
 
         const absNormX = Math.abs(normX);
         const cardOpacity =
@@ -262,8 +293,8 @@ export function ServiceHome() {
           const x = wrappedX;
           const y = cardHeight * 0.5 + rowGap * 0.5 - curveY + (isMobile ? 0 : floatY);
           const rotZ = isMobile ? 0 : tiltRad * (180 / Math.PI);
-          const rotY = isMobile ? normX * 3 : normX * 12;
-          const scale = 1 - Math.abs(normX) * (isMobile ? 0.03 : 0.08);
+          const rotY = isMobile ? normX * 4 : normX * 12;
+          const scale = 1 - Math.abs(normX) * (isMobile ? 0.04 : 0.08);
 
           const absNormX = Math.abs(normX);
           const cardOpacity =
@@ -363,7 +394,7 @@ export function ServiceHome() {
       ref={containerRef}
       id="servicehome"
       onWheel={handleWheel}
-      className="relative w-full min-h-[640px] sm:min-h-screen pt-12 pb-16 sm:py-20 md:py-24 lg:py-28 overflow-hidden select-none bg-[#09090b] text-zinc-100 flex flex-col items-center justify-between"
+      className="relative w-full min-h-[520px] sm:min-h-screen pt-10 pb-12 sm:py-20 md:py-24 lg:py-28 overflow-hidden select-none bg-[#09090b] text-zinc-100 flex flex-col items-center justify-between"
       style={{
         backgroundColor: "#09090b",
         backgroundImage:
@@ -439,7 +470,7 @@ export function ServiceHome() {
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerCancel}
-        className="relative w-full h-[490px] sm:h-[540px] md:h-[620px] lg:h-[680px] flex items-center justify-center overflow-visible z-10 touch-pan-y"
+        className="relative w-full h-[420px] sm:h-[540px] md:h-[620px] lg:h-[680px] flex items-center justify-center overflow-visible z-10 touch-pan-y"
         style={{
           perspective: layout.isMobile ? "1000px" : "1400px",
           perspectiveOrigin: "50% 50%",
@@ -457,7 +488,7 @@ export function ServiceHome() {
               ref={(el) => {
                 topCardRefs.current[idx] = el;
               }}
-              className="absolute pointer-events-auto will-change-transform touch-manipulation overflow-hidden rounded-[12px]"
+              className="absolute pointer-events-auto will-change-transform touch-manipulation"
               style={{
                 width: `${layout.cardWidth}px`,
                 height: `${layout.cardHeight}px`,
@@ -488,7 +519,7 @@ export function ServiceHome() {
               ref={(el) => {
                 bottomCardRefs.current[idx] = el;
               }}
-              className="absolute pointer-events-auto will-change-transform touch-manipulation overflow-hidden rounded-[12px]"
+              className="absolute pointer-events-auto will-change-transform touch-manipulation"
               style={{
                 width: `${layout.cardWidth}px`,
                 height: `${layout.cardHeight}px`,
@@ -691,7 +722,7 @@ function CardContent({
       />
 
       {/* Media Frame (Image) */}
-      <div className="relative z-10 w-full aspect-[16/10] max-h-[96px] sm:max-h-none rounded-[6px] sm:rounded-[8px] overflow-hidden bg-black/40 shrink-0 border border-white/5">
+      <div className="relative z-10 w-full aspect-[16/10] max-h-[90px] sm:max-h-none rounded-[6px] sm:rounded-[8px] overflow-hidden bg-black/40 shrink-0 border border-white/5">
         {hasImage ? (
           <img
             src={card.image}
@@ -718,7 +749,7 @@ function CardContent({
             {card.category}
           </span>
         )}
-        <h3 className="text-[11px] sm:text-[16px] font-bold leading-tight sm:leading-snug tracking-normal text-white line-clamp-2 group-hover:text-cyan-100 transition-colors duration-300">
+        <h3 className="text-[11.5px] sm:text-[16px] font-bold leading-tight sm:leading-snug tracking-normal text-white line-clamp-2 group-hover:text-cyan-100 transition-colors duration-300">
           {card.title}
         </h3>
       </div>

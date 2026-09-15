@@ -72,14 +72,11 @@ export function ServiceHome() {
   const layout = useMemo(() => {
     const w = dimensions.width;
     const isMobile = w < 768;
-    const isSmallMobile = w < 480;
 
-    // Mobile (2 rows): cards sized 155-195px (compact dual ribbon)
+    // Mobile (2 rows): cards sized 145-175px (compact dual ribbon)
     // Desktop (2 rows): cards sized 200-236px
     const cardWidth = isMobile
-      ? isSmallMobile
-        ? Math.max(150, Math.min(Math.round(w * 0.45), 175))
-        : Math.min(195, Math.max(170, Math.round(w * 0.42)))
+      ? Math.max(145, Math.min(175, Math.round(w * 0.42)))
       : Math.min(236, Math.max(200, 200 + ((w - 768) / 600) * 26));
 
     // Card height proportioned for 16:10 image + category + title
@@ -89,21 +86,21 @@ export function ServiceHome() {
 
     const gap = isMobile ? 14 : 36;
     const pitch = cardWidth + gap;
-    const rowGap = isMobile ? 14 : 40;
+    // Guaranteed vertical clearance buffer to completely eliminate row overlap
+    const rowGap = isMobile ? 28 : 40;
     const p = w <= 768 ? 0 : w >= 1280 ? 1 : Math.pow((w - 768) / 512, 2);
 
     return {
       isMobile,
-      isSmallMobile,
       cardWidth,
       cardHeight,
       gap,
       pitch,
       rowGap,
       viewportHalfWidth: Math.max(w, 1) / 2,
-      curveAmount: isMobile ? 6 : 10 + 54 * p,
-      curveMaxTiltRad: isMobile ? 0.06 : 0.11 + 0.25 * p,
-      curveRotationMul: isMobile ? 0.4 : 0.62 + 0.38 * p,
+      curveAmount: isMobile ? 5 : 10 + 54 * p,
+      curveMaxTiltRad: isMobile ? 0.05 : 0.11 + 0.25 * p,
+      curveRotationMul: isMobile ? 0.35 : 0.62 + 0.38 * p,
     };
   }, [dimensions.width]);
 
@@ -218,7 +215,7 @@ export function ServiceHome() {
         const floatY = 6.5 * Math.sin(t * 1.35 + idx * 0.85);
 
         const x = wrappedX;
-        const y = -cardHeight * 0.5 - rowGap * 0.5 - curveY + (isMobile ? floatY * 0.45 : floatY);
+        const y = -cardHeight * 0.5 - rowGap * 0.5 - curveY + (isMobile ? floatY * 0.25 : floatY);
         const rotZ = isMobile ? 0 : tiltRad * (180 / Math.PI);
         const rotY = isMobile ? normX * 4 : normX * 12;
         const scale = 1 - Math.abs(normX) * (isMobile ? 0.04 : 0.08);
@@ -262,7 +259,7 @@ export function ServiceHome() {
           const floatY = 6.5 * Math.sin(t * 1.25 + (idx + 10) * 0.72);
 
           const x = wrappedX;
-          const y = cardHeight * 0.5 + rowGap * 0.5 - curveY + (isMobile ? floatY * 0.45 : floatY);
+          const y = cardHeight * 0.5 + rowGap * 0.5 - curveY + (isMobile ? floatY * 0.25 : floatY);
           const rotZ = isMobile ? 0 : tiltRad * (180 / Math.PI);
           const rotY = isMobile ? normX * 4 : normX * 12;
           const scale = 1 - Math.abs(normX) * (isMobile ? 0.04 : 0.08);
@@ -441,7 +438,7 @@ export function ServiceHome() {
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerCancel}
-        className="relative w-full h-[470px] sm:h-[530px] md:h-[620px] lg:h-[680px] flex items-center justify-center overflow-visible z-10 touch-pan-y"
+        className="relative w-full h-[480px] sm:h-[540px] md:h-[620px] lg:h-[680px] flex items-center justify-center overflow-visible z-10 touch-pan-y"
         style={{
           perspective: layout.isMobile ? "1000px" : "1400px",
           perspectiveOrigin: "50% 50%",
@@ -658,7 +655,7 @@ function CardContent({
       ref={cardRef}
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
-      className={`group relative w-full h-full rounded-[12px] border border-white/10 bg-[#0b1319]/95 p-3 sm:p-3.5 flex flex-col justify-between overflow-hidden select-none transition-[transform,box-shadow,border-color] duration-500 ease-out text-left touch-manipulation ${
+      className={`group relative w-full h-full rounded-[12px] border border-white/10 bg-[#0b1319]/95 p-2.5 sm:p-3.5 flex flex-col justify-between overflow-hidden select-none transition-[transform,box-shadow,border-color] duration-500 ease-out text-left touch-manipulation ${
         isHovered ? "scale-[1.02] z-30 shadow-[0_12px_36px_rgba(0,0,0,0.7)] border-[#00b5e2]/40" : ""
       }`}
       style={{
@@ -714,13 +711,13 @@ function CardContent({
       </div>
 
       {/* Service Title & Category Container in Project Font */}
-      <div className="relative z-10 flex flex-col justify-end mt-1.5 sm:mt-3 flex-1 min-h-0">
+      <div className="relative z-10 flex flex-col justify-end mt-1 sm:mt-3 flex-1 min-h-0">
         {card.category && (
           <span className="text-[8px] sm:text-[10px] tracking-wider uppercase text-[#00b5e2]/80 font-semibold mb-0.5 sm:mb-1 truncate">
             {card.category}
           </span>
         )}
-        <h3 className="text-[12px] sm:text-[16px] font-bold leading-tight sm:leading-snug tracking-normal text-white line-clamp-2 group-hover:text-cyan-100 transition-colors duration-300">
+        <h3 className="text-[11.5px] sm:text-[16px] font-bold leading-tight sm:leading-snug tracking-normal text-white line-clamp-2 group-hover:text-cyan-100 transition-colors duration-300">
           {card.title}
         </h3>
       </div>

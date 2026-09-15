@@ -6,6 +6,7 @@ import { HeroCanvas } from "@/components/hero-canvas";
 import { ProcessSection } from "@/components/process-section";
 import { ContactCtaSection } from "@/components/contact-cta-section";
 import { ServiceHome } from "@/components/service-home";
+import { ContactForm } from "@/components/contact-form";
 import { Footer } from "@/components/footer";
 import { Preloader } from "@/components/preloader";
 import { CustomCursor } from "@/components/ui/custom-cursor";
@@ -42,9 +43,11 @@ export default function Home() {
       {/* Inspiring NK Studio ServiceHome Curved Ribbon Showcase */}
       <ServiceHome />
 
-      {/* Modern High-Performance Footer placed immediately after ServiceHome */}
+      {/* Modern Responsive Contact Form */}
+      <ContactForm />
+
+      {/* Modern High-Performance Footer placed immediately after ServiceHome / ContactForm */}
       <Footer />
     </div>
   );
 }
-

@@ -201,6 +201,11 @@ export function Preloader({ progress = 0, onComplete }: PreloaderProps) {
 
       {/* ── Main Logo Preloader Container ───────────────────────────── */}
       <div className="relative z-10 flex flex-col items-center">
+        {/* Text above logo (matching same distance as progress info below) */}
+        <p className="mb-4 text-[9px] sm:text-[11px] font-normal tracking-wider text-zinc-300 select-none animate-breathe">
+          Crafting Brilliance
+        </p>
+
         {/* SVG Logo Graphic (Isolated from background grid) */}
         <div className="relative h-24 w-16 sm:h-32 sm:w-24 md:h-36 md:w-28">
           <svg
@@ -304,23 +309,12 @@ export function Preloader({ progress = 0, onComplete }: PreloaderProps) {
           </svg>
         </div>
 
-        {/* Loading Progress Information */}
-        <div className="mt-4 flex flex-col items-center gap-1.5">
-          {/* Percentage Number */}
-          <div className="flex items-baseline gap-1 text-xs sm:text-sm font-semibold tracking-wider text-white">
-            <span className="font-mono text-sm sm:text-base text-[var(--brand-cyan)]">
-              {Math.floor(displayProgress)}
-            </span>
-            <span className="text-[10px] text-zinc-500">%</span>
-          </div>
-
-          {/* Minimal hairline progress bar */}
-          <div className="h-[2px] w-24 sm:w-28 rounded-full bg-white/10 overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-[var(--brand-cyan)] to-cyan-300 transition-all duration-200 ease-out"
-              style={{ width: `${displayProgress}%` }}
-            />
-          </div>
+        {/* Loading Progress Percentage Number (shifted right to optically center with logo) */}
+        <div className="mt-4 flex items-baseline gap-1 text-xs sm:text-sm font-semibold tracking-wider translate-x-1.5 sm:translate-x-2">
+          <span className="font-mono text-sm sm:text-base text-cyan-300 drop-shadow-[0_0_10px_rgba(103,232,249,0.3)]">
+            {Math.floor(displayProgress)}
+          </span>
+          <span className="text-[10px] text-cyan-300/60 font-mono">%</span>
         </div>
       </div>
     </div>

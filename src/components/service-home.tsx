@@ -73,21 +73,21 @@ export function ServiceHome() {
     const w = dimensions.width;
     const isMobile = w < 768;
 
-    // Mobile (2 rows): cards sized 145-175px (compact dual ribbon)
+    // Mobile (2 rows): cards sized 150-175px (compact dual ribbon)
     // Desktop (2 rows): cards sized 200-236px
     const cardWidth = isMobile
-      ? Math.max(145, Math.min(175, Math.round(w * 0.42)))
+      ? Math.max(150, Math.min(175, Math.round(w * 0.42)))
       : Math.min(236, Math.max(200, 200 + ((w - 768) / 600) * 26));
 
     // Card height proportioned for 16:10 image + category + title
     const cardHeight = isMobile
-      ? Math.round(cardWidth * 1.12)
+      ? Math.round(cardWidth * 1.15)
       : Math.round(cardWidth * 1.16);
 
     const gap = isMobile ? 14 : 36;
     const pitch = cardWidth + gap;
     // Guaranteed vertical clearance buffer to completely eliminate row overlap
-    const rowGap = isMobile ? 28 : 40;
+    const rowGap = isMobile ? 32 : 40;
     const p = w <= 768 ? 0 : w >= 1280 ? 1 : Math.pow((w - 768) / 512, 2);
 
     return {
@@ -98,9 +98,10 @@ export function ServiceHome() {
       pitch,
       rowGap,
       viewportHalfWidth: Math.max(w, 1) / 2,
-      curveAmount: isMobile ? 5 : 10 + 54 * p,
-      curveMaxTiltRad: isMobile ? 0.05 : 0.11 + 0.25 * p,
-      curveRotationMul: isMobile ? 0.35 : 0.62 + 0.38 * p,
+      // On mobile, keep parallel horizontal ribbons (0 curve distortion) to prevent vertical collision
+      curveAmount: isMobile ? 0 : 10 + 54 * p,
+      curveMaxTiltRad: isMobile ? 0 : 0.11 + 0.25 * p,
+      curveRotationMul: isMobile ? 0 : 0.62 + 0.38 * p,
     };
   }, [dimensions.width]);
 
@@ -215,10 +216,10 @@ export function ServiceHome() {
         const floatY = 6.5 * Math.sin(t * 1.35 + idx * 0.85);
 
         const x = wrappedX;
-        const y = -cardHeight * 0.5 - rowGap * 0.5 - curveY + (isMobile ? floatY * 0.25 : floatY);
+        const y = -cardHeight * 0.5 - rowGap * 0.5 - curveY + (isMobile ? 0 : floatY);
         const rotZ = isMobile ? 0 : tiltRad * (180 / Math.PI);
-        const rotY = isMobile ? normX * 4 : normX * 12;
-        const scale = 1 - Math.abs(normX) * (isMobile ? 0.04 : 0.08);
+        const rotY = isMobile ? normX * 3 : normX * 12;
+        const scale = 1 - Math.abs(normX) * (isMobile ? 0.03 : 0.08);
 
         const absNormX = Math.abs(normX);
         const cardOpacity =
@@ -259,10 +260,10 @@ export function ServiceHome() {
           const floatY = 6.5 * Math.sin(t * 1.25 + (idx + 10) * 0.72);
 
           const x = wrappedX;
-          const y = cardHeight * 0.5 + rowGap * 0.5 - curveY + (isMobile ? floatY * 0.25 : floatY);
+          const y = cardHeight * 0.5 + rowGap * 0.5 - curveY + (isMobile ? 0 : floatY);
           const rotZ = isMobile ? 0 : tiltRad * (180 / Math.PI);
-          const rotY = isMobile ? normX * 4 : normX * 12;
-          const scale = 1 - Math.abs(normX) * (isMobile ? 0.04 : 0.08);
+          const rotY = isMobile ? normX * 3 : normX * 12;
+          const scale = 1 - Math.abs(normX) * (isMobile ? 0.03 : 0.08);
 
           const absNormX = Math.abs(normX);
           const cardOpacity =
@@ -438,7 +439,7 @@ export function ServiceHome() {
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerCancel}
-        className="relative w-full h-[480px] sm:h-[540px] md:h-[620px] lg:h-[680px] flex items-center justify-center overflow-visible z-10 touch-pan-y"
+        className="relative w-full h-[490px] sm:h-[540px] md:h-[620px] lg:h-[680px] flex items-center justify-center overflow-visible z-10 touch-pan-y"
         style={{
           perspective: layout.isMobile ? "1000px" : "1400px",
           perspectiveOrigin: "50% 50%",
@@ -456,7 +457,7 @@ export function ServiceHome() {
               ref={(el) => {
                 topCardRefs.current[idx] = el;
               }}
-              className="absolute pointer-events-auto will-change-transform touch-manipulation"
+              className="absolute pointer-events-auto will-change-transform touch-manipulation overflow-hidden rounded-[12px]"
               style={{
                 width: `${layout.cardWidth}px`,
                 height: `${layout.cardHeight}px`,
@@ -487,7 +488,7 @@ export function ServiceHome() {
               ref={(el) => {
                 bottomCardRefs.current[idx] = el;
               }}
-              className="absolute pointer-events-auto will-change-transform touch-manipulation"
+              className="absolute pointer-events-auto will-change-transform touch-manipulation overflow-hidden rounded-[12px]"
               style={{
                 width: `${layout.cardWidth}px`,
                 height: `${layout.cardHeight}px`,
@@ -690,7 +691,7 @@ function CardContent({
       />
 
       {/* Media Frame (Image) */}
-      <div className="relative z-10 w-full aspect-[16/10] rounded-[6px] sm:rounded-[8px] overflow-hidden bg-black/40 shrink-0 border border-white/5">
+      <div className="relative z-10 w-full aspect-[16/10] max-h-[96px] sm:max-h-none rounded-[6px] sm:rounded-[8px] overflow-hidden bg-black/40 shrink-0 border border-white/5">
         {hasImage ? (
           <img
             src={card.image}
@@ -711,13 +712,13 @@ function CardContent({
       </div>
 
       {/* Service Title & Category Container in Project Font */}
-      <div className="relative z-10 flex flex-col justify-end mt-1 sm:mt-3 flex-1 min-h-0">
+      <div className="relative z-10 flex flex-col justify-end mt-1 sm:mt-3 flex-1 min-h-0 overflow-hidden">
         {card.category && (
           <span className="text-[8px] sm:text-[10px] tracking-wider uppercase text-[#00b5e2]/80 font-semibold mb-0.5 sm:mb-1 truncate">
             {card.category}
           </span>
         )}
-        <h3 className="text-[11.5px] sm:text-[16px] font-bold leading-tight sm:leading-snug tracking-normal text-white line-clamp-2 group-hover:text-cyan-100 transition-colors duration-300">
+        <h3 className="text-[11px] sm:text-[16px] font-bold leading-tight sm:leading-snug tracking-normal text-white line-clamp-2 group-hover:text-cyan-100 transition-colors duration-300">
           {card.title}
         </h3>
       </div>

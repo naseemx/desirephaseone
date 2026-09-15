@@ -74,16 +74,22 @@ export function ServiceHome() {
     const isMobile = w < 768;
     const isSmallMobile = w < 480;
 
-    // Mobile: single centered ribbon, cards sized comfortably for mobile screens (~62-65% width)
-    // Desktop: dual row, cards sized 200-236px
+    // Mobile (2 rows): cards sized 155-195px (compact dual ribbon)
+    // Desktop (2 rows): cards sized 200-236px
     const cardWidth = isMobile
-      ? Math.max(185, Math.min(Math.round(w * 0.65), 235))
+      ? isSmallMobile
+        ? Math.max(150, Math.min(Math.round(w * 0.45), 175))
+        : Math.min(195, Math.max(170, Math.round(w * 0.42)))
       : Math.min(236, Math.max(200, 200 + ((w - 768) / 600) * 26));
 
     // Card height proportioned for 16:10 image + category + title
-    const cardHeight = Math.round(cardWidth * 1.16);
-    const gap = isMobile ? (isSmallMobile ? 18 : 22) : 36;
+    const cardHeight = isMobile
+      ? Math.round(cardWidth * 1.12)
+      : Math.round(cardWidth * 1.16);
+
+    const gap = isMobile ? 14 : 36;
     const pitch = cardWidth + gap;
+    const rowGap = isMobile ? 14 : 40;
     const p = w <= 768 ? 0 : w >= 1280 ? 1 : Math.pow((w - 768) / 512, 2);
 
     return {
@@ -93,30 +99,23 @@ export function ServiceHome() {
       cardHeight,
       gap,
       pitch,
-      rowGap: 40,
+      rowGap,
       viewportHalfWidth: Math.max(w, 1) / 2,
-      // Concave cradle curve depth: subtle 8px on mobile for single row
-      curveAmount: isMobile ? 8 : 10 + 54 * p,
-      curveMaxTiltRad: isMobile ? 0.08 : 0.11 + 0.25 * p,
-      curveRotationMul: isMobile ? 0.5 : 0.62 + 0.38 * p,
+      curveAmount: isMobile ? 6 : 10 + 54 * p,
+      curveMaxTiltRad: isMobile ? 0.06 : 0.11 + 0.25 * p,
+      curveRotationMul: isMobile ? 0.4 : 0.62 + 0.38 * p,
     };
   }, [dimensions.width]);
 
-  // Card distribution: On mobile (w < 768), render ALL cards in a single row
-  // On desktop (w >= 768), split into top and bottom rows
+  // Card distribution: 2 rows across all screen sizes (mobile & desktop)
+  // Row 1 (top): 8 primary services
+  // Row 2 (bottom): 8 exhibition, branding & fabrication services
   const { topRowCards, bottomRowCards } = useMemo(() => {
-    if (layout.isMobile) {
-      return {
-        topRowCards: CARDS,
-        bottomRowCards: [],
-      };
-    }
-    const mid = Math.ceil(CARDS.length / 2);
     return {
-      topRowCards: CARDS.slice(0, mid),
-      bottomRowCards: CARDS.slice(mid),
+      topRowCards: CARDS.slice(0, 8),
+      bottomRowCards: CARDS.slice(8, 16),
     };
-  }, [layout.isMobile]);
+  }, []);
 
   const topCardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const bottomCardRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -174,6 +173,7 @@ export function ServiceHome() {
         cardWidth,
         cardHeight,
         pitch,
+        rowGap,
         curveAmount,
         curveMaxTiltRad,
         curveRotationMul,
@@ -218,9 +218,7 @@ export function ServiceHome() {
         const floatY = 6.5 * Math.sin(t * 1.35 + idx * 0.85);
 
         const x = wrappedX;
-        const y = isMobile
-          ? -curveY + floatY * 0.6
-          : -cardHeight * 0.5 - 20 - curveY + floatY;
+        const y = -cardHeight * 0.5 - rowGap * 0.5 - curveY + (isMobile ? floatY * 0.45 : floatY);
         const rotZ = isMobile ? 0 : tiltRad * (180 / Math.PI);
         const rotY = isMobile ? normX * 4 : normX * 12;
         const scale = 1 - Math.abs(normX) * (isMobile ? 0.04 : 0.08);
@@ -233,13 +231,13 @@ export function ServiceHome() {
         el.style.opacity = cardOpacity.toFixed(3);
       });
 
-      // Position Bottom Row (Rendered only on desktop)
-      if (!isMobile && bottomRowCards.length > 0) {
+      // Position Bottom Row (Rendered on both mobile & desktop)
+      if (bottomRowCards.length > 0) {
         bottomRowCards.forEach((_, idx) => {
           const el = bottomCardRefs.current[idx];
           if (!el) return;
 
-          const baseX = (idx - bottomRowCards.length / 2) * pitch + 100;
+          const baseX = (idx - bottomRowCards.length / 2) * pitch + (isMobile ? pitch * 0.5 : 100);
           const rawX = baseX - currentOffset;
           const wrappedX =
             (((rawX + bottomPeriod / 2) % bottomPeriod) + bottomPeriod) %
@@ -264,10 +262,10 @@ export function ServiceHome() {
           const floatY = 6.5 * Math.sin(t * 1.25 + (idx + 10) * 0.72);
 
           const x = wrappedX;
-          const y = cardHeight * 0.5 + 20 - curveY + floatY;
-          const rotZ = tiltRad * (180 / Math.PI);
-          const rotY = normX * 12;
-          const scale = 1 - Math.abs(normX) * 0.08;
+          const y = cardHeight * 0.5 + rowGap * 0.5 - curveY + (isMobile ? floatY * 0.45 : floatY);
+          const rotZ = isMobile ? 0 : tiltRad * (180 / Math.PI);
+          const rotY = isMobile ? normX * 4 : normX * 12;
+          const scale = 1 - Math.abs(normX) * (isMobile ? 0.04 : 0.08);
 
           const absNormX = Math.abs(normX);
           const cardOpacity =
@@ -367,7 +365,7 @@ export function ServiceHome() {
       ref={containerRef}
       id="servicehome"
       onWheel={handleWheel}
-      className="relative w-full min-h-[580px] sm:min-h-screen pt-16 pb-20 sm:py-20 md:py-24 lg:py-28 overflow-hidden select-none bg-[#09090b] text-zinc-100 flex flex-col items-center justify-between"
+      className="relative w-full min-h-[640px] sm:min-h-screen pt-12 pb-16 sm:py-20 md:py-24 lg:py-28 overflow-hidden select-none bg-[#09090b] text-zinc-100 flex flex-col items-center justify-between"
       style={{
         backgroundColor: "#09090b",
         backgroundImage:
@@ -387,11 +385,11 @@ export function ServiceHome() {
       <div className="absolute bottom-0 inset-x-0 h-20 sm:h-28 bg-gradient-to-t from-[#09090b] to-transparent pointer-events-none z-20" />
 
       {/* Atmospheric Starfield Particles */}
-      <AmbientStars count={layout.isMobile ? 35 : 160} />
+      <AmbientStars count={layout.isMobile ? 40 : 160} />
 
       {/* Header Info Bar matching brand cyan */}
-      <div className="relative z-30 mx-auto max-w-7xl px-4 sm:px-6 w-full flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left mb-6 sm:mb-8">
-        <div className="flex items-center gap-2.5">
+      <div className="relative z-30 mx-auto max-w-7xl px-4 sm:px-6 w-full flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-3 text-center sm:text-left mb-4 sm:mb-8">
+        <div className="flex items-center gap-2 sm:gap-2.5">
           <span className="relative flex h-2 w-2 sm:h-2.5 sm:w-2.5">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00b5e2] opacity-75" />
             <span className="relative inline-flex rounded-full h-2 w-2 sm:h-2.5 sm:w-2.5 bg-[#00b5e2]" />
@@ -401,7 +399,7 @@ export function ServiceHome() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 text-zinc-400 text-[11px] sm:text-xs md:text-sm bg-black/40 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/10 shadow-sm">
+        <div className="flex items-center gap-2 text-zinc-400 text-[11px] sm:text-xs md:text-sm bg-black/40 backdrop-blur-md px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full border border-white/10 shadow-sm">
           <MoveHorizontal className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#00b5e2] shrink-0" />
           <span className="hidden sm:inline">Drag or scroll horizontally to explore services</span>
           <span className="sm:hidden">Swipe to explore services</span>
@@ -436,14 +434,14 @@ export function ServiceHome() {
         }}
       />
 
-      {/* Center 3D Curved Ribbon Viewport */}
+      {/* Center 3D Curved Ribbon Viewport (Holds Dual Ribbon Rows) */}
       <div
         ref={viewportRef}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerCancel}
-        className="relative w-full h-[380px] sm:h-[440px] md:h-[600px] lg:h-[680px] flex items-center justify-center overflow-visible z-10 touch-pan-y"
+        className="relative w-full h-[470px] sm:h-[530px] md:h-[620px] lg:h-[680px] flex items-center justify-center overflow-visible z-10 touch-pan-y"
         style={{
           perspective: layout.isMobile ? "1000px" : "1400px",
           perspectiveOrigin: "50% 50%",
@@ -453,7 +451,7 @@ export function ServiceHome() {
           className="relative w-0 h-0 flex items-center justify-center pointer-events-none"
           style={{ transformStyle: "preserve-3d" }}
         >
-          {/* TOP ROW CARDS (On mobile, this holds ALL cards in a single centered row) */}
+          {/* TOP ROW CARDS (Line 1: 8 Primary Services) */}
           {topRowCards.map((card, idx) => (
             <div
               key={`top-${card.id}-${idx}`}
@@ -484,37 +482,36 @@ export function ServiceHome() {
             </div>
           ))}
 
-          {/* BOTTOM ROW CARDS (Rendered only on desktop w >= 768) */}
-          {!layout.isMobile &&
-            bottomRowCards.map((card, idx) => (
-              <div
-                key={`bottom-${card.id}-${idx}`}
-                data-cursor="card"
-                ref={(el) => {
-                  bottomCardRefs.current[idx] = el;
-                }}
-                className="absolute pointer-events-auto will-change-transform touch-manipulation"
-                style={{
-                  width: `${layout.cardWidth}px`,
-                  height: `${layout.cardHeight}px`,
-                  left: `${-layout.cardWidth / 2}px`,
-                  top: `${-layout.cardHeight / 2}px`,
-                  transformStyle: "preserve-3d",
-                }}
-                onClick={() => handleCardClick(card)}
-                onPointerEnter={() => setHoveredCardId(card.id)}
-                onPointerLeave={() => {
-                  setHoveredCardId((current) =>
-                    current === card.id ? null : current
-                  );
-                }}
-              >
-                <CardContent
-                  card={card}
-                  isHovered={hoveredCardId === card.id}
-                />
-              </div>
-            ))}
+          {/* BOTTOM ROW CARDS (Line 2: 8 Exhibition, Branding & Fabrication Services) */}
+          {bottomRowCards.map((card, idx) => (
+            <div
+              key={`bottom-${card.id}-${idx}`}
+              data-cursor="card"
+              ref={(el) => {
+                bottomCardRefs.current[idx] = el;
+              }}
+              className="absolute pointer-events-auto will-change-transform touch-manipulation"
+              style={{
+                width: `${layout.cardWidth}px`,
+                height: `${layout.cardHeight}px`,
+                left: `${-layout.cardWidth / 2}px`,
+                top: `${-layout.cardHeight / 2}px`,
+                transformStyle: "preserve-3d",
+              }}
+              onClick={() => handleCardClick(card)}
+              onPointerEnter={() => setHoveredCardId(card.id)}
+              onPointerLeave={() => {
+                setHoveredCardId((current) =>
+                  current === card.id ? null : current
+                );
+              }}
+            >
+              <CardContent
+                card={card}
+                isHovered={hoveredCardId === card.id}
+              />
+            </div>
+          ))}
         </div>
       </div>
 
@@ -696,7 +693,7 @@ function CardContent({
       />
 
       {/* Media Frame (Image) */}
-      <div className="relative z-10 w-full aspect-[16/10] rounded-[8px] overflow-hidden bg-black/40 shrink-0 border border-white/5">
+      <div className="relative z-10 w-full aspect-[16/10] rounded-[6px] sm:rounded-[8px] overflow-hidden bg-black/40 shrink-0 border border-white/5">
         {hasImage ? (
           <img
             src={card.image}
@@ -717,13 +714,13 @@ function CardContent({
       </div>
 
       {/* Service Title & Category Container in Project Font */}
-      <div className="relative z-10 flex flex-col justify-end mt-2.5 sm:mt-3 flex-1 min-h-0">
+      <div className="relative z-10 flex flex-col justify-end mt-1.5 sm:mt-3 flex-1 min-h-0">
         {card.category && (
-          <span className="text-[9.5px] sm:text-[10px] tracking-widest uppercase text-[#00b5e2]/80 font-semibold mb-1 truncate">
+          <span className="text-[8px] sm:text-[10px] tracking-wider uppercase text-[#00b5e2]/80 font-semibold mb-0.5 sm:mb-1 truncate">
             {card.category}
           </span>
         )}
-        <h3 className="text-[15px] sm:text-[17px] font-bold leading-snug tracking-normal text-white line-clamp-2 group-hover:text-cyan-100 transition-colors duration-300">
+        <h3 className="text-[12px] sm:text-[16px] font-bold leading-tight sm:leading-snug tracking-normal text-white line-clamp-2 group-hover:text-cyan-100 transition-colors duration-300">
           {card.title}
         </h3>
       </div>

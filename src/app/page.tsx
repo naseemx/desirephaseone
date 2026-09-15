@@ -3,8 +3,12 @@
 import React, { useState } from "react";
 import { Navbar } from "@/components/navbar";
 import { HeroCanvas } from "@/components/hero-canvas";
+import { ProcessSection } from "@/components/process-section";
+import { ContactCtaSection } from "@/components/contact-cta-section";
+import { ServiceHome } from "@/components/service-home";
 import { Footer } from "@/components/footer";
 import { Preloader } from "@/components/preloader";
+import { CustomCursor } from "@/components/ui/custom-cursor";
 
 export default function Home() {
   const [loadingProgress, setLoadingProgress] = useState(0);
@@ -12,6 +16,8 @@ export default function Home() {
 
   return (
     <div className="relative min-h-screen bg-[#09090b] text-zinc-100 selection:bg-cyan-500 selection:text-black">
+      {/* Global Interactive Custom Cursor with Fluid Ribbon Trail across All Sections */}
+      <CustomCursor />
       {/* SVG Circle Matrix Preloader */}
       <Preloader
         progress={loadingProgress}
@@ -27,8 +33,18 @@ export default function Home() {
         onLoaded={() => setLoadingProgress(100)}
       />
 
-      {/* Modern High-Performance Footer placed immediately after Hero */}
+      {/* Ricardo Chance Process Section */}
+      <ProcessSection />
+
+      {/* Ricardo Chance Editorial Contact CTA Section */}
+      <ContactCtaSection />
+
+      {/* Inspiring NK Studio ServiceHome Curved Ribbon Showcase */}
+      <ServiceHome />
+
+      {/* Modern High-Performance Footer placed immediately after ServiceHome */}
       <Footer />
     </div>
   );
 }
+

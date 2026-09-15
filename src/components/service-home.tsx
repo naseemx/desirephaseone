@@ -219,7 +219,7 @@ export function ServiceHome() {
 
         const x = wrappedX;
         const y = isMobile
-          ? -cardHeight * 0.5 + floatY * 0.6
+          ? -curveY + floatY * 0.6
           : -cardHeight * 0.5 - 20 - curveY + floatY;
         const rotZ = isMobile ? 0 : tiltRad * (180 / Math.PI);
         const rotY = isMobile ? normX * 4 : normX * 12;
@@ -367,7 +367,7 @@ export function ServiceHome() {
       ref={containerRef}
       id="servicehome"
       onWheel={handleWheel}
-      className="relative w-full min-h-[520px] sm:min-h-screen py-12 sm:py-20 md:py-24 lg:py-28 overflow-hidden select-none bg-[#09090b] text-zinc-100 flex flex-col items-center justify-between"
+      className="relative w-full min-h-[580px] sm:min-h-screen pt-16 pb-20 sm:py-20 md:py-24 lg:py-28 overflow-hidden select-none bg-[#09090b] text-zinc-100 flex flex-col items-center justify-between"
       style={{
         backgroundColor: "#09090b",
         backgroundImage:
@@ -390,7 +390,7 @@ export function ServiceHome() {
       <AmbientStars count={layout.isMobile ? 35 : 160} />
 
       {/* Header Info Bar matching brand cyan */}
-      <div className="relative z-20 mx-auto max-w-7xl px-4 sm:px-6 w-full flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left mb-4 sm:mb-6">
+      <div className="relative z-30 mx-auto max-w-7xl px-4 sm:px-6 w-full flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left mb-6 sm:mb-8">
         <div className="flex items-center gap-2.5">
           <span className="relative flex h-2 w-2 sm:h-2.5 sm:w-2.5">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00b5e2] opacity-75" />
@@ -411,7 +411,7 @@ export function ServiceHome() {
       {/* Left Edge Vignette Mask */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute top-0 bottom-0 left-0 z-30 w-12 sm:w-24 md:w-48 lg:w-[clamp(6rem,24vw,32rem)] sm:backdrop-blur-[12px] transition-opacity duration-300"
+        className="pointer-events-none absolute top-0 bottom-0 left-0 z-20 w-12 sm:w-24 md:w-48 lg:w-[clamp(6rem,24vw,32rem)] sm:backdrop-blur-[12px] transition-opacity duration-300"
         style={{
           background:
             "linear-gradient(90deg, rgba(9, 9, 11, 0.98) 0%, rgba(9, 9, 11, 0.75) 45%, transparent 100%)",
@@ -425,7 +425,7 @@ export function ServiceHome() {
       {/* Right Edge Vignette Mask */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute top-0 bottom-0 right-0 z-30 w-12 sm:w-24 md:w-48 lg:w-[clamp(6rem,24vw,32rem)] sm:backdrop-blur-[12px] transition-opacity duration-300"
+        className="pointer-events-none absolute top-0 bottom-0 right-0 z-20 w-12 sm:w-24 md:w-48 lg:w-[clamp(6rem,24vw,32rem)] sm:backdrop-blur-[12px] transition-opacity duration-300"
         style={{
           background:
             "linear-gradient(270deg, rgba(9, 9, 11, 0.98) 0%, rgba(9, 9, 11, 0.75) 45%, transparent 100%)",
@@ -443,7 +443,7 @@ export function ServiceHome() {
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerCancel}
-        className="relative w-full h-[400px] sm:h-[460px] md:h-[600px] lg:h-[680px] flex items-center justify-center overflow-visible z-10 touch-pan-y"
+        className="relative w-full h-[380px] sm:h-[440px] md:h-[600px] lg:h-[680px] flex items-center justify-center overflow-visible z-10 touch-pan-y"
         style={{
           perspective: layout.isMobile ? "1000px" : "1400px",
           perspectiveOrigin: "50% 50%",
@@ -540,22 +540,22 @@ export function ServiceHome() {
             {/* Tags / Category */}
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-3 sm:mb-4 pr-8">
               {selectedCard.category && (
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-mono tracking-wider uppercase bg-[#00b5e2]/15 text-[#00b5e2] border border-[#00b5e2]/30 font-semibold">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] tracking-wider uppercase bg-[#00b5e2]/15 text-[#00b5e2] border border-[#00b5e2]/30 font-semibold">
                   {selectedCard.category}
                 </span>
               )}
               {selectedCard.tag?.map((t, idx) => (
                 <span
                   key={idx}
-                  className="px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-mono tracking-wider uppercase bg-white/5 text-zinc-300 border border-white/10"
+                  className="px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] tracking-wider uppercase bg-white/5 text-zinc-300 border border-white/10 font-medium"
                 >
                   {t}
                 </span>
               ))}
             </div>
 
-            {/* Title */}
-            <h2 className="font-instrument-serif text-2xl sm:text-3xl lg:text-4xl text-white leading-snug mb-4 sm:mb-6">
+            {/* Title in Project Font */}
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl text-white font-bold leading-snug mb-4 sm:mb-6">
               {selectedCard.title}
             </h2>
 
@@ -570,20 +570,20 @@ export function ServiceHome() {
               </div>
             )}
 
-            {/* Description */}
+            {/* Description in Project Font */}
             {selectedCard.description && (
-              <p className="text-zinc-300 font-red-hat-display text-sm sm:text-base leading-relaxed mb-6">
+              <p className="text-zinc-300 text-sm sm:text-base leading-relaxed mb-6">
                 {selectedCard.description}
               </p>
             )}
 
-            {/* Features / Capabilities */}
+            {/* Features / Capabilities in Project Font */}
             {selectedCard.features && selectedCard.features.length > 0 && (
               <div className="p-4 sm:p-5 rounded-[10px] bg-white/[0.03] border border-white/10 mb-6">
-                <h4 className="text-[11px] sm:text-xs font-mono uppercase tracking-widest text-[#00b5e2] font-semibold mb-3">
+                <h4 className="text-[11px] sm:text-xs uppercase tracking-widest text-[#00b5e2] font-semibold mb-3">
                   Key Capabilities & Specifications
                 </h4>
-                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs sm:text-sm text-zinc-300 font-red-hat-display">
+                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs sm:text-sm text-zinc-300">
                   {selectedCard.features.map((feat, idx) => (
                     <li key={idx} className="flex items-start gap-2">
                       <span className="text-[#00b5e2] text-xs mt-0.5">✦</span>
@@ -596,7 +596,7 @@ export function ServiceHome() {
 
             {/* Footer action */}
             <div className="pt-4 border-t border-white/10 flex items-center justify-between">
-              <span className="text-xs font-mono text-zinc-400 tracking-wider">
+              <span className="text-xs text-zinc-400 tracking-wider font-semibold">
                 DESIRE DIGITAL
               </span>
               <a
@@ -710,20 +710,20 @@ function CardContent({
             decoding="async"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-zinc-900/60 text-zinc-600 text-xs font-mono">
+          <div className="w-full h-full flex items-center justify-center bg-zinc-900/60 text-zinc-600 text-xs font-medium">
             SERVICE
           </div>
         )}
       </div>
 
-      {/* Service Title & Category Container */}
+      {/* Service Title & Category Container in Project Font */}
       <div className="relative z-10 flex flex-col justify-end mt-2.5 sm:mt-3 flex-1 min-h-0">
         {card.category && (
-          <span className="text-[9.5px] sm:text-[10px] font-mono tracking-widest uppercase text-[#00b5e2]/80 font-medium mb-1 truncate">
+          <span className="text-[9.5px] sm:text-[10px] tracking-widest uppercase text-[#00b5e2]/80 font-semibold mb-1 truncate">
             {card.category}
           </span>
         )}
-        <h3 className="font-instrument-serif text-[18px] sm:text-[21px] leading-[1.12] tracking-tight text-white line-clamp-2 group-hover:text-cyan-100 transition-colors duration-300">
+        <h3 className="text-[15px] sm:text-[17px] font-bold leading-snug tracking-normal text-white line-clamp-2 group-hover:text-cyan-100 transition-colors duration-300">
           {card.title}
         </h3>
       </div>

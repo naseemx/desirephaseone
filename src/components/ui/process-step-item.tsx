@@ -35,7 +35,7 @@ export const ProcessStepItem = forwardRef<HTMLDivElement, ProcessStepItemProps>(
       >
         {/* Step Number & Glowing Spark Indicator */}
         <div className="flex items-center gap-2 mb-1.5 sm:mb-3">
-          <span className="step-num font-red-hat-display text-sm sm:text-base md:text-lg font-medium transition-colors duration-300 text-zinc-500 group-[.is-active]:text-white group-[.is-active]:font-semibold group-[[data-active=true]]:text-white group-[[data-active=true]]:font-semibold">
+          <span className="step-num text-sm sm:text-base md:text-lg font-semibold tracking-wider transition-colors duration-300 text-zinc-500 group-[.is-active]:text-white group-[[data-active=true]]:text-white">
             {step.id}
           </span>
 
@@ -45,8 +45,8 @@ export const ProcessStepItem = forwardRef<HTMLDivElement, ProcessStepItemProps>(
           </span>
         </div>
 
-        {/* Step Title in Instrument Serif */}
-        <h3 className="step-title font-instrument-serif text-2xl sm:text-3xl md:text-4xl font-normal leading-[1.15] mb-2 sm:mb-3 transition-all duration-300 text-zinc-400 group-[.is-active]:text-white group-[.is-active]:drop-shadow-[0_0_20px_rgba(255,255,255,0.4)] group-[[data-active=true]]:text-white group-[[data-active=true]]:drop-shadow-[0_0_20px_rgba(255,255,255,0.4)]">
+        {/* Step Title in Project Font */}
+        <h3 className="step-title text-2xl sm:text-3xl md:text-4xl font-bold leading-tight mb-2 sm:mb-3 transition-all duration-300 text-zinc-400 group-[.is-active]:text-white group-[.is-active]:drop-shadow-[0_0_20px_rgba(255,255,255,0.4)] group-[[data-active=true]]:text-white group-[[data-active=true]]:drop-shadow-[0_0_20px_rgba(255,255,255,0.4)]">
           {titleWords.map((word, wordIdx) => (
             <span key={wordIdx} className="inline-block whitespace-nowrap">
               {word}
@@ -55,8 +55,8 @@ export const ProcessStepItem = forwardRef<HTMLDivElement, ProcessStepItemProps>(
           ))}
         </h3>
 
-        {/* Step Description in Red Hat Display */}
-        <p className="step-desc font-red-hat-display text-xs sm:text-sm md:text-base font-normal leading-relaxed transition-colors duration-300 text-zinc-500 group-[.is-active]:text-zinc-200 group-[[data-active=true]]:text-zinc-200">
+        {/* Step Description in Project Font */}
+        <p className="step-desc text-xs sm:text-sm md:text-base font-normal leading-relaxed transition-colors duration-300 text-zinc-500 group-[.is-active]:text-zinc-200 group-[[data-active=true]]:text-zinc-200">
           {descWords.map((word, wordIdx) => (
             <span key={wordIdx} className="inline-block whitespace-nowrap">
               {word}

@@ -474,18 +474,18 @@ export function ProcessSection() {
             className="relative md:h-full flex items-center justify-end -translate-y-16 lg:-translate-y-20 z-10"
           >
             <div className="flex flex-col items-end justify-center gap-6 pr-12 lg:pr-16 text-right">
-              {/* Heading in Instrument Serif */}
+              {/* Heading in Project Font */}
               <CharacterReveal
                 ref={headingRef}
                 lines={TITLE_LINES}
-                className="font-instrument-serif text-4xl md:text-5xl lg:text-[54px] font-normal leading-[1.08] text-zinc-100 tracking-tight max-w-md lg:max-w-lg"
+                className="text-3xl sm:text-4xl md:text-5xl lg:text-[50px] font-bold leading-[1.12] text-zinc-100 tracking-tight max-w-md lg:max-w-lg"
               />
 
-              {/* Description in Red Hat Display */}
+              {/* Description in Project Font */}
               <MaskedLinesReveal
                 ref={descriptionRef}
                 lines={DESC_LINES}
-                className="font-red-hat-display text-base text-zinc-400 font-normal leading-relaxed max-w-sm lg:max-w-md"
+                className="text-sm sm:text-base text-zinc-400 font-normal leading-relaxed max-w-sm lg:max-w-md"
                 setLineRef={(el, idx) => {
                   descLinesRef.current[idx] = el;
                 }}
@@ -533,21 +533,21 @@ export function ProcessSection() {
           {/* Eyebrow badge */}
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 mb-4">
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--brand-cyan)] animate-pulse" />
-            <span className="text-[11px] font-mono uppercase tracking-widest text-zinc-300 font-medium">
+            <span className="text-[11px] uppercase tracking-widest text-zinc-300 font-semibold">
               Our Process
             </span>
           </div>
 
           {/* Headline */}
-          <h2 className="font-instrument-serif text-3xl sm:text-4xl text-zinc-100 font-normal leading-[1.1] tracking-tight">
+          <h2 className="text-3xl sm:text-4xl text-zinc-100 font-bold leading-[1.15] tracking-tight">
             A process built around<br />
-            <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-zinc-100 via-zinc-200 to-[var(--brand-cyan)]">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-100 via-zinc-200 to-[var(--brand-cyan)]">
               clarity and craft.
             </span>
           </h2>
 
           {/* Description */}
-          <p className="font-red-hat-display text-sm sm:text-base text-zinc-400 font-normal leading-relaxed mt-3.5 max-w-md">
+          <p className="text-sm sm:text-base text-zinc-400 font-normal leading-relaxed mt-3.5 max-w-md">
             No surprises, no handoff chaos. Just a clear path from the first
             conversation to a product that works.
           </p>
@@ -596,7 +596,7 @@ export function ProcessSection() {
             >
               {/* Step Number & Sparkle */}
               <div className="flex items-center gap-2 mb-2">
-                <span className="mobile-step-num font-mono text-sm sm:text-base font-medium tracking-wider text-zinc-500 transition-colors duration-500 group-[.is-active]:text-[var(--brand-cyan)] group-[.is-active]:font-semibold">
+                <span className="mobile-step-num text-sm sm:text-base font-semibold tracking-wider text-zinc-500 transition-colors duration-500 group-[.is-active]:text-[var(--brand-cyan)]">
                   {step.id}
                 </span>
                 <span className="mobile-step-sparkle text-[var(--brand-cyan)] text-xs opacity-0 transition-opacity duration-500 group-[.is-active]:opacity-100 drop-shadow-[0_0_8px_var(--brand-cyan)]">
@@ -604,13 +604,13 @@ export function ProcessSection() {
                 </span>
               </div>
 
-              {/* Step Title in Instrument Serif */}
-              <h3 className="mobile-step-title font-instrument-serif text-3xl sm:text-4xl font-normal leading-[1.12] text-zinc-400 transition-all duration-500 mb-3 group-[.is-active]:text-white group-[.is-active]:drop-shadow-[0_0_24px_rgba(255,255,255,0.6)] group-[.is-active]:translate-x-1">
+              {/* Step Title in Project Font */}
+              <h3 className="mobile-step-title text-2xl sm:text-3xl font-bold leading-snug text-zinc-400 transition-all duration-500 mb-2 sm:mb-3 group-[.is-active]:text-white group-[.is-active]:drop-shadow-[0_0_24px_rgba(255,255,255,0.6)] group-[.is-active]:translate-x-1">
                 {step.title}
               </h3>
 
-              {/* Step Description in Red Hat Display */}
-              <p className="mobile-step-desc font-red-hat-display text-sm sm:text-base font-normal leading-relaxed text-zinc-500 transition-colors duration-500 max-w-md group-[.is-active]:text-zinc-200">
+              {/* Step Description in Project Font */}
+              <p className="mobile-step-desc text-sm sm:text-base font-normal leading-relaxed text-zinc-500 transition-colors duration-500 max-w-md group-[.is-active]:text-zinc-200">
                 {step.description}
               </p>
             </div>

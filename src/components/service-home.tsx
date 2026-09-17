@@ -22,7 +22,11 @@ const CARDS: ServiceItem[] = SERVICES;
  * - Mobile responsive single-row ribbon with zero-lag touch physics
  * - Modal detail view displaying service capabilities and specifications
  */
-export function ServiceHome() {
+export interface ServiceHomeProps {
+  isStageMode?: boolean;
+}
+
+export function ServiceHome({ isStageMode = false }: ServiceHomeProps = {}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
 
@@ -30,6 +34,11 @@ export function ServiceHome() {
   const [isInView, setIsInView] = useState(false);
 
   useEffect(() => {
+    if (isStageMode) {
+      setIsInView(true);
+      return;
+    }
+
     const el = containerRef.current;
     if (!el) return;
 
@@ -42,7 +51,7 @@ export function ServiceHome() {
 
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [isStageMode]);
 
   // Layout parameters based on container / window dimensions
   const [dimensions, setDimensions] = useState(() => ({
@@ -173,9 +182,9 @@ export function ServiceHome() {
     return base;
   }, [layout.isMobile]);
 
-  // Main 60fps/120fps physics and 3D positioning animation loop
+  // Main 60fps/120fps physics and 3D positioning animation loop (Desktop only)
   useEffect(() => {
-    if (!isInView) return;
+    if (!isInView || layout.isMobile) return;
 
     let animId: number;
     let lastTime = performance.now();
@@ -422,7 +431,11 @@ export function ServiceHome() {
       ref={containerRef}
       id="servicehome"
       onWheel={handleWheel}
-      className="relative w-full min-h-[520px] sm:min-h-screen pt-10 pb-12 sm:py-20 md:py-24 lg:py-28 overflow-hidden select-none bg-[#09090b] text-zinc-100 flex flex-col items-center justify-between"
+      className={`relative w-full overflow-hidden select-none bg-[#09090b] text-zinc-100 flex flex-col items-center justify-center ${
+        isStageMode
+          ? "h-full min-h-screen py-4 sm:py-6"
+          : "min-h-[520px] sm:min-h-screen justify-between pt-10 pb-12 sm:py-20 md:py-24 lg:py-28"
+      }`}
       style={{
         backgroundColor: "#09090b",
         backgroundImage:
@@ -459,14 +472,14 @@ export function ServiceHome() {
         <div className="flex items-center gap-2 text-zinc-400 text-[11px] sm:text-xs md:text-sm bg-black/40 backdrop-blur-md px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full border border-white/10 shadow-sm">
           <MoveHorizontal className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#00b5e2] shrink-0" />
           <span className="hidden sm:inline">Drag or scroll horizontally to explore services</span>
-          <span className="sm:hidden">Swipe to explore services</span>
+          <span className="sm:hidden">Scroll down to explore services</span>
         </div>
       </div>
 
       {/* Left Edge Vignette Mask */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute top-0 bottom-0 left-0 z-20 w-12 sm:w-24 md:w-48 lg:w-[clamp(6rem,24vw,32rem)] sm:backdrop-blur-[12px] transition-opacity duration-300"
+        className="pointer-events-none absolute top-0 bottom-0 left-0 z-20 w-8 sm:w-24 md:w-48 lg:w-[clamp(6rem,24vw,32rem)] sm:backdrop-blur-[12px] transition-opacity duration-300"
         style={{
           background:
             "linear-gradient(90deg, rgba(9, 9, 11, 0.98) 0%, rgba(9, 9, 11, 0.75) 45%, transparent 100%)",
@@ -480,7 +493,7 @@ export function ServiceHome() {
       {/* Right Edge Vignette Mask */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute top-0 bottom-0 right-0 z-20 w-12 sm:w-24 md:w-48 lg:w-[clamp(6rem,24vw,32rem)] sm:backdrop-blur-[12px] transition-opacity duration-300"
+        className="pointer-events-none absolute top-0 bottom-0 right-0 z-20 w-8 sm:w-24 md:w-48 lg:w-[clamp(6rem,24vw,32rem)] sm:backdrop-blur-[12px] transition-opacity duration-300"
         style={{
           background:
             "linear-gradient(270deg, rgba(9, 9, 11, 0.98) 0%, rgba(9, 9, 11, 0.75) 45%, transparent 100%)",
@@ -491,16 +504,20 @@ export function ServiceHome() {
         }}
       />
 
-      {/* Center 3D Curved Ribbon Viewport (Holds Dual Ribbon Rows) */}
+      {/* DESKTOP VIEWPORT (hidden md:flex): 3D Curved Ribbon with mouse drag & tilt */}
       <div
         ref={viewportRef}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerCancel}
-        className="relative w-full h-[420px] sm:h-[540px] md:h-[620px] lg:h-[680px] flex items-center justify-center overflow-visible z-10 touch-pan-y"
+        className={`hidden md:flex relative w-full ${
+          isStageMode
+            ? "h-[390px] sm:h-[480px] md:h-[560px] lg:h-[620px]"
+            : "h-[420px] sm:h-[540px] md:h-[620px] lg:h-[680px]"
+        } items-center justify-center overflow-visible z-10 touch-pan-y`}
         style={{
-          perspective: layout.isMobile ? "1000px" : "1400px",
+          perspective: "1400px",
           perspectiveOrigin: "50% 50%",
         }}
       >
@@ -573,7 +590,98 @@ export function ServiceHome() {
           ))}
         </div>
       </div>
+
+      {/* MOBILE VIEWPORT (flex md:hidden): Dedicated Scroll-Driven Horizontal Track */}
+      <div className="flex md:hidden relative w-full flex-col justify-center items-center overflow-hidden z-10 py-1">
+        {/* Moving cards track container */}
+        <div className="relative w-full overflow-hidden px-5">
+          <div className="mobile-service-cards-track flex flex-col gap-3.5 will-change-transform py-1">
+            {/* Row 1: 8 Primary LED & Interactive Solutions */}
+            <div className="flex gap-3.5 items-center flex-nowrap">
+              {topRowCards.map((card, idx) => (
+                <MobileServiceCard
+                  key={`m-top-${card.id}-${idx}`}
+                  card={card}
+                  index={idx}
+                  isTop
+                />
+              ))}
+            </div>
+            {/* Row 2: 8 Exhibition, Branding & Fabrication Solutions (aligned directly with Row 1) */}
+            <div className="flex gap-3.5 items-center flex-nowrap">
+              {bottomRowCards.map((card, idx) => (
+                <MobileServiceCard
+                  key={`m-bottom-${card.id}-${idx}`}
+                  card={card}
+                  index={idx}
+                  isTop={false}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
+  );
+}
+
+/**
+ * MobileServiceCard
+ * High-performance card optimized for mobile scroll-driven track with grayscale-to-color focus
+ */
+function MobileServiceCard({
+  card,
+  index,
+  isTop,
+}: {
+  card: ServiceItem;
+  index: number;
+  isTop: boolean;
+}) {
+  const hasImage = Boolean(card.image);
+
+  return (
+    <Link
+      href={`/servicepage/${card.id}`}
+      className={`mobile-service-card ${
+        isTop ? "mobile-card-top" : "mobile-card-bottom"
+      } ${
+        index === 0 ? "is-active" : ""
+      } group relative w-[270px] sm:w-[290px] h-[200px] sm:h-[215px] rounded-[14px] border border-white/10 bg-[#0b1319]/95 p-3 flex flex-col justify-between overflow-hidden shrink-0 select-none shadow-[0_8px_24px_rgba(0,0,0,0.6)] active:scale-[0.98]`}
+    >
+      {/* Subtle brand glow on active */}
+      <div className="pointer-events-none absolute -inset-[1px] rounded-[14px] opacity-0 group-[.is-active]:opacity-100 transition-opacity duration-400 bg-gradient-to-br from-[#00b5e2]/30 via-transparent to-transparent" />
+
+      {/* Media Frame (Image) */}
+      <div className="relative z-10 w-full aspect-[16/9] max-h-[110px] sm:max-h-[120px] rounded-[8px] overflow-hidden bg-black/50 shrink-0 border border-white/5 pointer-events-none">
+        {hasImage ? (
+          <img
+            src={card.image}
+            alt={card.title}
+            draggable={false}
+            className="mobile-card-img w-full h-full object-cover object-center pointer-events-none"
+            loading="lazy"
+            decoding="async"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-zinc-900/60 text-zinc-600 text-[10px] font-medium pointer-events-none">
+            SERVICE
+          </div>
+        )}
+      </div>
+
+      {/* Service Title & Category Container */}
+      <div className="relative z-10 flex flex-col justify-end mt-1.5 flex-1 min-h-0 overflow-hidden pointer-events-none">
+        {card.category && (
+          <span className="mobile-card-cat text-[9.5px] sm:text-[10px] tracking-wider uppercase font-semibold mb-0.5 truncate pointer-events-none">
+            {card.category}
+          </span>
+        )}
+        <h3 className="mobile-card-title text-[13px] sm:text-[14.5px] font-bold leading-tight tracking-normal line-clamp-2 pointer-events-none">
+          {card.title}
+        </h3>
+      </div>
+    </Link>
   );
 }
 

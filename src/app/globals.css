@@ -77,3 +77,46 @@ body {
 .animate-breathe {
   animation: text-breathe 2.4s ease-in-out infinite;
 }
+
+/* Mobile Service Cards Grayscale to Color Transition */
+.mobile-service-card {
+  filter: grayscale(100%);
+  opacity: 0.38;
+  border-color: rgba(255, 255, 255, 0.08);
+  transition: filter 0.45s ease, opacity 0.45s ease, border-color 0.45s ease, box-shadow 0.45s ease;
+}
+
+.mobile-service-card.is-active {
+  filter: grayscale(0%);
+  opacity: 1;
+  border-color: rgba(0, 181, 226, 0.45);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 25px rgba(0, 181, 226, 0.18);
+}
+
+.mobile-service-card .mobile-card-img {
+  filter: grayscale(100%);
+  transition: filter 0.45s ease, transform 0.45s ease;
+}
+
+.mobile-service-card.is-active .mobile-card-img {
+  filter: grayscale(0%);
+}
+
+.mobile-service-card .mobile-card-cat {
+  color: #71717a;
+  transition: color 0.45s ease, text-shadow 0.45s ease;
+}
+
+.mobile-service-card.is-active .mobile-card-cat {
+  color: #00b5e2;
+  text-shadow: 0 0 10px rgba(0, 181, 226, 0.6);
+}
+
+.mobile-service-card .mobile-card-title {
+  color: #a1a1aa;
+  transition: color 0.45s ease;
+}
+
+.mobile-service-card.is-active .mobile-card-title {
+  color: #ffffff;
+}

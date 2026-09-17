@@ -11,110 +11,16 @@ import {
   User,
   MessageSquare,
 } from "lucide-react";
+import { AmbientStars } from "@/components/ui/ambient-stars";
 
-export function ContactForm() {
+export interface ContactFormProps {
+  isStageMode?: boolean;
+}
+
+export function ContactForm({ isStageMode = false }: ContactFormProps = {}) {
   const [result, setResult] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-  const ledCanvasRef = useRef<HTMLCanvasElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
-
-  // ── Ambient LED pixel-wall moving grid canvas background (matching Preloader) ─────
-  useEffect(() => {
-    const canvas = ledCanvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    let W = 0;
-    let H = 0;
-    let cols = 0;
-    let rows = 0;
-    let cell = 18;
-    let gap = 2;
-    let cellsState: { v: number; target: number; speed: number; isPurple?: boolean }[] = [];
-    let animId: number;
-    let triggerTimeout: ReturnType<typeof setTimeout> | null = null;
-    let isMounted = true;
-
-    const resize = () => {
-      const parent = canvas.parentElement;
-      W = canvas.width = parent ? parent.offsetWidth : window.innerWidth;
-      H = canvas.height = parent ? parent.offsetHeight : window.innerHeight;
-      const isMobile = W < 768;
-      cell = isMobile ? 10 : 18;
-      gap = isMobile ? 1.5 : 2;
-      cols = Math.ceil(W / cell) + 1;
-      rows = Math.ceil(H / cell) + 1;
-      cellsState = new Array(cols * rows).fill(0).map(() => ({
-        v: Math.random() * 0.14,
-        target: Math.random() * 0.14,
-        speed: 0.01 + Math.random() * 0.02,
-        isPurple: Math.random() < 0.12,
-      }));
-    };
-
-    window.addEventListener("resize", resize);
-    let ro: ResizeObserver | null = null;
-    if (typeof ResizeObserver !== "undefined" && sectionRef.current) {
-      ro = new ResizeObserver(resize);
-      ro.observe(sectionRef.current);
-    }
-    resize();
-
-    // Occasionally trigger a bright glowing pixel (matching preloader)
-    const trigger = () => {
-      if (!isMounted) return;
-      const idx = Math.floor(Math.random() * cellsState.length);
-      if (cellsState[idx]) {
-        cellsState[idx].target = 0.55 + Math.random() * 0.45;
-      }
-      if (Math.random() < 0.92) {
-        triggerTimeout = setTimeout(trigger, 35 + Math.random() * 80);
-      } else {
-        triggerTimeout = setTimeout(trigger, 100);
-      }
-    };
-    trigger();
-
-    const draw = () => {
-      ctx.clearRect(0, 0, W, H);
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          const i = r * cols + c;
-          const s = cellsState[i];
-          if (!s) continue;
-          s.v += (s.target - s.v) * s.speed;
-          if (Math.abs(s.target - s.v) < 0.01 && s.target > 0.2) {
-            s.target = Math.random() * 0.14;
-          }
-          const alpha = s.v;
-          if (alpha > 0.02) {
-            if (s.isPurple && alpha < 0.35) {
-              ctx.fillStyle = `rgba(104, 14, 166, ${alpha.toFixed(3)})`;
-            } else {
-              const cyan = alpha > 0.38;
-              ctx.fillStyle = cyan
-                ? `rgba(51, 224, 255, ${alpha.toFixed(3)})`
-                : `rgba(47, 107, 255, ${alpha.toFixed(3)})`;
-            }
-            ctx.fillRect(c * cell + gap, r * cell + gap, cell - gap * 2, cell - gap * 2);
-          }
-        }
-      }
-      if (isMounted) {
-        animId = requestAnimationFrame(draw);
-      }
-    };
-    draw();
-
-    return () => {
-      isMounted = false;
-      window.removeEventListener("resize", resize);
-      ro?.disconnect();
-      cancelAnimationFrame(animId);
-      if (triggerTimeout) clearTimeout(triggerTimeout);
-    };
-  }, []);
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -161,27 +67,28 @@ export function ContactForm() {
     <section
       id="contact"
       ref={sectionRef}
-      className="relative overflow-hidden bg-[#060a13] px-4 py-16 sm:px-6 sm:py-24 lg:px-8 text-white select-none"
+      className={`relative w-full overflow-hidden select-none bg-[#09090b] text-zinc-100 flex flex-col items-center justify-center ${
+        isStageMode
+          ? "h-full min-h-screen py-4 sm:py-6"
+          : "min-h-screen px-4 py-16 sm:px-6 sm:py-24 lg:px-8"
+      }`}
+      style={{
+        backgroundColor: "#09090b",
+        backgroundImage:
+          "radial-gradient(ellipse 85% 60% at 50% 40%, rgba(0, 181, 226, 0.08) 0%, rgba(9, 9, 11, 0.7) 55%, #09090b 100%)",
+        contain: "paint",
+      }}
     >
-      {/* ── Moving Ambient LED Pixel-Wall Canvas (Same as Preloader) ────── */}
-      <canvas
-        ref={ledCanvasRef}
-        className="pointer-events-none absolute inset-0 h-full w-full opacity-65"
-      />
+      {/* Top & Bottom seamless gradient blending */}
+      <div className="absolute top-0 inset-x-0 h-16 sm:h-24 bg-gradient-to-b from-[#09090b] to-transparent pointer-events-none z-20" />
+      <div className="absolute bottom-0 inset-x-0 h-16 sm:h-24 bg-gradient-to-t from-[#09090b] to-transparent pointer-events-none z-20" />
 
-      {/* ── Vignette Overlay for Contrast & Depth ────────────────────── */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-[1]"
-        style={{
-          background:
-            "radial-gradient(ellipse at 50% 50%, rgba(6, 10, 19, 0.45) 0%, rgba(6, 10, 19, 0.78) 55%, rgba(6, 10, 19, 0.98) 100%)",
-        }}
-      />
+      {/* Atmospheric Brand Glows & Celestial Star Particles */}
+      <AmbientStars count={80} />
 
       {/* ── Form Card Container ───────────────────────────────────────── */}
-      <div className="relative z-[2] mx-auto max-w-2xl w-full">
-        <div className="relative rounded-2xl sm:rounded-3xl border border-white/10 bg-[#0c0c12]/85 p-6 sm:p-8 lg:p-10 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.8)]">
+      <div className="relative z-10 mx-auto max-w-2xl w-full px-4 sm:px-6">
+        <div className="relative rounded-2xl sm:rounded-3xl border border-white/10 bg-[#0c0c12]/90 p-5 sm:p-8 lg:p-10 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.8)]">
           {/* Inner hairline cyan glow line */}
           <div className="pointer-events-none absolute inset-x-8 top-0 h-[1px] bg-gradient-to-r from-transparent via-[var(--brand-cyan)]/35 to-transparent" />
 

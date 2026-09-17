@@ -11,6 +11,9 @@ import {
   ProcessStepItem,
   ProcessStepData,
 } from "@/components/ui";
+import { ContactCtaSection } from "@/components/contact-cta-section";
+import { ServiceHome } from "@/components/service-home";
+import { ContactForm } from "@/components/contact-form";
 
 const PROCESS_STEPS: ProcessStepData[] = [
   {
@@ -54,6 +57,10 @@ const DESC_LINES = [
 
 export function ProcessSection() {
   const sectionRef = useRef<HTMLElement>(null);
+  const ctaLayerRef = useRef<HTMLDivElement>(null);
+  const processContentRef = useRef<HTMLDivElement>(null);
+  const serviceLayerRef = useRef<HTMLDivElement>(null);
+  const contactLayerRef = useRef<HTMLDivElement>(null);
   const centerLineRef = useRef<HTMLDivElement>(null);
   const starRef = useRef<HTMLDivElement>(null);
 
@@ -66,7 +73,8 @@ export function ProcessSection() {
   const ctaTextRef = useRef<HTMLSpanElement>(null);
   const rectBorderRef = useRef<SVGRectElement>(null);
 
-  // Mobile narrative refs
+  // Mobile narrative and track refs
+  const mobileTrackRef = useRef<HTMLDivElement>(null);
   const mobileNarrativeRef = useRef<HTMLDivElement>(null);
   const mobileBadgeRef = useRef<HTMLDivElement>(null);
   const mobileHeadingRef = useRef<HTMLHeadingElement>(null);
@@ -91,7 +99,7 @@ export function ProcessSection() {
       const mm = gsap.matchMedia();
 
       // ─────────────────────────────────────────────────────────────────────────
-      // DESKTOP (min-width: 768px): 100% UNTOUCHED ORIGINAL PINNED SCROLL EFFECT
+      // DESKTOP (min-width: 768px): STAGED CTA INTRO & IN-PLACE PROCESS FADE-IN
       // ─────────────────────────────────────────────────────────────────────────
       mm.add("(min-width: 768px)", () => {
         if (
@@ -106,6 +114,10 @@ export function ProcessSection() {
           return;
 
         const section = sectionRef.current;
+        const ctaLayer = ctaLayerRef.current;
+        const processContent = processContentRef.current;
+        const serviceLayer = serviceLayerRef.current;
+        const contactLayer = contactLayerRef.current;
         const centerLine = centerLineRef.current;
         const star = starRef.current;
         const heading = headingRef.current;
@@ -115,6 +127,11 @@ export function ProcessSection() {
         const rightTrack = rightTrackRef.current;
         const stepEls = stepRefs.current.filter(Boolean) as HTMLDivElement[];
         const descLines = descLinesRef.current.filter(Boolean) as HTMLDivElement[];
+
+        const ctaContent = ctaLayer?.querySelector<HTMLDivElement>(".cta-content-wrapper");
+        const ctaLine0 = ctaLayer?.querySelector<HTMLDivElement>(".cta-line-0");
+        const ctaLine1 = ctaLayer?.querySelector<HTMLDivElement>(".cta-line-1");
+        const ctaLine2 = ctaLayer?.querySelector<HTMLDivElement>(".cta-line-2");
 
         // Query all character spans for the headline
         const titleChars = Array.from(
@@ -139,6 +156,25 @@ export function ProcessSection() {
         // ─────────────────────────────────────────────────────────────────────
         // INITIAL STATES AT START (Progress = 0)
         // ─────────────────────────────────────────────────────────────────────
+        if (ctaLine0 && ctaLine1 && ctaLine2 && ctaContent) {
+          gsap.set(ctaLine0, { xPercent: -100, opacity: 0, force3D: true });
+          gsap.set(ctaLine1, { xPercent: 100, opacity: 0, force3D: true });
+          gsap.set(ctaLine2, { xPercent: -100, opacity: 0, force3D: true });
+          gsap.set(ctaContent, { opacity: 0.2, scale: 0.95, force3D: true });
+        }
+        if (ctaLayer) {
+          gsap.set(ctaLayer, { opacity: 1, pointerEvents: "auto", force3D: true });
+        }
+        if (processContent) {
+          gsap.set(processContent, { opacity: 0, scale: 0.96, pointerEvents: "none", force3D: true });
+        }
+        if (serviceLayer) {
+          gsap.set(serviceLayer, { opacity: 0, scale: 0.96, pointerEvents: "none", force3D: true });
+        }
+        if (contactLayer) {
+          gsap.set(contactLayer, { opacity: 0, scale: 0.96, pointerEvents: "none", force3D: true });
+        }
+
         gsap.set(centerLine, {
           scaleY: 0,
           transformOrigin: "bottom center",
@@ -180,8 +216,17 @@ export function ProcessSection() {
           gsap.set(el, { opacity: 0.25, scale: 0.98, force3D: true });
         });
 
-        // Master scrubbed timeline: 2800px provides silky progressive storytelling
-        const scrollDistance = 2800;
+        // Master scrubbed timeline: 5800px provides snappy, responsive progressive storytelling
+        // Phase 1-3: CTA Intro & Crossfade into Process (0 -> 3.8s)
+        // Phase 4: Process Storytelling (3.8 -> 11.0s)
+        // Phase 4.5: Step 04 reading hold (11.0 -> 11.5s)
+        // Phase 5a: ProcessSection clean fade-out (11.5 -> 12.3s)
+        // Phase 5b: ServiceHome smooth fade-in after Process completely dissolves (12.4 -> 13.3s)
+        // Phase 6: ServiceHome interactive hold (13.3 -> 14.1s)
+        // Phase 7a: ServiceHome clean fade-out (14.1 -> 14.9s)
+        // Phase 7b: ContactForm smooth fade-in after ServiceHome completely dissolves (15.0 -> 15.9s)
+        // Phase 8: ContactForm buffer before Footer unpin (15.9 -> 16.2s)
+        const scrollDistance = 5800;
 
         const tl = gsap.timeline({
           defaults: { immediateRender: false },
@@ -195,10 +240,40 @@ export function ProcessSection() {
             fastScrollEnd: true,
             preventOverlaps: true,
             onUpdate: (self) => {
-              const currentY = startY + self.progress * (endY - startY);
+              if (ctaLayer && processContent && serviceLayer && contactLayer) {
+                if (self.progress < 0.15) {
+                  ctaLayer.style.pointerEvents = "auto";
+                  processContent.style.pointerEvents = "none";
+                  serviceLayer.style.pointerEvents = "none";
+                  contactLayer.style.pointerEvents = "none";
+                } else if (self.progress >= 0.15 && self.progress < 0.76) {
+                  ctaLayer.style.pointerEvents = "none";
+                  processContent.style.pointerEvents = "auto";
+                  serviceLayer.style.pointerEvents = "none";
+                  contactLayer.style.pointerEvents = "none";
+                } else if (self.progress >= 0.76 && self.progress < 0.92) {
+                  ctaLayer.style.pointerEvents = "none";
+                  processContent.style.pointerEvents = "none";
+                  serviceLayer.style.pointerEvents = "auto";
+                  contactLayer.style.pointerEvents = "none";
+                } else {
+                  ctaLayer.style.pointerEvents = "none";
+                  processContent.style.pointerEvents = "none";
+                  serviceLayer.style.pointerEvents = "none";
+                  contactLayer.style.pointerEvents = "auto";
+                }
+              }
 
-              let newClosest = -1;
-              if (self.progress >= 0.12) {
+              if (self.progress >= 0.20 && self.progress <= 0.72) {
+                const trackStartProgress = 0.26; // 4.2 / 16.2
+                const trackEndProgress = 0.68;   // 11.0 / 16.2
+                const trackProgress = Math.max(
+                  0,
+                  Math.min(1, (self.progress - trackStartProgress) / (trackEndProgress - trackStartProgress))
+                );
+                const currentY = startY + trackProgress * (endY - startY);
+
+                let newClosest = -1;
                 let minDiff = Infinity;
                 stepCenters.forEach((center, idx) => {
                   const stepViewportY = currentY + center;
@@ -208,19 +283,19 @@ export function ProcessSection() {
                     newClosest = idx;
                   }
                 });
-              }
 
-              if (newClosest !== activeStepRef.current) {
-                activeStepRef.current = newClosest;
-                stepEls.forEach((el, idx) => {
-                  const isActive = idx === newClosest;
-                  el.setAttribute("data-active", isActive ? "true" : "false");
-                  if (isActive) {
-                    el.classList.add("is-active");
-                  } else {
-                    el.classList.remove("is-active");
-                  }
-                });
+                if (newClosest !== activeStepRef.current) {
+                  activeStepRef.current = newClosest;
+                  stepEls.forEach((el, idx) => {
+                    const isActive = idx === newClosest;
+                    el.setAttribute("data-active", isActive ? "true" : "false");
+                    if (isActive) {
+                      el.classList.add("is-active");
+                    } else {
+                      el.classList.remove("is-active");
+                    }
+                  });
+                }
               }
             },
           },
@@ -228,7 +303,45 @@ export function ProcessSection() {
 
         timelineRef.current = tl;
 
-        // 1. Center hairline shoots up quickly (t = 0.0 -> 0.7)
+        // ─────────────────────────────────────────────────────────────────
+        // PHASE 1: CTA INTRO - Text lines slide in from sides based on user scroll (t = 0.0 -> 1.8)
+        // ─────────────────────────────────────────────────────────────────
+        if (ctaLine0 && ctaLine1 && ctaLine2 && ctaContent) {
+          tl.to(ctaContent, { opacity: 1, scale: 1, duration: 1.4, ease: "power2.out", force3D: true }, 0);
+          tl.to(ctaLine0, { xPercent: 0, opacity: 1, duration: 1.4, ease: "power2.out", force3D: true }, 0.1);
+          tl.to(ctaLine1, { xPercent: 0, opacity: 1, duration: 1.4, ease: "power2.out", force3D: true }, 0.35);
+          tl.to(ctaLine2, { xPercent: 0, opacity: 1, duration: 1.4, ease: "power2.out", force3D: true }, 0.6);
+        }
+
+        // ─────────────────────────────────────────────────────────────────
+        // PHASE 2: Dedicated reading hold window (t = 1.8 -> 2.8)
+        // ─────────────────────────────────────────────────────────────────
+        tl.to({}, { duration: 1.0 }, 1.8);
+
+        // ─────────────────────────────────────────────────────────────────
+        // PHASE 3: Immediate Crossfade: As CTA fades out, ProcessSection immediately fades in (t = 2.8 -> 3.8)
+        // ─────────────────────────────────────────────────────────────────
+        if (ctaLine0 && ctaLine1 && ctaLine2 && ctaLayer) {
+          tl.to(ctaLine0, { xPercent: -35, opacity: 0, duration: 1.0, ease: "power2.in", force3D: true }, 2.8);
+          tl.to(ctaLine1, { xPercent: 35, opacity: 0, duration: 1.0, ease: "power2.in", force3D: true }, 2.85);
+          tl.to(ctaLine2, { xPercent: -35, opacity: 0, duration: 1.0, ease: "power2.in", force3D: true }, 2.9);
+          tl.to(ctaLayer, { opacity: 0, scale: 0.92, duration: 1.0, ease: "power2.inOut", force3D: true }, 2.8);
+        }
+
+        // ProcessSection immediately starts fading in in-place as CTA fades out!
+        if (processContent) {
+          tl.fromTo(
+            processContent,
+            { opacity: 0, scale: 0.96 },
+            { opacity: 1, scale: 1.0, duration: 1.0, ease: "power2.out", force3D: true },
+            2.8
+          );
+        }
+
+        // ─────────────────────────────────────────────────────────────────
+        // PHASE 4: Process Storytelling Timeline (t = 3.8 -> 11.0)
+        // ─────────────────────────────────────────────────────────────────
+        // 1. Center hairline shoots up quickly (t = 3.8 -> 4.5)
         tl.fromTo(
           centerLine,
           { scaleY: 0, transformOrigin: "bottom center" },
@@ -238,10 +351,10 @@ export function ProcessSection() {
             ease: "power2.out",
             force3D: true,
           },
-          0
+          3.8
         );
 
-        // 2. Star blooms at center as line reaches it (t = 0.25 -> 0.75)
+        // 2. Star blooms at center as line reaches it (t = 4.05 -> 4.55)
         tl.fromTo(
           star,
           { scale: 0, opacity: 0 },
@@ -252,10 +365,10 @@ export function ProcessSection() {
             ease: "back.out(1.7)",
             force3D: true,
           },
-          0.25
+          4.05
         );
 
-        // 3. Title typewriter glow
+        // 3. Title typewriter glow (t = 4.05 -> 4.6)
         if (titleChars.length > 0) {
           tl.fromTo(
             titleChars,
@@ -266,11 +379,11 @@ export function ProcessSection() {
               duration: 0.35,
               ease: "power1.inOut",
             },
-            0.25
+            4.05
           );
         }
 
-        // 4. Description lines rising from mask
+        // 4. Description lines rising from mask (t = 4.4 -> 5.05)
         if (descLines.length > 0) {
           tl.fromTo(
             descLines,
@@ -283,11 +396,11 @@ export function ProcessSection() {
               ease: "power2.out",
               force3D: true,
             },
-            0.6
+            4.4
           );
         }
 
-        // 5. CTA button border draw + text illumination (in sync with description)
+        // 5. CTA button border draw + text illumination (t = 4.4 -> 5.05)
         if (rectBorder) {
           tl.fromTo(
             rectBorder,
@@ -297,7 +410,7 @@ export function ProcessSection() {
               duration: 0.65,
               ease: "power2.out",
             },
-            0.6
+            4.4
           );
         }
 
@@ -309,7 +422,7 @@ export function ProcessSection() {
             duration: 0.65,
             ease: "power2.out",
           },
-          0.6
+          4.4
         );
 
         if (ctaText) {
@@ -323,27 +436,27 @@ export function ProcessSection() {
               ease: "power2.out",
               clearProps: "transform",
             },
-            0.6
+            4.4
           );
         }
 
-        // 6. Right track moves continuously from startY to endY (t = 0.4 -> 10.0)
+        // 6. Right track moves continuously from startY to endY (t = 4.2 -> 11.0)
         tl.to(
           rightTrack,
           {
             y: endY,
-            duration: 9.6,
+            duration: 6.8,
             ease: "none",
             force3D: true,
           },
-          0.4
+          4.2
         );
 
         // 7. Step blooming & dimming
         stepEls.forEach((el, idx) => {
           const stepTargetY = centerTarget - stepCenters[idx];
           const fraction = (stepTargetY - startY) / (endY - startY);
-          const centerTime = Math.max(1.8, Math.min(9.6, 0.4 + fraction * 9.6));
+          const centerTime = Math.max(5.0, Math.min(10.8, 4.2 + fraction * 6.8));
 
           tl.fromTo(
             el,
@@ -355,7 +468,7 @@ export function ProcessSection() {
               ease: "power2.out",
               force3D: true,
             },
-            Math.max(0.4, centerTime - 0.9)
+            Math.max(4.2, centerTime - 0.9)
           );
 
           if (idx < stepEls.length - 1) {
@@ -372,14 +485,79 @@ export function ProcessSection() {
             );
           }
         });
+
+        // ─────────────────────────────────────────────────────────────────
+        // PHASE 4.5: Step 04 reading hold (t = 11.0 -> 11.5)
+        // ─────────────────────────────────────────────────────────────────
+        tl.to({}, { duration: 0.5 }, 11.0);
+
+        // ─────────────────────────────────────────────────────────────────
+        // PHASE 5a: ProcessSection cleanly & smoothly fades out (t = 11.5 -> 12.3)
+        // ─────────────────────────────────────────────────────────────────
+        if (processContent) {
+          tl.to(
+            processContent,
+            { opacity: 0, scale: 0.94, duration: 0.8, ease: "power1.inOut", force3D: true },
+            11.5
+          );
+        }
+
+        // ─────────────────────────────────────────────────────────────────
+        // PHASE 5b: ServiceHome smoothly fades in ONLY AFTER Process completely fades out (t = 12.4 -> 13.3)
+        // ─────────────────────────────────────────────────────────────────
+        if (serviceLayer) {
+          tl.fromTo(
+            serviceLayer,
+            { opacity: 0, scale: 0.96 },
+            { opacity: 1, scale: 1.0, duration: 0.9, ease: "power1.inOut", force3D: true },
+            12.4
+          );
+        }
+
+        // ─────────────────────────────────────────────────────────────────
+        // PHASE 6: Dedicated ServiceHome interactive exploration window (t = 13.3 -> 14.1)
+        // ─────────────────────────────────────────────────────────────────
+        tl.to({}, { duration: 0.8 }, 13.3);
+
+        // ─────────────────────────────────────────────────────────────────
+        // PHASE 7a: ServiceHome cleanly & smoothly fades out (t = 14.1 -> 14.9)
+        // ─────────────────────────────────────────────────────────────────
+        if (serviceLayer) {
+          tl.to(
+            serviceLayer,
+            { opacity: 0, scale: 0.94, duration: 0.8, ease: "power1.inOut", force3D: true },
+            14.1
+          );
+        }
+
+        // ─────────────────────────────────────────────────────────────────
+        // PHASE 7b: ContactForm smoothly fades in ONLY AFTER ServiceHome completely fades out (t = 15.0 -> 15.9)
+        // ─────────────────────────────────────────────────────────────────
+        if (contactLayer) {
+          tl.fromTo(
+            contactLayer,
+            { opacity: 0, scale: 0.96 },
+            { opacity: 1, scale: 1.0, duration: 0.9, ease: "power1.inOut", force3D: true },
+            15.0
+          );
+        }
+
+        // ─────────────────────────────────────────────────────────────────
+        // PHASE 8: ContactForm buffer before smooth unpinning directly to Footer (t = 15.9 -> 16.2)
+        // ─────────────────────────────────────────────────────────────────
+        tl.to({}, { duration: 0.3 }, 15.9);
       });
 
       // ─────────────────────────────────────────────────────────────────────────
-      // MOBILE (max-width: 767px): AUTHENTIC RICARDO CHANCE EDITORIAL SCROLL
-      // Dynamic illumination as each step passes the sticky glowing center star
+      // MOBILE (max-width: 767px): STAGED CTA INTRO & IN-PLACE PROCESS FADE-IN
       // ─────────────────────────────────────────────────────────────────────────
       mm.add("(max-width: 767px)", () => {
-        const narrative = mobileNarrativeRef.current;
+        const section = sectionRef.current;
+        const ctaLayer = ctaLayerRef.current;
+        const processContent = processContentRef.current;
+        const serviceLayer = serviceLayerRef.current;
+        const contactLayer = contactLayerRef.current;
+        const mobileTrack = mobileTrackRef.current;
         const heading = mobileHeadingRef.current;
         const badge = mobileBadgeRef.current;
         const cta = mobileCtaRef.current;
@@ -387,9 +565,38 @@ export function ProcessSection() {
         const rectBorder = mobileRectBorderRef.current;
         const descLines = mobileDescLinesRef.current.filter(Boolean) as HTMLDivElement[];
 
+        const ctaContent = ctaLayer?.querySelector<HTMLDivElement>(".cta-content-wrapper");
+        const ctaLine0 = ctaLayer?.querySelector<HTMLDivElement>(".cta-line-0");
+        const ctaLine1 = ctaLayer?.querySelector<HTMLDivElement>(".cta-line-1");
+        const ctaLine2 = ctaLayer?.querySelector<HTMLDivElement>(".cta-line-2");
+
         const titleChars = heading
           ? Array.from(heading.querySelectorAll<HTMLSpanElement>(".char-item"))
           : [];
+
+        const mobileSteps = Array.from(
+          section?.querySelectorAll<HTMLDivElement>(".mobile-step-item") ?? []
+        );
+
+        // Initial setup for CTA lines
+        if (ctaLine0 && ctaLine1 && ctaLine2 && ctaContent) {
+          gsap.set(ctaLine0, { xPercent: -100, opacity: 0, force3D: true });
+          gsap.set(ctaLine1, { xPercent: 100, opacity: 0, force3D: true });
+          gsap.set(ctaLine2, { xPercent: -100, opacity: 0, force3D: true });
+          gsap.set(ctaContent, { opacity: 0.2, scale: 0.95, force3D: true });
+        }
+        if (ctaLayer) {
+          gsap.set(ctaLayer, { opacity: 1, pointerEvents: "auto", force3D: true });
+        }
+        if (processContent) {
+          gsap.set(processContent, { opacity: 0, scale: 0.96, pointerEvents: "none", force3D: true });
+        }
+        if (serviceLayer) {
+          gsap.set(serviceLayer, { opacity: 0, scale: 0.96, pointerEvents: "none", force3D: true });
+        }
+        if (contactLayer) {
+          gsap.set(contactLayer, { opacity: 0, scale: 0.96, pointerEvents: "none", force3D: true });
+        }
 
         // Set initial states for mobile narrative
         if (badge) {
@@ -421,147 +628,330 @@ export function ProcessSection() {
           });
         }
 
-        // Master intro timeline for mobile narrative
-        const introTl = gsap.timeline({
+        const stepsWindow = mobileTrack?.parentElement;
+        const stepsWindowH = stepsWindow?.clientHeight || 340;
+        const centerTarget = stepsWindowH / 2;
+
+        const mobileStepCenters = mobileSteps.map(
+          (el) => el.offsetTop + el.offsetHeight / 2
+        );
+        const startY = centerTarget - (mobileStepCenters[0] ?? 0);
+        const lastStepCenter =
+          mobileStepCenters[mobileStepCenters.length - 1] ?? (mobileStepCenters[0] ?? 0) + 360;
+        const mobileEndY = centerTarget - lastStepCenter;
+
+        if (mobileTrack) {
+          gsap.set(mobileTrack, { y: startY, force3D: true });
+        }
+
+        mobileSteps.forEach((step) => {
+          gsap.set(step, { opacity: 0.3, force3D: true });
+        });
+
+        const mobileServiceTrack = serviceLayer?.querySelector<HTMLDivElement>(".mobile-service-cards-track");
+        if (mobileServiceTrack) {
+          gsap.set(mobileServiceTrack, { x: 0, force3D: true });
+        }
+        const mobileTopCards = serviceLayer?.querySelectorAll<HTMLElement>(".mobile-card-top");
+        const mobileBottomCards = serviceLayer?.querySelectorAll<HTMLElement>(".mobile-card-bottom");
+
+        // Master pinned mobile stage: CTA intro -> Process narrative & steps track -> Process clean fade-out -> ServiceHome smooth fade-in -> ServiceHome horizontal cards track scroll -> ServiceHome clean fade-out -> ContactForm smooth fade-in -> ContactForm unpin to Footer
+        const mobileScrollDist = 4900;
+        const mobileTl = gsap.timeline({
+          defaults: { immediateRender: false },
           scrollTrigger: {
-            trigger: narrative || sectionRef.current,
-            start: "top 85%",
-            toggleActions: "play none none none",
-            once: true,
+            trigger: section,
+            start: "top top",
+            end: `+=${mobileScrollDist}`,
+            pin: true,
+            scrub: true,
+            anticipatePin: 1,
+            onUpdate: (self) => {
+              if (ctaLayer && processContent && serviceLayer && contactLayer) {
+                if (self.progress < 0.14) {
+                  ctaLayer.style.pointerEvents = "auto";
+                  processContent.style.pointerEvents = "none";
+                  serviceLayer.style.pointerEvents = "none";
+                  contactLayer.style.pointerEvents = "none";
+                } else if (self.progress >= 0.14 && self.progress < 0.52) {
+                  ctaLayer.style.pointerEvents = "none";
+                  processContent.style.pointerEvents = "auto";
+                  serviceLayer.style.pointerEvents = "none";
+                  contactLayer.style.pointerEvents = "none";
+                } else if (self.progress >= 0.52 && self.progress < 0.92) {
+                  ctaLayer.style.pointerEvents = "none";
+                  processContent.style.pointerEvents = "none";
+                  serviceLayer.style.pointerEvents = "auto";
+                  contactLayer.style.pointerEvents = "none";
+                } else {
+                  ctaLayer.style.pointerEvents = "none";
+                  processContent.style.pointerEvents = "none";
+                  serviceLayer.style.pointerEvents = "none";
+                  contactLayer.style.pointerEvents = "auto";
+                }
+              }
+
+              if (self.progress >= 0.18 && self.progress <= 0.48) {
+                const trackStartProgress = 0.221; // 3.8 / 17.2
+                const trackEndProgress = 0.453;   // 7.8 / 17.2
+                const trackProgress = Math.max(
+                  0,
+                  Math.min(1, (self.progress - trackStartProgress) / (trackEndProgress - trackStartProgress))
+                );
+                const currentY = startY + trackProgress * (mobileEndY - startY);
+
+                let newClosest = -1;
+                let minDiff = Infinity;
+                mobileStepCenters.forEach((center, idx) => {
+                  const stepViewportY = currentY + center;
+                  const diff = Math.abs(stepViewportY - centerTarget);
+                  if (diff < minDiff) {
+                    minDiff = diff;
+                    newClosest = idx;
+                  }
+                });
+
+                mobileSteps.forEach((el, idx) => {
+                  const isActive = idx === newClosest;
+                  if (isActive) {
+                    el.classList.add("is-active");
+                  } else {
+                    el.classList.remove("is-active");
+                  }
+                });
+              }
+
+              // Dynamic 2-card column active color focus on mobile ServiceHome
+              if (
+                self.progress >= 0.52 &&
+                self.progress <= 0.92 &&
+                mobileTopCards &&
+                mobileBottomCards &&
+                mobileTopCards.length > 0
+              ) {
+                const serviceStartProgress = 0.575; // 9.9 / 17.2
+                const serviceEndProgress = 0.843;   // 14.5 / 17.2
+                const trackProgress = Math.max(
+                  0,
+                  Math.min(1, (self.progress - serviceStartProgress) / (serviceEndProgress - serviceStartProgress))
+                );
+
+                const cardWidth = 270;
+                const gap = 14;
+                const cardPitch = cardWidth + gap;
+                const totalCols = mobileTopCards.length;
+                const parentW = mobileServiceTrack?.parentElement?.clientWidth || window.innerWidth;
+                const trackScrollW = mobileServiceTrack?.scrollWidth || totalCols * cardPitch;
+                const maxScroll = Math.max(0, trackScrollW - parentW + 40);
+                const currentX = trackProgress * (-maxScroll);
+                const focusX = parentW * 0.45;
+
+                let closestCol = 0;
+                let minDiff = Infinity;
+                for (let i = 0; i < totalCols; i++) {
+                  const colCenter = 20 + i * cardPitch + cardWidth / 2 + currentX;
+                  const diff = Math.abs(colCenter - focusX);
+                  if (diff < minDiff) {
+                    minDiff = diff;
+                    closestCol = i;
+                  }
+                }
+
+                mobileTopCards.forEach((card, idx) => {
+                  if (idx === closestCol) {
+                    card.classList.add("is-active");
+                  } else {
+                    card.classList.remove("is-active");
+                  }
+                });
+
+                mobileBottomCards.forEach((card, idx) => {
+                  if (idx === closestCol) {
+                    card.classList.add("is-active");
+                  } else {
+                    card.classList.remove("is-active");
+                  }
+                });
+              }
+            },
           },
         });
 
-        // 1. Eyebrow badge
+        // 1. Text lines slide in from alternating sides (t = 0 to 1.6)
+        if (ctaLine0 && ctaLine1 && ctaLine2 && ctaContent) {
+          mobileTl.to(ctaContent, { opacity: 1, scale: 1, duration: 1.4, ease: "power2.out", force3D: true }, 0);
+          mobileTl.to(ctaLine0, { xPercent: 0, opacity: 1, duration: 1.4, ease: "power2.out", force3D: true }, 0.1);
+          mobileTl.to(ctaLine1, { xPercent: 0, opacity: 1, duration: 1.4, ease: "power2.out", force3D: true }, 0.3);
+          mobileTl.to(ctaLine2, { xPercent: 0, opacity: 1, duration: 1.4, ease: "power2.out", force3D: true }, 0.5);
+        }
+
+        // 2. Hold moment (t = 1.6 to 2.4)
+        mobileTl.to({}, { duration: 0.8 }, 1.6);
+
+        // 3. Immediate Crossfade: As CTA fades out, ProcessSection immediately fades in (t = 2.4 -> 3.4)
+        if (ctaLine0 && ctaLine1 && ctaLine2 && ctaLayer) {
+          mobileTl.to(ctaLine0, { xPercent: -35, opacity: 0, duration: 0.9, ease: "power2.in", force3D: true }, 2.4);
+          mobileTl.to(ctaLine1, { xPercent: 35, opacity: 0, duration: 0.9, ease: "power2.in", force3D: true }, 2.45);
+          mobileTl.to(ctaLine2, { xPercent: -35, opacity: 0, duration: 0.9, ease: "power2.in", force3D: true }, 2.5);
+          mobileTl.to(ctaLayer, { opacity: 0, scale: 0.92, duration: 1.0, ease: "power2.inOut", force3D: true }, 2.4);
+        }
+
+        // Mobile Process Narrative immediately starts fading in in-place as CTA fades out!
+        if (processContent) {
+          mobileTl.fromTo(
+            processContent,
+            { opacity: 0, scale: 0.96 },
+            { opacity: 1, scale: 1.0, duration: 1.0, ease: "power2.out", force3D: true },
+            2.4
+          );
+        }
+
+        // 4. Mobile narrative element reveals (badge, title, desc, cta) (t = 3.2 -> 3.8)
         if (badge) {
-          introTl.to(
-            badge,
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.4,
-              ease: "power2.out",
-            },
-            0
-          );
+          mobileTl.fromTo(badge, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 3.2);
         }
-
-        // 2. Headline typewriter character reveal
         if (titleChars.length > 0) {
-          introTl.fromTo(
-            titleChars,
-            { opacity: 0 },
-            {
-              opacity: 1,
-              stagger: 0.024,
-              duration: 0.35,
-              ease: "power1.inOut",
-            },
-            0.15
-          );
+          mobileTl.fromTo(titleChars, { opacity: 0 }, { opacity: 1, stagger: 0.024, duration: 0.35, ease: "power1.inOut" }, 3.3);
+        }
+        if (descLines.length > 0) {
+          mobileTl.fromTo(descLines, { yPercent: 140, opacity: 0 }, { yPercent: 0, opacity: 1, stagger: 0.12, duration: 0.55, ease: "power2.out" }, 3.5);
+        }
+        if (rectBorder) {
+          mobileTl.fromTo(rectBorder, { strokeDashoffset: 100 }, { strokeDashoffset: 0, duration: 0.65, ease: "power2.out" }, 3.6);
+        }
+        if (cta) {
+          mobileTl.fromTo(cta, { backgroundColor: "rgba(0, 181, 226, 0)" }, { backgroundColor: "rgba(0, 181, 226, 0.08)", duration: 0.65, ease: "power2.out" }, 3.6);
+        }
+        if (ctaText) {
+          mobileTl.fromTo(ctaText, { opacity: 0.4, y: 4 }, { opacity: 1, y: 0, duration: 0.65, ease: "power2.out", clearProps: "transform" }, 3.6);
         }
 
-        // 3. Description lines rising from mask
-        if (descLines.length > 0) {
-          introTl.fromTo(
-            descLines,
-            { yPercent: 140, opacity: 0 },
+        // 5. Mobile Track movement (t = 3.8 -> 7.8) - ONLY the steps move up!
+        if (mobileTrack) {
+          mobileTl.fromTo(
+            mobileTrack,
+            { y: startY },
             {
-              yPercent: 0,
-              opacity: 1,
-              stagger: 0.12,
-              duration: 0.55,
-              ease: "power2.out",
+              y: mobileEndY,
+              duration: 4.0,
+              ease: "none",
               force3D: true,
             },
-            0.4
+            3.8
           );
         }
 
-        // 4. CTA button border draw & text illumination
-        if (rectBorder) {
-          introTl.fromTo(
-            rectBorder,
-            { strokeDashoffset: 100 },
-            {
-              strokeDashoffset: 0,
-              duration: 0.65,
-              ease: "power2.out",
-            },
-            0.55
-          );
-        }
+        // 6. Mobile Steps blooming & dimming
+        mobileSteps.forEach((stepEl, idx) => {
+          const stepY = mobileStepCenters[idx] ?? 0;
+          const fraction =
+            (stepY - (mobileStepCenters[0] ?? 0)) /
+            Math.max(1, lastStepCenter - (mobileStepCenters[0] ?? 0));
+          const centerTime = 3.8 + fraction * 4.0;
 
-        if (cta) {
-          introTl.fromTo(
-            cta,
-            { backgroundColor: "rgba(0, 181, 226, 0)" },
-            {
-              backgroundColor: "rgba(0, 181, 226, 0.08)",
-              duration: 0.65,
-              ease: "power2.out",
-            },
-            0.55
-          );
-        }
-
-        if (ctaText) {
-          introTl.fromTo(
-            ctaText,
-            { opacity: 0.4, y: 4 },
+          mobileTl.fromTo(
+            stepEl,
+            { opacity: 0.3 },
             {
               opacity: 1,
-              y: 0,
-              duration: 0.65,
-              ease: "power2.out",
-              clearProps: "transform",
+              duration: 0.5,
+              ease: "power1.out",
+              onStart: () => {
+                stepEl.classList.add("is-active");
+              },
+              onReverseComplete: () => {
+                stepEl.classList.remove("is-active");
+              },
             },
-            0.55
+            Math.max(3.6, centerTime - 0.5)
+          );
+
+          if (idx < mobileSteps.length - 1) {
+            mobileTl.to(
+              stepEl,
+              {
+                opacity: 0.3,
+                duration: 0.5,
+                ease: "power1.in",
+                onComplete: () => {
+                  stepEl.classList.remove("is-active");
+                },
+                onReverseComplete: () => {
+                  stepEl.classList.add("is-active");
+                },
+              },
+              centerTime + 0.3
+            );
+          }
+        });
+
+        // Step 04 reading hold on mobile (t = 7.8 -> 8.3)
+        mobileTl.to({}, { duration: 0.5 }, 7.8);
+
+        // 7a. Phase 5a: Mobile ProcessSection cleanly & smoothly fades out (t = 8.3 -> 9.0)
+        if (processContent) {
+          mobileTl.to(
+            processContent,
+            { opacity: 0, scale: 0.94, duration: 0.7, ease: "power1.inOut", force3D: true },
+            8.3
           );
         }
 
-        // Mobile steps illumination
-        const mobileSteps =
-          sectionRef.current?.querySelectorAll<HTMLDivElement>(
-            ".mobile-step-item"
+        // 7b. Phase 5b: Mobile ServiceHome smoothly fades in ONLY AFTER Process completely fades out (t = 9.1 -> 9.9)
+        if (serviceLayer) {
+          mobileTl.fromTo(
+            serviceLayer,
+            { opacity: 0, scale: 0.96 },
+            { opacity: 1, scale: 1.0, duration: 0.8, ease: "power1.inOut", force3D: true },
+            9.1
           );
-        if (mobileSteps && mobileSteps.length > 0) {
-          mobileSteps.forEach((stepEl) => {
-            ScrollTrigger.create({
-              trigger: stepEl,
-              start: "top center+=120",
-              end: "bottom center-=120",
-              toggleClass: { targets: stepEl, className: "is-active" },
-              onEnter: () => {
-                gsap.to(stepEl, {
-                  opacity: 1,
-                  duration: 0.45,
-                  ease: "power2.out",
-                });
-              },
-              onLeave: () => {
-                gsap.to(stepEl, {
-                  opacity: 0.35,
-                  duration: 0.45,
-                  ease: "power2.out",
-                });
-              },
-              onEnterBack: () => {
-                gsap.to(stepEl, {
-                  opacity: 1,
-                  duration: 0.45,
-                  ease: "power2.out",
-                });
-              },
-              onLeaveBack: () => {
-                gsap.to(stepEl, {
-                  opacity: 0.35,
-                  duration: 0.45,
-                  ease: "power2.out",
-                });
-              },
-            });
-          });
         }
+
+        // 8. Phase 6: Mobile ServiceHome horizontal cards track moves right-to-left as user scrolls (t = 9.9 -> 14.5)
+        if (mobileServiceTrack) {
+          const getScrollDist = () => {
+            const trackW = mobileServiceTrack.scrollWidth;
+            const parentW = mobileServiceTrack.parentElement?.clientWidth || window.innerWidth;
+            return Math.max(0, trackW - parentW + 40);
+          };
+
+          mobileTl.fromTo(
+            mobileServiceTrack,
+            { x: 0 },
+            {
+              x: () => -getScrollDist(),
+              duration: 4.6,
+              ease: "none",
+              force3D: true,
+            },
+            9.9
+          );
+        }
+
+        // 8b. Reading hold on the final cards (t = 14.5 -> 15.1)
+        mobileTl.to({}, { duration: 0.6 }, 14.5);
+
+        // 9a. Phase 7a: Mobile ServiceHome cleanly & smoothly fades out after the end of the cards (t = 15.1 -> 15.9)
+        if (serviceLayer) {
+          mobileTl.to(
+            serviceLayer,
+            { opacity: 0, scale: 0.94, duration: 0.8, ease: "power1.inOut", force3D: true },
+            15.1
+          );
+        }
+
+        // 9b. Phase 7b: Mobile ContactForm smoothly fades in ONLY AFTER ServiceHome completely fades out (t = 16.0 -> 16.8)
+        if (contactLayer) {
+          mobileTl.fromTo(
+            contactLayer,
+            { opacity: 0, scale: 0.96 },
+            { opacity: 1, scale: 1.0, duration: 0.8, ease: "power1.inOut", force3D: true },
+            16.0
+          );
+        }
+
+        // 10. Phase 8: Mobile ContactForm buffer before smooth unpinning to Footer (t = 16.8 -> 17.2)
+        mobileTl.to({}, { duration: 0.4 }, 16.8);
       });
 
       ScrollTrigger.refresh();
@@ -578,7 +968,7 @@ export function ProcessSection() {
     const st = timelineRef.current?.scrollTrigger;
     if (!st || typeof window === "undefined") return;
 
-    const stepProgressBenchmarks = [0.26, 0.5, 0.74, 0.95];
+    const stepProgressBenchmarks = [0.32, 0.43, 0.54, 0.66];
     const targetScroll =
       st.start + stepProgressBenchmarks[idx] * (st.end - st.start);
 
@@ -597,7 +987,7 @@ export function ProcessSection() {
     <section
       ref={sectionRef}
       id="process"
-      className="relative w-full h-auto md:h-screen overflow-visible md:overflow-hidden select-none bg-[#09090b] text-zinc-100 md:[contain:paint]"
+      className="relative w-full h-screen overflow-hidden select-none bg-[#09090b] text-zinc-100 [contain:paint]"
       style={{
         backgroundColor: "#09090b",
         backgroundImage:
@@ -605,16 +995,30 @@ export function ProcessSection() {
       }}
     >
       {/* Top & Bottom seamless gradient blending */}
-      <div className="absolute top-0 inset-x-0 h-16 sm:h-24 bg-gradient-to-b from-black to-transparent pointer-events-none z-10" />
-      <div className="absolute bottom-0 inset-x-0 h-16 sm:h-24 bg-gradient-to-t from-[#09090b] to-transparent pointer-events-none z-10" />
+      <div className="absolute top-0 inset-x-0 h-16 sm:h-24 bg-gradient-to-b from-black to-transparent pointer-events-none z-30" />
+      <div className="absolute bottom-0 inset-x-0 h-16 sm:h-24 bg-gradient-to-t from-[#09090b] to-transparent pointer-events-none z-30" />
 
       {/* Atmospheric Brand Glows & Celestial Star Particles */}
       <AmbientStars />
 
-      {/* ─────────────────────────────────────────────────────────────────── */}
-      {/* DESKTOP VIEWPORT (hidden md:block): 100% UNTOUCHED ORIGINAL SCROLL */}
-      {/* ─────────────────────────────────────────────────────────────────── */}
-      <div className="hidden md:block relative z-10 mx-auto max-w-7xl h-full px-5 sm:px-10 lg:px-16">
+      {/* Pinned Contact CTA Layer - Centered on top of Process Content */}
+      <div
+        ref={ctaLayerRef}
+        className="absolute inset-0 z-20 flex items-center justify-center pointer-events-auto h-screen"
+      >
+        <ContactCtaSection isStageMode />
+      </div>
+
+      {/* Process Content Wrapper (both Desktop and Mobile) */}
+      <div
+        ref={processContentRef}
+        className="relative w-full h-full will-change-transform pointer-events-none"
+        style={{ opacity: 0, transformOrigin: "50% 50%" }}
+      >
+        {/* ─────────────────────────────────────────────────────────────────── */}
+        {/* DESKTOP VIEWPORT (hidden md:block): 100% UNTOUCHED ORIGINAL SCROLL */}
+        {/* ─────────────────────────────────────────────────────────────────── */}
+        <div className="hidden md:block relative z-10 mx-auto max-w-7xl h-full px-5 sm:px-10 lg:px-16">
         {/* Center Vertical Divider Line & Pinned Glowing 4-Point Star */}
         <CenterStarDivider lineRef={centerLineRef} starRef={starRef} />
 
@@ -675,22 +1079,21 @@ export function ProcessSection() {
       </div>
 
       {/* ─────────────────────────────────────────────────────────────────── */}
-      {/* MOBILE VIEWPORT (block md:hidden): AUTHENTIC RICARDO CHANCE FLOW   */}
-      {/* Narrative at top, followed by editorial steps & sticky center star */}
+      {/* MOBILE VIEWPORT (block md:hidden): PINNED TOP NARRATIVE + SCROLLING STEPS */}
       {/* ─────────────────────────────────────────────────────────────────── */}
-      <div className="block md:hidden relative z-10 w-full px-6 sm:px-10 py-16 sm:py-24 max-w-2xl mx-auto">
-        {/* Top Narrative Block */}
+      <div className="block md:hidden relative z-10 w-full h-full flex flex-col pt-16 sm:pt-20 pb-4 px-5 sm:px-8 max-w-lg mx-auto overflow-hidden">
+        {/* Pinned Top Narrative Block: Always visible at top */}
         <div
           ref={mobileNarrativeRef}
-          className="flex flex-col items-start text-left mb-16 sm:mb-24"
+          className="flex-shrink-0 flex flex-col items-start text-left z-20 pb-2"
         >
           {/* Eyebrow badge */}
           <div
             ref={mobileBadgeRef}
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 mb-4"
+            className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/[0.04] border border-white/10 mb-2.5"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--brand-cyan)] animate-pulse" />
-            <span className="text-[11px] uppercase tracking-widest text-zinc-300 font-semibold">
+            <span className="text-[10px] sm:text-[11px] uppercase tracking-widest text-zinc-300 font-semibold">
               Our Process
             </span>
           </div>
@@ -699,21 +1102,21 @@ export function ProcessSection() {
           <CharacterReveal
             ref={mobileHeadingRef}
             lines={TITLE_LINES}
-            className="text-3xl sm:text-4xl font-bold leading-[1.15] text-zinc-100 tracking-tight"
+            className="text-2xl sm:text-3xl font-bold leading-[1.12] text-zinc-100 tracking-tight"
           />
 
           {/* Description with Masked Lines Reveal */}
           <MaskedLinesReveal
             ref={mobileDescriptionRef}
             lines={DESC_LINES}
-            className="text-sm sm:text-base text-zinc-400 font-normal leading-relaxed mt-3.5 max-w-md"
+            className="text-xs sm:text-sm text-zinc-400 font-normal leading-relaxed mt-1.5 max-w-sm"
             setLineRef={(el, idx) => {
               mobileDescLinesRef.current[idx] = el;
             }}
           />
 
           {/* Animated Stroke CTA Button */}
-          <div className="mt-6">
+          <div className="mt-3">
             <StrokeButton
               ref={mobileCtaRef}
               rectRef={mobileRectBorderRef}
@@ -724,23 +1127,23 @@ export function ProcessSection() {
           </div>
         </div>
 
-        {/* Steps Container with Continuous Left Hairline and Sticky Center Star */}
-        <div className="relative pl-8 sm:pl-12 flex flex-col gap-28 sm:gap-36 pb-16">
-          {/* Full-height Vertical Hairline with Sticky Star pinned at screen center */}
-          <div className="absolute top-0 bottom-0 left-0 w-px pointer-events-none">
-            {/* Hairline gradient */}
+        {/* Dynamic Scrolling Steps Window below the pinned top narrative */}
+        <div className="relative flex-1 min-h-0 w-full overflow-hidden mt-2 pt-2">
+          {/* Top & Bottom soft gradient masks to dissolve steps smoothly */}
+          <div className="absolute top-0 inset-x-0 h-6 sm:h-8 bg-gradient-to-b from-[#09090b] to-transparent z-20 pointer-events-none" />
+          <div className="absolute bottom-0 inset-x-0 h-8 sm:h-10 bg-gradient-to-t from-[#09090b] to-transparent z-20 pointer-events-none" />
+
+          {/* Full-height Vertical Hairline with Pinned Center Glowing Star */}
+          <div className="absolute top-0 bottom-0 left-3 sm:left-4 w-px pointer-events-none z-10">
             <div className="absolute inset-0 w-px bg-gradient-to-b from-white/0 via-white/20 to-white/0" />
 
-            {/* Sticky 4-Point Star pinned at viewport center (top-1/2) during mobile scroll */}
-            <div className="sticky top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 flex items-center justify-center pointer-events-none z-20">
+            {/* Glowing 4-Point Star pinned at vertical center of steps window */}
+            <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-7 h-7 flex items-center justify-center pointer-events-none">
               <div className="relative flex items-center justify-center">
-                {/* Star Ambient Halo & Cyan Blur */}
-                <div className="absolute w-10 h-10 rounded-full bg-white/25 blur-md animate-pulse" />
-                <div className="absolute w-16 h-16 rounded-full bg-[var(--brand-cyan)]/30 blur-xl pointer-events-none" />
-
-                {/* 4-Point Star SVG (exact Ricardo Chance geometry) */}
+                <div className="absolute w-8 h-8 rounded-full bg-white/25 blur-md animate-pulse" />
+                <div className="absolute w-12 h-12 rounded-full bg-[var(--brand-cyan)]/30 blur-lg pointer-events-none" />
                 <svg
-                  className="relative w-6 h-6 sm:w-7 sm:h-7 text-white drop-shadow-[0_0_14px_rgba(255,255,255,0.95)] drop-shadow-[0_0_24px_rgba(0,181,226,0.7)]"
+                  className="relative w-5 h-5 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.95)] drop-shadow-[0_0_20px_rgba(0,181,226,0.7)]"
                   viewBox="0 0 57 57"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
@@ -754,34 +1157,58 @@ export function ProcessSection() {
             </div>
           </div>
 
-          {/* 4 Process Steps in Authentic Editorial Layout */}
-          {PROCESS_STEPS.map((step) => (
-            <div
-              key={step.id}
-              className="mobile-step-item flex flex-col opacity-35 transition-all duration-500 will-change-transform ease-out group"
-            >
-              {/* Step Number & Sparkle */}
-              <div className="flex items-center gap-2 mb-2">
-                <span className="mobile-step-num text-sm sm:text-base font-semibold tracking-wider text-zinc-500 transition-colors duration-500 group-[.is-active]:text-[var(--brand-cyan)]">
-                  {step.id}
-                </span>
-                <span className="mobile-step-sparkle text-[var(--brand-cyan)] text-xs opacity-0 transition-opacity duration-500 group-[.is-active]:opacity-100 drop-shadow-[0_0_8px_var(--brand-cyan)]">
-                  ✦
-                </span>
+          {/* Moving Steps Track (Only steps move!) */}
+          <div
+            ref={mobileTrackRef}
+            className="relative pl-8 sm:pl-11 flex flex-col gap-14 sm:gap-18 will-change-transform py-4"
+          >
+            {PROCESS_STEPS.map((step) => (
+              <div
+                key={step.id}
+                className="mobile-step-item flex flex-col opacity-30 transition-all duration-500 will-change-transform ease-out group"
+              >
+                {/* Step Number & Sparkle */}
+                <div className="flex items-center gap-1.5 mb-1">
+                  <span className="mobile-step-num text-xs sm:text-sm font-semibold tracking-wider text-zinc-500 transition-colors duration-500 group-[.is-active]:text-[var(--brand-cyan)]">
+                    {step.id}
+                  </span>
+                  <span className="mobile-step-sparkle text-[var(--brand-cyan)] text-[10px] opacity-0 transition-opacity duration-500 group-[.is-active]:opacity-100 drop-shadow-[0_0_8px_var(--brand-cyan)]">
+                    ✦
+                  </span>
+                </div>
+
+                {/* Step Title in Project Font */}
+                <h3 className="mobile-step-title text-xl sm:text-2xl font-bold leading-snug text-zinc-400 transition-all duration-500 mb-1 group-[.is-active]:text-white group-[.is-active]:drop-shadow-[0_0_20px_rgba(255,255,255,0.6)] group-[.is-active]:translate-x-1">
+                  {step.title}
+                </h3>
+
+                {/* Step Description in Project Font */}
+                <p className="mobile-step-desc text-xs sm:text-sm font-normal leading-relaxed text-zinc-500 transition-colors duration-500 max-w-sm group-[.is-active]:text-zinc-200">
+                  {step.description}
+                </p>
               </div>
-
-              {/* Step Title in Project Font */}
-              <h3 className="mobile-step-title text-2xl sm:text-3xl font-bold leading-snug text-zinc-400 transition-all duration-500 mb-2 sm:mb-3 group-[.is-active]:text-white group-[.is-active]:drop-shadow-[0_0_24px_rgba(255,255,255,0.6)] group-[.is-active]:translate-x-1">
-                {step.title}
-              </h3>
-
-              {/* Step Description in Project Font */}
-              <p className="mobile-step-desc text-sm sm:text-base font-normal leading-relaxed text-zinc-500 transition-colors duration-500 max-w-md group-[.is-active]:text-zinc-200">
-                {step.description}
-              </p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
+      </div>
+      </div>
+
+      {/* Pinned Service Home Layer - In-place center crossfade */}
+      <div
+        ref={serviceLayerRef}
+        className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none h-screen w-full overflow-hidden"
+        style={{ opacity: 0, transformOrigin: "50% 50%" }}
+      >
+        <ServiceHome isStageMode />
+      </div>
+
+      {/* Pinned Contact Form Layer - In-place center crossfade */}
+      <div
+        ref={contactLayerRef}
+        className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none h-screen w-full overflow-hidden"
+        style={{ opacity: 0, transformOrigin: "50% 50%" }}
+      >
+        <ContactForm isStageMode />
       </div>
     </section>
   );

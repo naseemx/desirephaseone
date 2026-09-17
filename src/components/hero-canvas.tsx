@@ -523,7 +523,7 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
             playState = 1;
           }
         } else if (currentPhase === 4) {
-          // Already at final frame — user wants to continue to next section (Footer)!
+          // Already at final checkpoint frame — user wants to continue to next section (Contact CTA)
           if (playState === 0) {
             unlockScroll();
           } else {

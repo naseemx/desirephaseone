@@ -4,9 +4,6 @@ import React, { useState } from "react";
 import { Navbar } from "@/components/navbar";
 import { HeroCanvas } from "@/components/hero-canvas";
 import { ProcessSection } from "@/components/process-section";
-import { ContactCtaSection } from "@/components/contact-cta-section";
-import { ServiceHome } from "@/components/service-home";
-import { ContactForm } from "@/components/contact-form";
 import { Footer } from "@/components/footer";
 import { Preloader } from "@/components/preloader";
 import { CustomCursor } from "@/components/ui/custom-cursor";
@@ -34,19 +31,10 @@ export default function Home() {
         onLoaded={() => setLoadingProgress(100)}
       />
 
-      {/* Ricardo Chance Process Section */}
+      {/* Unified Master Stage: Contact CTA -> Process Section -> Service Home -> Contact Form (In-Place Center Crossfades) */}
       <ProcessSection />
 
-      {/* Ricardo Chance Editorial Contact CTA Section */}
-      <ContactCtaSection />
-
-      {/* Inspiring NK Studio ServiceHome Curved Ribbon Showcase */}
-      <ServiceHome />
-
-      {/* Modern Responsive Contact Form */}
-      <ContactForm />
-
-      {/* Modern High-Performance Footer placed immediately after ServiceHome / ContactForm */}
+      {/* Modern High-Performance Footer placed immediately after the master stage */}
       <Footer />
     </div>
   );

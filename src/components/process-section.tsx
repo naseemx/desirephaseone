@@ -90,6 +90,8 @@ export function ProcessSection() {
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
 
   const activeStepRef = useRef<number>(-1);
+  const mobileActiveStepRef = useRef<number>(-1);
+  const mobileActiveColRef = useRef<number>(-1);
 
   // GSAP Responsive Media Query Choreography
   useGSAP(
@@ -235,7 +237,7 @@ export function ProcessSection() {
             start: "top top",
             end: `+=${scrollDistance}`,
             pin: true,
-            scrub: true,
+            scrub: 0.5,
             anticipatePin: 1,
             fastScrollEnd: true,
             preventOverlaps: true,
@@ -652,11 +654,19 @@ export function ProcessSection() {
         if (mobileServiceTrack) {
           gsap.set(mobileServiceTrack, { x: 0, force3D: true });
         }
+
+        // Pre-compute service track dimensions ONCE to avoid per-frame DOM reads
+        const precomputedTrackW = mobileServiceTrack?.scrollWidth || 0;
+        const precomputedParentW = mobileServiceTrack?.parentElement?.clientWidth || window.innerWidth;
         const mobileTopCards = serviceLayer?.querySelectorAll<HTMLElement>(".mobile-card-top");
         const mobileBottomCards = serviceLayer?.querySelectorAll<HTMLElement>(".mobile-card-bottom");
 
         // Master pinned mobile stage: CTA intro -> Process narrative & steps track -> Process clean fade-out -> ServiceHome smooth fade-in -> ServiceHome horizontal cards track scroll -> ServiceHome clean fade-out -> ContactForm smooth fade-in -> ContactForm unpin to Footer
         const mobileScrollDist = 4900;
+        // Reset dirty-check refs on mobile init
+        mobileActiveStepRef.current = -1;
+        mobileActiveColRef.current = -1;
+
         const mobileTl = gsap.timeline({
           defaults: { immediateRender: false },
           scrollTrigger: {
@@ -664,8 +674,9 @@ export function ProcessSection() {
             start: "top top",
             end: `+=${mobileScrollDist}`,
             pin: true,
-            scrub: true,
+            scrub: 0.6,
             anticipatePin: 1,
+            fastScrollEnd: true,
             onUpdate: (self) => {
               if (ctaLayer && processContent && serviceLayer && contactLayer) {
                 if (self.progress < 0.14) {
@@ -691,6 +702,7 @@ export function ProcessSection() {
                 }
               }
 
+              // Mobile step highlighting with dirty-check guard
               if (self.progress >= 0.18 && self.progress <= 0.48) {
                 const trackStartProgress = 0.221; // 3.8 / 17.2
                 const trackEndProgress = 0.453;   // 7.8 / 17.2
@@ -702,26 +714,29 @@ export function ProcessSection() {
 
                 let newClosest = -1;
                 let minDiff = Infinity;
-                mobileStepCenters.forEach((center, idx) => {
-                  const stepViewportY = currentY + center;
+                for (let idx = 0; idx < mobileStepCenters.length; idx++) {
+                  const stepViewportY = currentY + mobileStepCenters[idx];
                   const diff = Math.abs(stepViewportY - centerTarget);
                   if (diff < minDiff) {
                     minDiff = diff;
                     newClosest = idx;
                   }
-                });
+                }
 
-                mobileSteps.forEach((el, idx) => {
-                  const isActive = idx === newClosest;
-                  if (isActive) {
-                    el.classList.add("is-active");
-                  } else {
-                    el.classList.remove("is-active");
+                // Only toggle classes when active step actually changed
+                if (newClosest !== mobileActiveStepRef.current) {
+                  mobileActiveStepRef.current = newClosest;
+                  for (let idx = 0; idx < mobileSteps.length; idx++) {
+                    if (idx === newClosest) {
+                      mobileSteps[idx].classList.add("is-active");
+                    } else {
+                      mobileSteps[idx].classList.remove("is-active");
+                    }
                   }
-                });
+                }
               }
 
-              // Dynamic 2-card column active color focus on mobile ServiceHome
+              // Dynamic 2-card column active color focus on mobile ServiceHome (with dirty-check)
               if (
                 self.progress >= 0.52 &&
                 self.progress <= 0.92 &&
@@ -740,38 +755,40 @@ export function ProcessSection() {
                 const gap = 14;
                 const cardPitch = cardWidth + gap;
                 const totalCols = mobileTopCards.length;
-                const parentW = mobileServiceTrack?.parentElement?.clientWidth || window.innerWidth;
-                const trackScrollW = mobileServiceTrack?.scrollWidth || totalCols * cardPitch;
-                const maxScroll = Math.max(0, trackScrollW - parentW + 40);
+                // Use pre-computed values instead of per-frame DOM reads
+                const maxScroll = Math.max(0, precomputedTrackW - precomputedParentW + 40);
                 const currentX = trackProgress * (-maxScroll);
-                const focusX = parentW * 0.45;
+                const focusX = precomputedParentW * 0.45;
 
                 let closestCol = 0;
-                let minDiff = Infinity;
+                let minColDiff = Infinity;
                 for (let i = 0; i < totalCols; i++) {
                   const colCenter = 20 + i * cardPitch + cardWidth / 2 + currentX;
                   const diff = Math.abs(colCenter - focusX);
-                  if (diff < minDiff) {
-                    minDiff = diff;
+                  if (diff < minColDiff) {
+                    minColDiff = diff;
                     closestCol = i;
                   }
                 }
 
-                mobileTopCards.forEach((card, idx) => {
-                  if (idx === closestCol) {
-                    card.classList.add("is-active");
-                  } else {
-                    card.classList.remove("is-active");
+                // Only toggle classes when active column actually changed
+                if (closestCol !== mobileActiveColRef.current) {
+                  mobileActiveColRef.current = closestCol;
+                  for (let idx = 0; idx < mobileTopCards.length; idx++) {
+                    if (idx === closestCol) {
+                      mobileTopCards[idx].classList.add("is-active");
+                    } else {
+                      mobileTopCards[idx].classList.remove("is-active");
+                    }
                   }
-                });
-
-                mobileBottomCards.forEach((card, idx) => {
-                  if (idx === closestCol) {
-                    card.classList.add("is-active");
-                  } else {
-                    card.classList.remove("is-active");
+                  for (let idx = 0; idx < mobileBottomCards.length; idx++) {
+                    if (idx === closestCol) {
+                      mobileBottomCards[idx].classList.add("is-active");
+                    } else {
+                      mobileBottomCards[idx].classList.remove("is-active");
+                    }
                   }
-                });
+                }
               }
             },
           },
@@ -1197,7 +1214,7 @@ export function ProcessSection() {
       <div
         ref={serviceLayerRef}
         className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none h-screen w-full overflow-hidden"
-        style={{ opacity: 0, transformOrigin: "50% 50%" }}
+        style={{ opacity: 0, transformOrigin: "50% 50%", willChange: "transform, opacity" }}
       >
         <ServiceHome isStageMode />
       </div>
@@ -1206,7 +1223,7 @@ export function ProcessSection() {
       <div
         ref={contactLayerRef}
         className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none h-screen w-full overflow-hidden"
-        style={{ opacity: 0, transformOrigin: "50% 50%" }}
+        style={{ opacity: 0, transformOrigin: "50% 50%", willChange: "transform, opacity" }}
       >
         <ContactForm isStageMode />
       </div>

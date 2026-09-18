@@ -172,7 +172,7 @@ export function ContactCtaSection({
               start: "top top",
               end: `+=${scrollDistance}`,
               pin: true,
-              scrub: 1,
+              scrub: 0.6,
               anticipatePin: 1,
               fastScrollEnd: true,
               preventOverlaps: true,

@@ -19,7 +19,13 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
       smoothWheel: true,
       wheelMultiplier: 1,
       touchMultiplier: 1.5,
-      prevent: () => {
+      prevent: (node) => {
+        if ((window as unknown as { serviceDrawerOpen?: boolean }).serviceDrawerOpen) {
+          return true;
+        }
+        if (node instanceof HTMLElement && node.closest("[data-lenis-prevent]")) {
+          return true;
+        }
         // Prevent all Lenis scrolling when hero section is active / locked
         return (window as unknown as { heroScrollLocked?: boolean }).heroScrollLocked !== false;
       },

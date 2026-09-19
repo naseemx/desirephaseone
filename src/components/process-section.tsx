@@ -13,7 +13,9 @@ import {
 } from "@/components/ui";
 import { ContactCtaSection } from "@/components/contact-cta-section";
 import { ServiceHome } from "@/components/service-home";
+import { MissionVisionSection } from "@/components/mission-vision-section";
 import { ContactForm } from "@/components/contact-form";
+import { GeoLocationSection } from "@/components/geo-location-section";
 
 const PROCESS_STEPS: ProcessStepData[] = [
   {
@@ -60,9 +62,12 @@ export function ProcessSection() {
   const ctaLayerRef = useRef<HTMLDivElement>(null);
   const processContentRef = useRef<HTMLDivElement>(null);
   const serviceLayerRef = useRef<HTMLDivElement>(null);
+  const missionLayerRef = useRef<HTMLDivElement>(null);
   const contactLayerRef = useRef<HTMLDivElement>(null);
+  const locationLayerRef = useRef<HTMLDivElement>(null);
   const centerLineRef = useRef<HTMLDivElement>(null);
   const starRef = useRef<HTMLDivElement>(null);
+  const desktopServiceScrollRef = useRef<number>(0);
 
   // Left narrative refs (desktop)
   const narrativeWrapperRef = useRef<HTMLDivElement>(null);
@@ -119,7 +124,9 @@ export function ProcessSection() {
         const ctaLayer = ctaLayerRef.current;
         const processContent = processContentRef.current;
         const serviceLayer = serviceLayerRef.current;
+        const missionLayer = missionLayerRef.current;
         const contactLayer = contactLayerRef.current;
+        const locationLayer = locationLayerRef.current;
         const centerLine = centerLineRef.current;
         const star = starRef.current;
         const heading = headingRef.current;
@@ -158,12 +165,91 @@ export function ProcessSection() {
         // ─────────────────────────────────────────────────────────────────────
         // INITIAL STATES AT START (Progress = 0)
         // ─────────────────────────────────────────────────────────────────────
+        // Computes offscreen X position past the left edge of the viewport
+        const getLeftOffscreenX = (el: HTMLElement | null) => {
+          if (typeof window === "undefined") return -1200;
+          const vw = window.innerWidth;
+          const elW = el?.offsetWidth || 300;
+          return -(vw / 2 + elW / 2 + 60);
+        };
+
+        // Computes offscreen X position past the right edge of the viewport
+        const getRightOffscreenX = (el: HTMLElement | null) => {
+          if (typeof window === "undefined") return 1200;
+          const vw = window.innerWidth;
+          const elW = el?.offsetWidth || 300;
+          return (vw / 2 + elW / 2 + 60);
+        };
+
         if (ctaLine0 && ctaLine1 && ctaLine2 && ctaContent) {
-          gsap.set(ctaLine0, { xPercent: -100, opacity: 0, force3D: true });
-          gsap.set(ctaLine1, { xPercent: 100, opacity: 0, force3D: true });
-          gsap.set(ctaLine2, { xPercent: -100, opacity: 0, force3D: true });
-          gsap.set(ctaContent, { opacity: 0.2, scale: 0.95, force3D: true });
+          gsap.set(ctaLine0, { x: () => getLeftOffscreenX(ctaLine0), opacity: 0, force3D: true });
+          gsap.set(ctaLine1, { x: () => getRightOffscreenX(ctaLine1), opacity: 0, force3D: true });
+          gsap.set(ctaLine2, { x: () => getLeftOffscreenX(ctaLine2), opacity: 0, force3D: true });
+          gsap.set(ctaContent, { opacity: 0, scale: 0.95, force3D: true });
         }
+
+        let ctaState: "hidden" | "visible" = "hidden";
+        const playAutoCtaIntro = () => {
+          if (ctaState === "visible") return;
+          ctaState = "visible";
+          if (ctaContent && ctaLine0 && ctaLine1 && ctaLine2) {
+            gsap.killTweensOf([ctaContent, ctaLine0, ctaLine1, ctaLine2]);
+            gsap.to(ctaContent, { opacity: 1, scale: 1, duration: 0.8, ease: "power2.out", force3D: true });
+            gsap.fromTo(
+              ctaLine0,
+              { x: () => getLeftOffscreenX(ctaLine0), opacity: 0 },
+              { x: 0, opacity: 1, duration: 1.15, ease: "power3.out", delay: 0.08, force3D: true }
+            );
+            gsap.fromTo(
+              ctaLine1,
+              { x: () => getRightOffscreenX(ctaLine1), opacity: 0 },
+              { x: 0, opacity: 1, duration: 1.15, ease: "power3.out", delay: 0.24, force3D: true }
+            );
+            gsap.fromTo(
+              ctaLine2,
+              { x: () => getLeftOffscreenX(ctaLine2), opacity: 0 },
+              { x: 0, opacity: 1, duration: 1.15, ease: "power3.out", delay: 0.40, force3D: true }
+            );
+          }
+        };
+
+        const playAutoCtaOutro = () => {
+          if (ctaState === "hidden") return;
+          ctaState = "hidden";
+          if (ctaContent && ctaLine0 && ctaLine1 && ctaLine2) {
+            gsap.killTweensOf([ctaContent, ctaLine0, ctaLine1, ctaLine2]);
+            gsap.to(ctaLine0, { x: () => getLeftOffscreenX(ctaLine0) * 0.45, opacity: 0, duration: 0.5, ease: "power2.in", force3D: true });
+            gsap.to(ctaLine1, { x: () => getRightOffscreenX(ctaLine1) * 0.45, opacity: 0, duration: 0.5, ease: "power2.in", force3D: true });
+            gsap.to(ctaLine2, { x: () => getLeftOffscreenX(ctaLine2) * 0.45, opacity: 0, duration: 0.5, ease: "power2.in", force3D: true });
+            gsap.to(ctaContent, {
+              opacity: 0,
+              scale: 0.95,
+              duration: 0.5,
+              ease: "power2.inOut",
+              force3D: true,
+              onComplete: () => {
+                if (ctaState === "hidden") {
+                  gsap.set(ctaLine0, { x: () => getLeftOffscreenX(ctaLine0), opacity: 0, force3D: true });
+                  gsap.set(ctaLine1, { x: () => getRightOffscreenX(ctaLine1), opacity: 0, force3D: true });
+                  gsap.set(ctaLine2, { x: () => getLeftOffscreenX(ctaLine2), opacity: 0, force3D: true });
+                  gsap.set(ctaContent, { opacity: 0, scale: 0.95, force3D: true });
+                }
+              },
+            });
+          }
+        };
+
+        // Initial visibility of ProcessSection:
+        // When user lands at top of page, start hidden with pointerEvents: none so HeroCanvas is visible & interactive.
+        // If reloading mid-page (scrollY > 50), show immediately.
+        if (typeof window !== "undefined") {
+          if (window.scrollY > 50) {
+            gsap.set(section, { opacity: 1, pointerEvents: "auto", force3D: true });
+          } else {
+            gsap.set(section, { opacity: 0, pointerEvents: "none", force3D: true });
+          }
+        }
+
         if (ctaLayer) {
           gsap.set(ctaLayer, { opacity: 1, pointerEvents: "auto", force3D: true });
         }
@@ -173,9 +259,16 @@ export function ProcessSection() {
         if (serviceLayer) {
           gsap.set(serviceLayer, { opacity: 0, scale: 0.96, pointerEvents: "none", force3D: true });
         }
+        if (missionLayer) {
+          gsap.set(missionLayer, { opacity: 0, scale: 0.96, pointerEvents: "none", force3D: true });
+        }
         if (contactLayer) {
           gsap.set(contactLayer, { opacity: 0, scale: 0.96, pointerEvents: "none", force3D: true });
         }
+        if (locationLayer) {
+          gsap.set(locationLayer, { opacity: 0, scale: 0.96, pointerEvents: "none", force3D: true });
+        }
+        desktopServiceScrollRef.current = 0;
 
         gsap.set(centerLine, {
           scaleY: 0,
@@ -218,17 +311,25 @@ export function ProcessSection() {
           gsap.set(el, { opacity: 0.25, scale: 0.98, force3D: true });
         });
 
-        // Master scrubbed timeline: 5800px provides snappy, responsive progressive storytelling
+        // Master scrubbed timeline: 9600px provides snappy, responsive progressive storytelling
         // Phase 1-3: CTA Intro & Crossfade into Process (0 -> 3.8s)
         // Phase 4: Process Storytelling (3.8 -> 11.0s)
         // Phase 4.5: Step 04 reading hold (11.0 -> 11.5s)
         // Phase 5a: ProcessSection clean fade-out (11.5 -> 12.3s)
         // Phase 5b: ServiceHome smooth fade-in after Process completely dissolves (12.4 -> 13.3s)
-        // Phase 6: ServiceHome interactive hold (13.3 -> 14.1s)
-        // Phase 7a: ServiceHome clean fade-out (14.1 -> 14.9s)
-        // Phase 7b: ContactForm smooth fade-in after ServiceHome completely dissolves (15.0 -> 15.9s)
-        // Phase 8: ContactForm buffer before Footer unpin (15.9 -> 16.2s)
-        const scrollDistance = 5800;
+        // Phase 6: ServiceHome scroll-driven cards showcase (13.3 -> 18.8s)
+        // Phase 6b: Final cards reading hold (18.8 -> 19.5s)
+        // Phase 7a: ServiceHome clean fade-out (19.5 -> 20.3s)
+        // Phase 7b: MissionVision smooth fade-in after ServiceHome completely dissolves (20.4 -> 21.3s)
+        // Phase 7c: MissionVision reading hold (21.3 -> 23.8s)
+        // Phase 7d: MissionVision clean fade-out (23.8 -> 24.6s)
+        // Phase 7e: ContactForm smooth fade-in after MissionVision completely dissolves (24.7 -> 25.6s)
+        // Phase 8a: ContactForm reading & interaction hold (25.6 -> 28.1s)
+        // Phase 8b: ContactForm clean fade-out (28.1 -> 28.9s)
+        // Phase 9a: GeoLocationSection smooth fade-in (29.0 -> 29.9s)
+        // Phase 9b: GeoLocationSection reading hold (29.9 -> 32.4s)
+        // Phase 10: Buffer before Footer unpin (32.4 -> 32.8s)
+        const scrollDistance = 12000;
 
         const tl = gsap.timeline({
           defaults: { immediateRender: false },
@@ -241,34 +342,69 @@ export function ProcessSection() {
             anticipatePin: 1,
             fastScrollEnd: true,
             preventOverlaps: true,
+            onEnter: () => {
+              if (typeof window !== "undefined" && window.scrollY > 50) {
+                playAutoCtaIntro();
+              }
+            },
+            onLeaveBack: () => {
+              playAutoCtaOutro();
+            },
             onUpdate: (self) => {
-              if (ctaLayer && processContent && serviceLayer && contactLayer) {
-                if (self.progress < 0.15) {
+              if (self.progress >= 0.12 && self.direction === 1) {
+                playAutoCtaOutro();
+              } else if (self.progress < 0.08 && self.direction === -1) {
+                playAutoCtaIntro();
+              }
+              if (ctaLayer && processContent && serviceLayer && missionLayer && contactLayer && locationLayer) {
+                if (self.progress < 0.12) {
                   ctaLayer.style.pointerEvents = "auto";
                   processContent.style.pointerEvents = "none";
                   serviceLayer.style.pointerEvents = "none";
+                  missionLayer.style.pointerEvents = "none";
                   contactLayer.style.pointerEvents = "none";
-                } else if (self.progress >= 0.15 && self.progress < 0.76) {
+                  locationLayer.style.pointerEvents = "none";
+                } else if (self.progress >= 0.12 && self.progress < 0.38) {
                   ctaLayer.style.pointerEvents = "none";
                   processContent.style.pointerEvents = "auto";
                   serviceLayer.style.pointerEvents = "none";
+                  missionLayer.style.pointerEvents = "none";
                   contactLayer.style.pointerEvents = "none";
-                } else if (self.progress >= 0.76 && self.progress < 0.92) {
+                  locationLayer.style.pointerEvents = "none";
+                } else if (self.progress >= 0.38 && self.progress < 0.62) {
                   ctaLayer.style.pointerEvents = "none";
                   processContent.style.pointerEvents = "none";
                   serviceLayer.style.pointerEvents = "auto";
+                  missionLayer.style.pointerEvents = "none";
                   contactLayer.style.pointerEvents = "none";
+                  locationLayer.style.pointerEvents = "none";
+                } else if (self.progress >= 0.62 && self.progress < 0.75) {
+                  ctaLayer.style.pointerEvents = "none";
+                  processContent.style.pointerEvents = "none";
+                  serviceLayer.style.pointerEvents = "none";
+                  missionLayer.style.pointerEvents = "auto";
+                  contactLayer.style.pointerEvents = "none";
+                  locationLayer.style.pointerEvents = "none";
+                } else if (self.progress >= 0.75 && self.progress < 0.88) {
+                  ctaLayer.style.pointerEvents = "none";
+                  processContent.style.pointerEvents = "none";
+                  serviceLayer.style.pointerEvents = "none";
+                  missionLayer.style.pointerEvents = "none";
+                  contactLayer.style.pointerEvents = "auto";
+                  locationLayer.style.pointerEvents = "none";
                 } else {
                   ctaLayer.style.pointerEvents = "none";
                   processContent.style.pointerEvents = "none";
                   serviceLayer.style.pointerEvents = "none";
-                  contactLayer.style.pointerEvents = "auto";
+                  missionLayer.style.pointerEvents = "none";
+                  contactLayer.style.pointerEvents = "none";
+                  locationLayer.style.pointerEvents = "auto";
                 }
               }
 
-              if (self.progress >= 0.20 && self.progress <= 0.72) {
-                const trackStartProgress = 0.26; // 4.2 / 16.2
-                const trackEndProgress = 0.68;   // 11.0 / 16.2
+              if (self.progress >= 0.12 && self.progress <= 0.38) {
+                const trackStartProgress = 4.2 / 32.8; // 0.1280
+                const trackEndProgress = 11.0 / 32.8;   // 0.3354
                 const trackProgress = Math.max(
                   0,
                   Math.min(1, (self.progress - trackStartProgress) / (trackEndProgress - trackStartProgress))
@@ -306,27 +442,14 @@ export function ProcessSection() {
         timelineRef.current = tl;
 
         // ─────────────────────────────────────────────────────────────────
-        // PHASE 1: CTA INTRO - Text lines slide in from sides based on user scroll (t = 0.0 -> 1.8)
+        // PHASE 1-2: CTA reading hold window while revealed automatically (t = 0.0 -> 2.8)
         // ─────────────────────────────────────────────────────────────────
-        if (ctaLine0 && ctaLine1 && ctaLine2 && ctaContent) {
-          tl.to(ctaContent, { opacity: 1, scale: 1, duration: 1.4, ease: "power2.out", force3D: true }, 0);
-          tl.to(ctaLine0, { xPercent: 0, opacity: 1, duration: 1.4, ease: "power2.out", force3D: true }, 0.1);
-          tl.to(ctaLine1, { xPercent: 0, opacity: 1, duration: 1.4, ease: "power2.out", force3D: true }, 0.35);
-          tl.to(ctaLine2, { xPercent: 0, opacity: 1, duration: 1.4, ease: "power2.out", force3D: true }, 0.6);
-        }
-
-        // ─────────────────────────────────────────────────────────────────
-        // PHASE 2: Dedicated reading hold window (t = 1.8 -> 2.8)
-        // ─────────────────────────────────────────────────────────────────
-        tl.to({}, { duration: 1.0 }, 1.8);
+        tl.to({}, { duration: 2.8 }, 0);
 
         // ─────────────────────────────────────────────────────────────────
         // PHASE 3: Immediate Crossfade: As CTA fades out, ProcessSection immediately fades in (t = 2.8 -> 3.8)
         // ─────────────────────────────────────────────────────────────────
-        if (ctaLine0 && ctaLine1 && ctaLine2 && ctaLayer) {
-          tl.to(ctaLine0, { xPercent: -35, opacity: 0, duration: 1.0, ease: "power2.in", force3D: true }, 2.8);
-          tl.to(ctaLine1, { xPercent: 35, opacity: 0, duration: 1.0, ease: "power2.in", force3D: true }, 2.85);
-          tl.to(ctaLine2, { xPercent: -35, opacity: 0, duration: 1.0, ease: "power2.in", force3D: true }, 2.9);
+        if (ctaLayer) {
           tl.to(ctaLayer, { opacity: 0, scale: 0.92, duration: 1.0, ease: "power2.inOut", force3D: true }, 2.8);
         }
 
@@ -517,37 +640,172 @@ export function ProcessSection() {
         }
 
         // ─────────────────────────────────────────────────────────────────
-        // PHASE 6: Dedicated ServiceHome interactive exploration window (t = 13.3 -> 14.1)
+        // PHASE 6: Desktop ServiceHome horizontal cards move right-to-left as user scrolls down (t = 13.3 -> 18.8)
         // ─────────────────────────────────────────────────────────────────
-        tl.to({}, { duration: 0.8 }, 13.3);
+        const desktopServiceProxy = { progress: 0 };
+        tl.fromTo(
+          desktopServiceProxy,
+          { progress: 0 },
+          {
+            progress: 1,
+            duration: 5.5,
+            ease: "none",
+            onUpdate: () => {
+              desktopServiceScrollRef.current = desktopServiceProxy.progress;
+            },
+          },
+          13.3
+        );
+
+        // 8b. Reading hold on the final cards (t = 18.8 -> 19.5)
+        tl.to({}, { duration: 0.7 }, 18.8);
 
         // ─────────────────────────────────────────────────────────────────
-        // PHASE 7a: ServiceHome cleanly & smoothly fades out (t = 14.1 -> 14.9)
+        // PHASE 7a: ServiceHome cleanly & smoothly fades out after all cards are shown (t = 19.5 -> 20.3)
         // ─────────────────────────────────────────────────────────────────
         if (serviceLayer) {
           tl.to(
             serviceLayer,
             { opacity: 0, scale: 0.94, duration: 0.8, ease: "power1.inOut", force3D: true },
-            14.1
+            19.5
           );
         }
 
         // ─────────────────────────────────────────────────────────────────
-        // PHASE 7b: ContactForm smoothly fades in ONLY AFTER ServiceHome completely fades out (t = 15.0 -> 15.9)
+        // PHASE 7b: MissionVision smoothly fades in ONLY AFTER ServiceHome completely fades out (t = 20.4 -> 21.3)
+        // ─────────────────────────────────────────────────────────────────
+        if (missionLayer) {
+          tl.fromTo(
+            missionLayer,
+            { opacity: 0, scale: 0.96 },
+            { opacity: 1, scale: 1.0, duration: 0.9, ease: "power1.inOut", force3D: true },
+            20.4
+          );
+        }
+
+        // ─────────────────────────────────────────────────────────────────
+        // PHASE 7c: MissionVision reading hold (t = 21.3 -> 23.8)
+        // ─────────────────────────────────────────────────────────────────
+        tl.to({}, { duration: 2.5 }, 21.3);
+
+        // ─────────────────────────────────────────────────────────────────
+        // PHASE 7d: MissionVision cleanly & smoothly fades out (t = 23.8 -> 24.6)
+        // ─────────────────────────────────────────────────────────────────
+        if (missionLayer) {
+          tl.to(
+            missionLayer,
+            { opacity: 0, scale: 0.94, duration: 0.8, ease: "power1.inOut", force3D: true },
+            23.8
+          );
+        }
+
+        // ─────────────────────────────────────────────────────────────────
+        // PHASE 7e: ContactForm smoothly fades in ONLY AFTER MissionVision completely fades out (t = 24.7 -> 25.6)
         // ─────────────────────────────────────────────────────────────────
         if (contactLayer) {
           tl.fromTo(
             contactLayer,
             { opacity: 0, scale: 0.96 },
             { opacity: 1, scale: 1.0, duration: 0.9, ease: "power1.inOut", force3D: true },
-            15.0
+            24.7
           );
         }
 
         // ─────────────────────────────────────────────────────────────────
-        // PHASE 8: ContactForm buffer before smooth unpinning directly to Footer (t = 15.9 -> 16.2)
+        // PHASE 8a: ContactForm reading & interaction hold (t = 25.6 -> 28.1)
         // ─────────────────────────────────────────────────────────────────
-        tl.to({}, { duration: 0.3 }, 15.9);
+        tl.to({}, { duration: 2.5 }, 25.6);
+
+        // ─────────────────────────────────────────────────────────────────
+        // PHASE 8b: ContactForm cleanly & smoothly fades out (t = 28.1 -> 28.9)
+        // ─────────────────────────────────────────────────────────────────
+        if (contactLayer) {
+          tl.to(
+            contactLayer,
+            { opacity: 0, scale: 0.94, duration: 0.8, ease: "power1.inOut", force3D: true },
+            28.1
+          );
+        }
+
+        // ─────────────────────────────────────────────────────────────────
+        // PHASE 9a: GeoLocationSection smoothly fades in ONLY AFTER ContactForm completely dissolves (t = 29.0 -> 29.9)
+        // ─────────────────────────────────────────────────────────────────
+        if (locationLayer) {
+          tl.fromTo(
+            locationLayer,
+            { opacity: 0, scale: 0.96 },
+            { opacity: 1, scale: 1.0, duration: 0.9, ease: "power1.inOut", force3D: true },
+            29.0
+          );
+        }
+
+        // ─────────────────────────────────────────────────────────────────
+        // PHASE 9b: GeoLocationSection reading hold (t = 29.9 -> 32.4)
+        // ─────────────────────────────────────────────────────────────────
+        tl.to({}, { duration: 2.5 }, 29.9);
+
+        // ─────────────────────────────────────────────────────────────────
+        // PHASE 10: Buffer before smooth unpinning directly to Footer (t = 32.4 -> 32.8)
+        // ─────────────────────────────────────────────────────────────────
+        tl.to({}, { duration: 0.4 }, 32.4);
+
+        // Trigger auto reveal immediately ONLY if actually active on mount (e.g. reload or anchor)
+        if (typeof window !== "undefined" && section) {
+          const rect = section.getBoundingClientRect();
+          if (rect.top <= 50 && rect.bottom > 200 && window.scrollY > 100) {
+            playAutoCtaIntro();
+          }
+        }
+
+        // ── Custom Crossfade Handlers (Handoff with HeroCanvas) ───────────
+        const handleFadeToProcess = () => {
+          if (!section) return;
+          gsap.killTweensOf(section);
+          section.style.pointerEvents = "auto";
+          gsap.to(section, {
+            opacity: 1,
+            duration: 0.8,
+            ease: "power2.out",
+            force3D: true,
+            onComplete: () => {
+              document.body.style.overflow = "auto";
+              document.documentElement.style.overflow = "auto";
+              (window as unknown as { heroScrollLocked?: boolean }).heroScrollLocked = false;
+              const lenis = (window as unknown as { lenis?: { start: () => void } }).lenis;
+              lenis?.start();
+              ScrollTrigger.refresh();
+            },
+          });
+
+          // Delay the text intro slightly so the section background and stars fade in first over the last frame,
+          // allowing the editorial text lines to glide in cleanly and visibly
+          gsap.delayedCall(0.45, () => {
+            playAutoCtaIntro();
+          });
+        };
+
+        const handleFadeToHero = () => {
+          if (!section) return;
+          playAutoCtaOutro();
+          gsap.killTweensOf(section);
+          gsap.to(section, {
+            opacity: 0,
+            duration: 0.6,
+            ease: "power2.inOut",
+            force3D: true,
+            onComplete: () => {
+              section.style.pointerEvents = "none";
+            },
+          });
+        };
+
+        window.addEventListener("hero:fade-to-process", handleFadeToProcess);
+        window.addEventListener("hero:fade-to-hero", handleFadeToHero);
+
+        return () => {
+          window.removeEventListener("hero:fade-to-process", handleFadeToProcess);
+          window.removeEventListener("hero:fade-to-hero", handleFadeToHero);
+        };
       });
 
       // ─────────────────────────────────────────────────────────────────────────
@@ -558,7 +816,9 @@ export function ProcessSection() {
         const ctaLayer = ctaLayerRef.current;
         const processContent = processContentRef.current;
         const serviceLayer = serviceLayerRef.current;
+        const missionLayer = missionLayerRef.current;
         const contactLayer = contactLayerRef.current;
+        const locationLayer = locationLayerRef.current;
         const mobileTrack = mobileTrackRef.current;
         const heading = mobileHeadingRef.current;
         const badge = mobileBadgeRef.current;
@@ -580,13 +840,90 @@ export function ProcessSection() {
           section?.querySelectorAll<HTMLDivElement>(".mobile-step-item") ?? []
         );
 
+        // Computes mobile offscreen X position past the left edge of the viewport
+        const getMobileLeftOffscreenX = (el: HTMLElement | null) => {
+          if (typeof window === "undefined") return -600;
+          const vw = window.innerWidth;
+          const elW = el?.offsetWidth || 200;
+          return -(vw / 2 + elW / 2 + 40);
+        };
+
+        // Computes mobile offscreen X position past the right edge of the viewport
+        const getMobileRightOffscreenX = (el: HTMLElement | null) => {
+          if (typeof window === "undefined") return 600;
+          const vw = window.innerWidth;
+          const elW = el?.offsetWidth || 200;
+          return (vw / 2 + elW / 2 + 40);
+        };
+
         // Initial setup for CTA lines
         if (ctaLine0 && ctaLine1 && ctaLine2 && ctaContent) {
-          gsap.set(ctaLine0, { xPercent: -100, opacity: 0, force3D: true });
-          gsap.set(ctaLine1, { xPercent: 100, opacity: 0, force3D: true });
-          gsap.set(ctaLine2, { xPercent: -100, opacity: 0, force3D: true });
-          gsap.set(ctaContent, { opacity: 0.2, scale: 0.95, force3D: true });
+          gsap.set(ctaLine0, { x: () => getMobileLeftOffscreenX(ctaLine0), opacity: 0, force3D: true });
+          gsap.set(ctaLine1, { x: () => getMobileRightOffscreenX(ctaLine1), opacity: 0, force3D: true });
+          gsap.set(ctaLine2, { x: () => getMobileLeftOffscreenX(ctaLine2), opacity: 0, force3D: true });
+          gsap.set(ctaContent, { opacity: 0, scale: 0.95, force3D: true });
         }
+
+        let mobileCtaState: "hidden" | "visible" = "hidden";
+        const playMobileAutoCtaIntro = () => {
+          if (mobileCtaState === "visible") return;
+          mobileCtaState = "visible";
+          if (ctaContent && ctaLine0 && ctaLine1 && ctaLine2) {
+            gsap.killTweensOf([ctaContent, ctaLine0, ctaLine1, ctaLine2]);
+            gsap.to(ctaContent, { opacity: 1, scale: 1, duration: 0.8, ease: "power2.out", force3D: true });
+            gsap.fromTo(
+              ctaLine0,
+              { x: () => getMobileLeftOffscreenX(ctaLine0), opacity: 0 },
+              { x: 0, opacity: 1, duration: 1.1, ease: "power3.out", delay: 0.08, force3D: true }
+            );
+            gsap.fromTo(
+              ctaLine1,
+              { x: () => getMobileRightOffscreenX(ctaLine1), opacity: 0 },
+              { x: 0, opacity: 1, duration: 1.1, ease: "power3.out", delay: 0.24, force3D: true }
+            );
+            gsap.fromTo(
+              ctaLine2,
+              { x: () => getMobileLeftOffscreenX(ctaLine2), opacity: 0 },
+              { x: 0, opacity: 1, duration: 1.1, ease: "power3.out", delay: 0.40, force3D: true }
+            );
+          }
+        };
+
+        const playMobileAutoCtaOutro = () => {
+          if (mobileCtaState === "hidden") return;
+          mobileCtaState = "hidden";
+          if (ctaContent && ctaLine0 && ctaLine1 && ctaLine2) {
+            gsap.killTweensOf([ctaContent, ctaLine0, ctaLine1, ctaLine2]);
+            gsap.to(ctaLine0, { x: () => getMobileLeftOffscreenX(ctaLine0) * 0.45, opacity: 0, duration: 0.5, ease: "power2.in", force3D: true });
+            gsap.to(ctaLine1, { x: () => getMobileRightOffscreenX(ctaLine1) * 0.45, opacity: 0, duration: 0.5, ease: "power2.in", force3D: true });
+            gsap.to(ctaLine2, { x: () => getMobileLeftOffscreenX(ctaLine2) * 0.45, opacity: 0, duration: 0.5, ease: "power2.in", force3D: true });
+            gsap.to(ctaContent, {
+              opacity: 0,
+              scale: 0.95,
+              duration: 0.5,
+              ease: "power2.inOut",
+              force3D: true,
+              onComplete: () => {
+                if (mobileCtaState === "hidden") {
+                  gsap.set(ctaLine0, { x: () => getMobileLeftOffscreenX(ctaLine0), opacity: 0, force3D: true });
+                  gsap.set(ctaLine1, { x: () => getMobileRightOffscreenX(ctaLine1), opacity: 0, force3D: true });
+                  gsap.set(ctaLine2, { x: () => getMobileLeftOffscreenX(ctaLine2), opacity: 0, force3D: true });
+                  gsap.set(ctaContent, { opacity: 0, scale: 0.95, force3D: true });
+                }
+              },
+            });
+          }
+        };
+
+        // Initial visibility of ProcessSection on Mobile
+        if (typeof window !== "undefined") {
+          if (window.scrollY > 50) {
+            gsap.set(section, { opacity: 1, pointerEvents: "auto", force3D: true });
+          } else {
+            gsap.set(section, { opacity: 0, pointerEvents: "none", force3D: true });
+          }
+        }
+
         if (ctaLayer) {
           gsap.set(ctaLayer, { opacity: 1, pointerEvents: "auto", force3D: true });
         }
@@ -596,8 +933,14 @@ export function ProcessSection() {
         if (serviceLayer) {
           gsap.set(serviceLayer, { opacity: 0, scale: 0.96, pointerEvents: "none", force3D: true });
         }
+        if (missionLayer) {
+          gsap.set(missionLayer, { opacity: 0, scale: 0.96, pointerEvents: "none", force3D: true });
+        }
         if (contactLayer) {
           gsap.set(contactLayer, { opacity: 0, scale: 0.96, pointerEvents: "none", force3D: true });
+        }
+        if (locationLayer) {
+          gsap.set(locationLayer, { opacity: 0, scale: 0.96, pointerEvents: "none", force3D: true });
         }
 
         // Set initial states for mobile narrative
@@ -651,18 +994,42 @@ export function ProcessSection() {
         });
 
         const mobileServiceTrack = serviceLayer?.querySelector<HTMLDivElement>(".mobile-service-cards-track");
-        if (mobileServiceTrack) {
-          gsap.set(mobileServiceTrack, { x: 0, force3D: true });
-        }
-
-        // Pre-compute service track dimensions ONCE to avoid per-frame DOM reads
-        const precomputedTrackW = mobileServiceTrack?.scrollWidth || 0;
-        const precomputedParentW = mobileServiceTrack?.parentElement?.clientWidth || window.innerWidth;
         const mobileTopCards = serviceLayer?.querySelectorAll<HTMLElement>(".mobile-card-top");
         const mobileBottomCards = serviceLayer?.querySelectorAll<HTMLElement>(".mobile-card-bottom");
+        const totalServiceCols = mobileTopCards?.length || 8;
 
-        // Master pinned mobile stage: CTA intro -> Process narrative & steps track -> Process clean fade-out -> ServiceHome smooth fade-in -> ServiceHome horizontal cards track scroll -> ServiceHome clean fade-out -> ContactForm smooth fade-in -> ContactForm unpin to Footer
-        const mobileScrollDist = 4900;
+        // Computes the exact track X position to place column `colIdx` dead-center in the viewport
+        const getColumnCenterTrackX = (colIdx: number) => {
+          if (!mobileServiceTrack) return 0;
+          const parentW = mobileServiceTrack.parentElement?.clientWidth || window.innerWidth;
+          const firstCard = mobileTopCards?.[0];
+          const secondCard = mobileTopCards?.[1];
+          const cardW = firstCard?.offsetWidth || 270;
+          const gap =
+            secondCard && firstCard && secondCard.offsetLeft > firstCard.offsetLeft
+              ? secondCard.offsetLeft - (firstCard.offsetLeft + cardW)
+              : 14;
+          const trackX0 = (parentW - cardW) / 2;
+          return trackX0 - colIdx * (cardW + gap);
+        };
+
+        if (mobileServiceTrack) {
+          gsap.set(mobileServiceTrack, { x: () => getColumnCenterTrackX(0), force3D: true });
+        }
+
+        if (mobileTopCards && mobileBottomCards) {
+          mobileTopCards.forEach((c, idx) => {
+            if (idx === 0) c.classList.add("is-active");
+            else c.classList.remove("is-active");
+          });
+          mobileBottomCards.forEach((c, idx) => {
+            if (idx === 0) c.classList.add("is-active");
+            else c.classList.remove("is-active");
+          });
+        }
+
+        // Master pinned mobile stage: CTA intro -> Process narrative & steps track -> Process clean fade-out -> ServiceHome smooth fade-in -> ServiceHome cards move and stop in center -> ServiceHome clean fade-out -> MissionVision smooth fade-in -> MissionVision hold & clean fade-out -> ContactForm smooth fade-in -> ContactForm fade-out -> GeoLocationSection smooth fade-in -> GeoLocationSection unpin to Footer
+        const mobileScrollDist = 10200;
         // Reset dirty-check refs on mobile init
         mobileActiveStepRef.current = -1;
         mobileActiveColRef.current = -1;
@@ -677,35 +1044,70 @@ export function ProcessSection() {
             scrub: 0.6,
             anticipatePin: 1,
             fastScrollEnd: true,
+            onEnter: () => {
+              if (typeof window !== "undefined" && window.scrollY > 50) {
+                playMobileAutoCtaIntro();
+              }
+            },
+            onLeaveBack: () => {
+              playMobileAutoCtaOutro();
+            },
             onUpdate: (self) => {
-              if (ctaLayer && processContent && serviceLayer && contactLayer) {
-                if (self.progress < 0.14) {
+              if (self.progress >= 0.12 && self.direction === 1) {
+                playMobileAutoCtaOutro();
+              } else if (self.progress < 0.08 && self.direction === -1) {
+                playMobileAutoCtaIntro();
+              }
+              if (ctaLayer && processContent && serviceLayer && missionLayer && contactLayer && locationLayer) {
+                if (self.progress < 0.10) {
                   ctaLayer.style.pointerEvents = "auto";
                   processContent.style.pointerEvents = "none";
                   serviceLayer.style.pointerEvents = "none";
+                  missionLayer.style.pointerEvents = "none";
                   contactLayer.style.pointerEvents = "none";
-                } else if (self.progress >= 0.14 && self.progress < 0.52) {
+                  locationLayer.style.pointerEvents = "none";
+                } else if (self.progress >= 0.10 && self.progress < 0.35) {
                   ctaLayer.style.pointerEvents = "none";
                   processContent.style.pointerEvents = "auto";
                   serviceLayer.style.pointerEvents = "none";
+                  missionLayer.style.pointerEvents = "none";
                   contactLayer.style.pointerEvents = "none";
-                } else if (self.progress >= 0.52 && self.progress < 0.92) {
+                  locationLayer.style.pointerEvents = "none";
+                } else if (self.progress >= 0.35 && self.progress < 0.61) {
                   ctaLayer.style.pointerEvents = "none";
                   processContent.style.pointerEvents = "none";
                   serviceLayer.style.pointerEvents = "auto";
+                  missionLayer.style.pointerEvents = "none";
                   contactLayer.style.pointerEvents = "none";
+                  locationLayer.style.pointerEvents = "none";
+                } else if (self.progress >= 0.61 && self.progress < 0.74) {
+                  ctaLayer.style.pointerEvents = "none";
+                  processContent.style.pointerEvents = "none";
+                  serviceLayer.style.pointerEvents = "none";
+                  missionLayer.style.pointerEvents = "auto";
+                  contactLayer.style.pointerEvents = "none";
+                  locationLayer.style.pointerEvents = "none";
+                } else if (self.progress >= 0.74 && self.progress < 0.87) {
+                  ctaLayer.style.pointerEvents = "none";
+                  processContent.style.pointerEvents = "none";
+                  serviceLayer.style.pointerEvents = "none";
+                  missionLayer.style.pointerEvents = "none";
+                  contactLayer.style.pointerEvents = "auto";
+                  locationLayer.style.pointerEvents = "none";
                 } else {
                   ctaLayer.style.pointerEvents = "none";
                   processContent.style.pointerEvents = "none";
                   serviceLayer.style.pointerEvents = "none";
-                  contactLayer.style.pointerEvents = "auto";
+                  missionLayer.style.pointerEvents = "none";
+                  contactLayer.style.pointerEvents = "none";
+                  locationLayer.style.pointerEvents = "auto";
                 }
               }
 
               // Mobile step highlighting with dirty-check guard
-              if (self.progress >= 0.18 && self.progress <= 0.48) {
-                const trackStartProgress = 0.221; // 3.8 / 17.2
-                const trackEndProgress = 0.453;   // 7.8 / 17.2
+              if (self.progress >= 0.12 && self.progress <= 0.35) {
+                const trackStartProgress = 3.6 / 31.0; // ~0.1161
+                const trackEndProgress = 8.8 / 31.0;   // ~0.2839
                 const trackProgress = Math.max(
                   0,
                   Math.min(1, (self.progress - trackStartProgress) / (trackEndProgress - trackStartProgress))
@@ -736,37 +1138,22 @@ export function ProcessSection() {
                 }
               }
 
-              // Dynamic 2-card column active color focus on mobile ServiceHome (with dirty-check)
+              // Dynamic 2-card column active color focus on mobile ServiceHome
               if (
-                self.progress >= 0.52 &&
-                self.progress <= 0.92 &&
+                self.progress >= 0.37 &&
+                self.progress <= 0.77 &&
                 mobileTopCards &&
                 mobileBottomCards &&
-                mobileTopCards.length > 0
+                mobileTopCards.length > 0 &&
+                mobileServiceTrack
               ) {
-                const serviceStartProgress = 0.575; // 9.9 / 17.2
-                const serviceEndProgress = 0.843;   // 14.5 / 17.2
-                const trackProgress = Math.max(
-                  0,
-                  Math.min(1, (self.progress - serviceStartProgress) / (serviceEndProgress - serviceStartProgress))
-                );
-
-                const cardWidth = 270;
-                const gap = 14;
-                const cardPitch = cardWidth + gap;
-                const totalCols = mobileTopCards.length;
-                // Use pre-computed values instead of per-frame DOM reads
-                const maxScroll = Math.max(0, precomputedTrackW - precomputedParentW + 40);
-                const currentX = trackProgress * (-maxScroll);
-                const focusX = precomputedParentW * 0.45;
-
+                const currentTrackX = gsap.getProperty(mobileServiceTrack, "x") as number;
                 let closestCol = 0;
-                let minColDiff = Infinity;
-                for (let i = 0; i < totalCols; i++) {
-                  const colCenter = 20 + i * cardPitch + cardWidth / 2 + currentX;
-                  const diff = Math.abs(colCenter - focusX);
-                  if (diff < minColDiff) {
-                    minColDiff = diff;
+                let minDiff = Infinity;
+                for (let i = 0; i < totalServiceCols; i++) {
+                  const diff = Math.abs(currentTrackX - getColumnCenterTrackX(i));
+                  if (diff < minDiff) {
+                    minDiff = diff;
                     closestCol = i;
                   }
                 }
@@ -789,27 +1176,28 @@ export function ProcessSection() {
                     }
                   }
                 }
+              } else if (self.progress < 0.37) {
+                if (mobileActiveColRef.current !== 0 && mobileTopCards && mobileBottomCards) {
+                  mobileActiveColRef.current = 0;
+                  for (let idx = 0; idx < mobileTopCards.length; idx++) {
+                    if (idx === 0) mobileTopCards[idx].classList.add("is-active");
+                    else mobileTopCards[idx].classList.remove("is-active");
+                  }
+                  for (let idx = 0; idx < mobileBottomCards.length; idx++) {
+                    if (idx === 0) mobileBottomCards[idx].classList.add("is-active");
+                    else mobileBottomCards[idx].classList.remove("is-active");
+                  }
+                }
               }
             },
           },
         });
 
-        // 1. Text lines slide in from alternating sides (t = 0 to 1.6)
-        if (ctaLine0 && ctaLine1 && ctaLine2 && ctaContent) {
-          mobileTl.to(ctaContent, { opacity: 1, scale: 1, duration: 1.4, ease: "power2.out", force3D: true }, 0);
-          mobileTl.to(ctaLine0, { xPercent: 0, opacity: 1, duration: 1.4, ease: "power2.out", force3D: true }, 0.1);
-          mobileTl.to(ctaLine1, { xPercent: 0, opacity: 1, duration: 1.4, ease: "power2.out", force3D: true }, 0.3);
-          mobileTl.to(ctaLine2, { xPercent: 0, opacity: 1, duration: 1.4, ease: "power2.out", force3D: true }, 0.5);
-        }
-
-        // 2. Hold moment (t = 1.6 to 2.4)
-        mobileTl.to({}, { duration: 0.8 }, 1.6);
+        // 1-2. Hold moment while text intro is revealed automatically (t = 0 to 2.4)
+        mobileTl.to({}, { duration: 2.4 }, 0);
 
         // 3. Immediate Crossfade: As CTA fades out, ProcessSection immediately fades in (t = 2.4 -> 3.4)
-        if (ctaLine0 && ctaLine1 && ctaLine2 && ctaLayer) {
-          mobileTl.to(ctaLine0, { xPercent: -35, opacity: 0, duration: 0.9, ease: "power2.in", force3D: true }, 2.4);
-          mobileTl.to(ctaLine1, { xPercent: 35, opacity: 0, duration: 0.9, ease: "power2.in", force3D: true }, 2.45);
-          mobileTl.to(ctaLine2, { xPercent: -35, opacity: 0, duration: 0.9, ease: "power2.in", force3D: true }, 2.5);
+        if (ctaLayer) {
           mobileTl.to(ctaLayer, { opacity: 0, scale: 0.92, duration: 1.0, ease: "power2.inOut", force3D: true }, 2.4);
         }
 
@@ -924,51 +1312,165 @@ export function ProcessSection() {
           );
         }
 
-        // 8. Phase 6: Mobile ServiceHome horizontal cards track moves right-to-left as user scrolls (t = 9.9 -> 14.5)
+        // 8. Phase 6: Mobile ServiceHome horizontal cards track - stepped movement where each card stops in the center (t = 9.9 -> 18.0)
         if (mobileServiceTrack) {
-          const getScrollDist = () => {
-            const trackW = mobileServiceTrack.scrollWidth;
-            const parentW = mobileServiceTrack.parentElement?.clientWidth || window.innerWidth;
-            return Math.max(0, trackW - parentW + 40);
-          };
+          const moveDuration = 0.55;
+          const normalHold = 0.5;
+          const finalHold = 0.75;
+          let currentT = 9.9;
 
-          mobileTl.fromTo(
-            mobileServiceTrack,
-            { x: 0 },
-            {
-              x: () => -getScrollDist(),
-              duration: 4.6,
-              ease: "none",
-              force3D: true,
-            },
-            9.9
-          );
+          // Initial hold for Column 0 (already centered on fade-in)
+          mobileTl.to({}, { duration: normalHold }, currentT);
+          currentT += normalHold;
+
+          // Step through columns 1 to totalServiceCols - 1
+          for (let col = 1; col < totalServiceCols; col++) {
+            const isLast = col === totalServiceCols - 1;
+            const holdTime = isLast ? finalHold : normalHold;
+
+            mobileTl.to(
+              mobileServiceTrack,
+              {
+                x: () => getColumnCenterTrackX(col),
+                duration: moveDuration,
+                ease: "power2.inOut",
+                force3D: true,
+              },
+              currentT
+            );
+            currentT += moveDuration;
+
+            // Reading pause while column `col` is centered
+            mobileTl.to({}, { duration: holdTime }, currentT);
+            currentT += holdTime;
+          }
         }
 
-        // 8b. Reading hold on the final cards (t = 14.5 -> 15.1)
-        mobileTl.to({}, { duration: 0.6 }, 14.5);
-
-        // 9a. Phase 7a: Mobile ServiceHome cleanly & smoothly fades out after the end of the cards (t = 15.1 -> 15.9)
+        // 9a. Phase 7a: Mobile ServiceHome cleanly & smoothly fades out after the end of the cards (t = 18.0 -> 18.8)
         if (serviceLayer) {
           mobileTl.to(
             serviceLayer,
             { opacity: 0, scale: 0.94, duration: 0.8, ease: "power1.inOut", force3D: true },
-            15.1
+            18.0
           );
         }
 
-        // 9b. Phase 7b: Mobile ContactForm smoothly fades in ONLY AFTER ServiceHome completely fades out (t = 16.0 -> 16.8)
+        // 9b. Phase 7b: Mobile MissionVision smoothly fades in ONLY AFTER ServiceHome completely fades out (t = 18.9 -> 19.7)
+        if (missionLayer) {
+          mobileTl.fromTo(
+            missionLayer,
+            { opacity: 0, scale: 0.96 },
+            { opacity: 1, scale: 1.0, duration: 0.8, ease: "power1.inOut", force3D: true },
+            18.9
+          );
+        }
+
+        // 9c. Phase 7c: Mobile MissionVision reading hold (t = 19.7 -> 22.2)
+        mobileTl.to({}, { duration: 2.5 }, 19.7);
+
+        // 9d. Phase 7d: Mobile MissionVision cleanly & smoothly fades out (t = 22.2 -> 23.0)
+        if (missionLayer) {
+          mobileTl.to(
+            missionLayer,
+            { opacity: 0, scale: 0.94, duration: 0.8, ease: "power1.inOut", force3D: true },
+            22.2
+          );
+        }
+
+        // 9e. Phase 7e: Mobile ContactForm smoothly fades in ONLY AFTER MissionVision completely fades out (t = 23.1 -> 23.9)
         if (contactLayer) {
           mobileTl.fromTo(
             contactLayer,
             { opacity: 0, scale: 0.96 },
             { opacity: 1, scale: 1.0, duration: 0.8, ease: "power1.inOut", force3D: true },
-            16.0
+            23.1
           );
         }
 
-        // 10. Phase 8: Mobile ContactForm buffer before smooth unpinning to Footer (t = 16.8 -> 17.2)
-        mobileTl.to({}, { duration: 0.4 }, 16.8);
+        // 9f. Phase 8a: Mobile ContactForm reading & interaction hold (t = 23.9 -> 26.4)
+        mobileTl.to({}, { duration: 2.5 }, 23.9);
+
+        // 9g. Phase 8b: Mobile ContactForm cleanly & smoothly fades out (t = 26.4 -> 27.2)
+        if (contactLayer) {
+          mobileTl.to(
+            contactLayer,
+            { opacity: 0, scale: 0.94, duration: 0.8, ease: "power1.inOut", force3D: true },
+            26.4
+          );
+        }
+
+        // 10a. Phase 9a: Mobile GeoLocationSection smoothly fades in ONLY AFTER ContactForm completely dissolves (t = 27.3 -> 28.1)
+        if (locationLayer) {
+          mobileTl.fromTo(
+            locationLayer,
+            { opacity: 0, scale: 0.96 },
+            { opacity: 1, scale: 1.0, duration: 0.8, ease: "power1.inOut", force3D: true },
+            27.3
+          );
+        }
+
+        // 10b. Phase 9b: Mobile GeoLocationSection reading hold (t = 28.1 -> 30.6)
+        mobileTl.to({}, { duration: 2.5 }, 28.1);
+
+        // 11. Phase 10: Mobile buffer before smooth unpinning to Footer (t = 30.6 -> 31.0)
+        mobileTl.to({}, { duration: 0.4 }, 30.6);
+
+        // Trigger auto reveal immediately ONLY if actually active on mount
+        if (typeof window !== "undefined" && section) {
+          const rect = section.getBoundingClientRect();
+          if (rect.top <= 50 && rect.bottom > 200 && window.scrollY > 100) {
+            playMobileAutoCtaIntro();
+          }
+        }
+
+        // ── Custom Crossfade Handlers for Mobile (Handoff with HeroCanvas) ───────────
+        const handleFadeToProcessMobile = () => {
+          if (!section) return;
+          gsap.killTweensOf(section);
+          section.style.pointerEvents = "auto";
+          gsap.to(section, {
+            opacity: 1,
+            duration: 0.75,
+            ease: "power2.out",
+            force3D: true,
+            onComplete: () => {
+              document.body.style.overflow = "auto";
+              document.documentElement.style.overflow = "auto";
+              (window as unknown as { heroScrollLocked?: boolean }).heroScrollLocked = false;
+              const lenis = (window as unknown as { lenis?: { start: () => void } }).lenis;
+              lenis?.start();
+              ScrollTrigger.refresh();
+            },
+          });
+
+          // Delay the text intro slightly on mobile as well
+          gsap.delayedCall(0.35, () => {
+            playMobileAutoCtaIntro();
+          });
+        };
+
+        const handleFadeToHeroMobile = () => {
+          if (!section) return;
+          playMobileAutoCtaOutro();
+          gsap.killTweensOf(section);
+          gsap.to(section, {
+            opacity: 0,
+            duration: 0.55,
+            ease: "power2.inOut",
+            force3D: true,
+            onComplete: () => {
+              section.style.pointerEvents = "none";
+            },
+          });
+        };
+
+        window.addEventListener("hero:fade-to-process", handleFadeToProcessMobile);
+        window.addEventListener("hero:fade-to-hero", handleFadeToHeroMobile);
+
+        return () => {
+          window.removeEventListener("hero:fade-to-process", handleFadeToProcessMobile);
+          window.removeEventListener("hero:fade-to-hero", handleFadeToHeroMobile);
+        };
       });
 
       ScrollTrigger.refresh();
@@ -985,7 +1487,7 @@ export function ProcessSection() {
     const st = timelineRef.current?.scrollTrigger;
     if (!st || typeof window === "undefined") return;
 
-    const stepProgressBenchmarks = [0.32, 0.43, 0.54, 0.66];
+    const stepProgressBenchmarks = [0.19, 0.27, 0.35, 0.42];
     const targetScroll =
       st.start + stepProgressBenchmarks[idx] * (st.end - st.start);
 
@@ -1004,7 +1506,7 @@ export function ProcessSection() {
     <section
       ref={sectionRef}
       id="process"
-      className="relative w-full h-screen overflow-hidden select-none bg-[#09090b] text-zinc-100 [contain:paint]"
+      className="relative z-10 w-full h-screen overflow-hidden select-none bg-[#09090b] text-zinc-100 [contain:paint]"
       style={{
         backgroundColor: "#09090b",
         backgroundImage:
@@ -1043,7 +1545,7 @@ export function ProcessSection() {
           {/* LEFT SIDE: Narrative */}
           <div
             ref={narrativeWrapperRef}
-            className="relative md:h-full flex items-center justify-end -translate-y-16 lg:-translate-y-20 z-10"
+            className="relative md:h-full flex items-center justify-end z-10"
           >
             <div className="flex flex-col items-end justify-center gap-6 pr-12 lg:pr-16 text-right">
               {/* Heading in Project Font */}
@@ -1078,7 +1580,7 @@ export function ProcessSection() {
           <div className="relative h-full overflow-visible flex items-start pl-12 lg:pl-16 pointer-events-auto">
             <div
               ref={rightTrackRef}
-              className="flex flex-col gap-52 will-change-transform w-full"
+              className="flex flex-col gap-12 will-change-transform w-full"
             >
               {PROCESS_STEPS.map((step, idx) => (
                 <ProcessStepItem
@@ -1098,7 +1600,7 @@ export function ProcessSection() {
       {/* ─────────────────────────────────────────────────────────────────── */}
       {/* MOBILE VIEWPORT (block md:hidden): PINNED TOP NARRATIVE + SCROLLING STEPS */}
       {/* ─────────────────────────────────────────────────────────────────── */}
-      <div className="block md:hidden relative z-10 w-full h-full flex flex-col pt-16 sm:pt-20 pb-4 px-5 sm:px-8 max-w-lg mx-auto overflow-hidden">
+      <div className="block md:hidden relative z-10 w-full h-full flex flex-col pt-16 sm:pt-20 pb-4 px-9 sm:px-10 max-w-lg mx-auto overflow-hidden">
         {/* Pinned Top Narrative Block: Always visible at top */}
         <div
           ref={mobileNarrativeRef}
@@ -1216,7 +1718,16 @@ export function ProcessSection() {
         className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none h-screen w-full overflow-hidden"
         style={{ opacity: 0, transformOrigin: "50% 50%", willChange: "transform, opacity" }}
       >
-        <ServiceHome isStageMode />
+        <ServiceHome isStageMode scrollProgressRef={desktopServiceScrollRef} />
+      </div>
+
+      {/* Pinned Mission Vision Layer - In-place center crossfade */}
+      <div
+        ref={missionLayerRef}
+        className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none h-screen w-full overflow-hidden"
+        style={{ opacity: 0, transformOrigin: "50% 50%", willChange: "transform, opacity" }}
+      >
+        <MissionVisionSection isStageMode />
       </div>
 
       {/* Pinned Contact Form Layer - In-place center crossfade */}
@@ -1226,6 +1737,15 @@ export function ProcessSection() {
         style={{ opacity: 0, transformOrigin: "50% 50%", willChange: "transform, opacity" }}
       >
         <ContactForm isStageMode />
+      </div>
+
+      {/* Pinned Geo Location Layer - In-place center crossfade */}
+      <div
+        ref={locationLayerRef}
+        className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none h-screen w-full overflow-hidden"
+        style={{ opacity: 0, transformOrigin: "50% 50%", willChange: "transform, opacity" }}
+      >
+        <GeoLocationSection isStageMode />
       </div>
     </section>
   );

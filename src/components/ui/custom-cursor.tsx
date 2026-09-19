@@ -9,23 +9,18 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
  * Architecture & Features:
  * - Full-window fixed canvas at z-[9997] with DPR synchronization
  * - Fluid comet ribbon tail using spring physics (0.7 momentum, 0.1 spring constant)
- * - 4px glowing cyan dot leading the trail at the spring head
- * - 36px idle frosted follower lens lagging smoothly (lerp = 0.06)
- * - Expands to 48px frosted lens on hover over interactive elements & service cards
- * - Compresses to 28px on pointer down
+ * - Glowing cyan dot leading the trail at the spring head
  * - Active globally across all sections of the site
  * - Media query (pointer: fine) safeguard for desktop / trackpad devices
  */
 export function CustomCursor() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const dotRef = useRef<HTMLDivElement>(null);
-  const lensRef = useRef<HTMLDivElement>(null);
 
   // Positions and physics
   const mousePosRef = useRef({ x: -100, y: -100 });
   const springPosRef = useRef({ x: -100, y: -100 });
   const springVelRef = useRef({ x: 0, y: 0 });
-  const lensPosRef = useRef({ x: -100, y: -100 });
   const trailHistoryRef = useRef<{ x: number; y: number }[]>([]);
 
   const isInsideRef = useRef(false);
@@ -133,9 +128,9 @@ export function CustomCursor() {
         springPosRef.current.x += springVelRef.current.x;
         springPosRef.current.y += springVelRef.current.y;
 
-        // 2. Position 4px Glowing Dot at Spring Head (trailDot in nk.studio)
+        // 2. Position Glowing Dot at Spring Head
         if (dotRef.current) {
-          dotRef.current.style.transform = `translate3d(${springPosRef.current.x}px, ${springPosRef.current.y}px, 0px) translate(-50%, -50%)`;
+          dotRef.current.style.transform = `translate3d(${springPosRef.current.x}px, ${springPosRef.current.y}px, 0px)`;
         }
 
         // 3. Append to Trail History (stores up to 18 trailing points)
@@ -171,14 +166,6 @@ export function CustomCursor() {
             }
           }
         }
-
-        // 5. Outer Follower Lens with smooth lerp (lerp = 0.06)
-        lensPosRef.current.x += (targetX - lensPosRef.current.x) * 0.06;
-        lensPosRef.current.y += (targetY - lensPosRef.current.y) * 0.06;
-
-        if (lensRef.current) {
-          lensRef.current.style.transform = `translate3d(${lensPosRef.current.x}px, ${lensPosRef.current.y}px, 0px) translate(-50%, -50%)`;
-        }
       } else {
         // Clear canvas when cursor is outside the browser viewport
         if (ctx) {
@@ -206,11 +193,9 @@ export function CustomCursor() {
         isInsideRef.current = true;
         springPosRef.current = { x: e.clientX, y: e.clientY };
         springVelRef.current = { x: 0, y: 0 };
-        lensPosRef.current = { x: e.clientX, y: e.clientY };
         trailHistoryRef.current = [{ x: e.clientX, y: e.clientY }];
 
         if (dotRef.current) dotRef.current.style.opacity = "1";
-        if (lensRef.current) lensRef.current.style.opacity = "1";
       }
     };
 
@@ -229,7 +214,6 @@ export function CustomCursor() {
     const onMouseLeave = () => {
       isInsideRef.current = false;
       if (dotRef.current) dotRef.current.style.opacity = "0";
-      if (lensRef.current) lensRef.current.style.opacity = "0";
       if (canvasRef.current) {
         const ctx = canvasRef.current.getContext("2d");
         if (ctx) {
@@ -266,35 +250,22 @@ export function CustomCursor() {
         aria-hidden="true"
       />
 
-      {/* 2. Inner Glowing Brand Cyan Dot at Spring Head (inspiring.nk.studio trailDot) */}
+      {/* 2. Glowing Brand Cyan Dot at Spring Head (trailDot) */}
       <div
         ref={dotRef}
-        className="pointer-events-none fixed top-0 left-0 z-[9999] rounded-full bg-[#00b5e2] opacity-0 transition-opacity duration-300 will-change-transform"
-        style={{
-          width: "4px",
-          height: "4px",
-          boxShadow:
-            "0 0 6px rgba(0, 181, 226, 0.95), 0 0 14px rgba(0, 181, 226, 0.5)",
-        }}
+        className="pointer-events-none fixed top-0 left-0 z-[9999] opacity-0 transition-opacity duration-300 will-change-transform"
         aria-hidden="true"
-      />
-
-      {/* 3. Outer Frosted Follower Lens (36px idle -> 48px on interactive/card hover) */}
-      <div
-        ref={lensRef}
-        className={`pointer-events-none fixed top-0 left-0 z-[9998] rounded-full flex items-center justify-center opacity-0 will-change-transform ${
-          isHovering
-            ? "w-12 h-12 bg-[#070b0a]/75 backdrop-blur-md border border-[#00b5e2]/40 shadow-[0_0_20px_rgba(0,181,226,0.25)]"
-            : isPointerDown
-            ? "w-7 h-7 bg-[#070b0a]/40 backdrop-blur-sm border border-white/10 scale-90"
-            : "w-9 h-9 bg-[#070b0a]/25 backdrop-blur-[4px] border border-white/10"
-        }`}
-        style={{
-          transition:
-            "width 0.4s cubic-bezier(0.64, 0.1, 0, 1), height 0.4s cubic-bezier(0.64, 0.1, 0, 1), background-color 0.35s cubic-bezier(0.64, 0.1, 0, 1), border-color 0.35s cubic-bezier(0.64, 0.1, 0, 1), box-shadow 0.35s cubic-bezier(0.64, 0.1, 0, 1), transform 0.2s ease-out, opacity 0.3s ease-out",
-        }}
-        aria-hidden="true"
-      />
+      >
+        <div
+          className={`rounded-full bg-[#00b5e2] -translate-x-1/2 -translate-y-1/2 transition-all duration-200 ${
+            isHovering
+              ? "w-2 h-2 shadow-[0_0_12px_rgba(0,181,226,1),0_0_20px_rgba(0,181,226,0.6)]"
+              : isPointerDown
+              ? "w-1 h-1 shadow-[0_0_4px_rgba(0,181,226,0.9)]"
+              : "w-1.5 h-1.5 shadow-[0_0_8px_rgba(0,181,226,0.95),0_0_14px_rgba(0,181,226,0.5)]"
+          }`}
+        />
+      </div>
     </>
   );
 }

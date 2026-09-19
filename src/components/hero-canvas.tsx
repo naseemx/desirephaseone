@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useCallback, useState } from "react";
-import { gsap, Observer, useGSAP } from "@/lib/gsap";
+import { gsap, Observer, ScrollTrigger, useGSAP } from "@/lib/gsap";
 import { FrostedCard } from "@/components/frosted-card";
 import { KioskFeature } from "@/components/kiosk-feature";
 
@@ -285,13 +285,13 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
       let pauseCooldown = false;
       let cooldownTimer: ReturnType<typeof setTimeout> | null = null;
 
-      const triggerCooldown = () => {
+      const triggerCooldown = (durationMs = PAUSE_COOLDOWN_MS) => {
         pauseCooldown = true;
         if (cooldownTimer) clearTimeout(cooldownTimer);
         cooldownTimer = setTimeout(() => {
           pauseCooldown = false;
           cooldownTimer = null;
-        }, PAUSE_COOLDOWN_MS);
+        }, durationMs);
       };
 
       // Initial scroll lock
@@ -324,9 +324,6 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
             if (e.cancelable) e.preventDefault();
             removeReentryListeners();
             lockScroll();
-            currentPhase = 4;
-            playState = 0;
-            handleScrollReverse();
           }
         }
       };
@@ -357,7 +354,7 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
         }
         pauseCooldown = false;
 
-        // Activate re-entry guard — block re-entry for 800ms
+        // Activate re-entry guard — block re-entry for 1000ms
         reentryGuard = true;
         if (reentryGuardTimer) clearTimeout(reentryGuardTimer);
         reentryGuardTimer = setTimeout(() => {
@@ -365,33 +362,14 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
           reentryGuardTimer = null;
           // Only add re-entry listeners after the guard period
           addReentryListeners();
-        }, 800);
+        }, 1000);
 
-        // Pin the hero container to its exact rendered pixel height before unlocking,
-        // preventing 100dvh recalculation jumps
-        const container = containerRef.current;
-        if (container) {
-          const currentHeight = container.getBoundingClientRect().height;
-          container.style.height = `${currentHeight}px`;
-        }
+        // Hide Checkpoint 4 cards on HeroCanvas so they dissolve smoothly
+        currentActivePhase = -1;
+        setActivePhase(-1);
 
-        // Release document overflow
-        document.body.style.overflow = "auto";
-        document.documentElement.style.overflow = "auto";
-
-        // Release Lenis
-        (window as unknown as { heroScrollLocked?: boolean }).heroScrollLocked = false;
-        const lenis = (window as unknown as { lenis?: { start: () => void; scrollTo: (t: number, o?: object) => void } }).lenis;
-        lenis?.start();
-
-        // Smoothly transition down into the next section (Footer)
-        requestAnimationFrame(() => {
-          if (lenis) {
-            lenis.scrollTo(window.innerHeight, { duration: 1.2 });
-          } else {
-            window.scrollTo({ top: window.innerHeight, behavior: "smooth" });
-          }
-        });
+        // Dispatch fade-to-process event: ProcessSection fades in over the stationary last frame
+        window.dispatchEvent(new CustomEvent("hero:fade-to-process"));
       };
 
       const lockScroll = () => {
@@ -404,17 +382,14 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
         document.body.style.overflow = "hidden";
         document.documentElement.style.overflow = "hidden";
 
-        // Restore dynamic viewport sizing
-        const container = containerRef.current;
-        if (container) {
-          container.style.height = "";
-        }
-
         if (window.scrollY > 0) {
           window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
         }
 
         removeReentryListeners();
+
+        // Dispatch fade-to-hero event: ProcessSection fades out
+        window.dispatchEvent(new CustomEvent("hero:fade-to-hero"));
 
         // Re-enter at the final frame
         currentPhase = 4;
@@ -423,6 +398,8 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
         setActivePhase(4);
         render();
 
+        // Brief cooldown before accepting new scroll input
+        triggerCooldown();
         observer.enable();
       };
 
@@ -453,9 +430,7 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
               setActivePhase(currentPhase);
             }
 
-            if (currentPhase < 4) {
-              triggerCooldown();
-            }
+            triggerCooldown(currentPhase === 4 ? 600 : PAUSE_COOLDOWN_MS);
           }
           render();
         } else if (playState === -1) {
@@ -637,11 +612,21 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
         if (reentryGuard) return; // Don't re-lock during post-unlock guard
         if (!scrollLocked && window.scrollY <= 0 && e.deltaY < 0) {
           lockScroll();
-          handleScrollReverse();
+        }
+      };
+
+      // Toggle hero visibility on scroll to preserve GPU memory when scrolled deep down
+      const updateHeroVisibility = () => {
+        if (!containerRef.current) return;
+        if (window.scrollY > 300) {
+          containerRef.current.style.visibility = "hidden";
+        } else {
+          containerRef.current.style.visibility = "visible";
         }
       };
 
       window.addEventListener("scroll", onNativeScroll, { passive: true });
+      window.addEventListener("scroll", updateHeroVisibility, { passive: true });
       window.addEventListener("wheel", onWindowWheel, { passive: true });
 
       // ── Keyboard Navigation ─────────────────────────────────────────────
@@ -669,17 +654,12 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
           document.documentElement.style.overflow = "auto";
           observer.disable();
 
-          const container = containerRef.current;
-          if (container) {
-            const currentHeight = container.getBoundingClientRect().height;
-            container.style.height = `${currentHeight}px`;
-          }
-
           currentPhase = 4;
           virtualTime = totalDuration;
           playState = 0;
           render();
           addReentryListeners();
+          updateHeroVisibility();
         }
       };
 
@@ -693,6 +673,7 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
         observer.kill();
         removeReentryListeners();
         window.removeEventListener("scroll", onNativeScroll);
+        window.removeEventListener("scroll", updateHeroVisibility);
         window.removeEventListener("wheel", onWindowWheel);
         window.removeEventListener("keydown", handleKeyDown);
 
@@ -709,10 +690,6 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
         document.documentElement.style.overflow = "auto";
         (window as unknown as { heroScrollLocked?: boolean }).heroScrollLocked = false;
         (window as unknown as { lenis?: { start: () => void } }).lenis?.start();
-
-        if (containerRef.current) {
-          containerRef.current.style.height = "";
-        }
       };
     },
     { scope: containerRef, dependencies: [isMobile] }
@@ -722,7 +699,7 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
     <div
       id="hero"
       ref={containerRef}
-      className="relative h-screen w-full overflow-hidden bg-black select-none"
+      className="fixed inset-0 h-screen w-full overflow-hidden bg-black select-none z-0"
     >
       {/* 24FPS Pre-rendered Frame Sequence Canvas */}
       <canvas

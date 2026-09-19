@@ -125,3 +125,27 @@ body {
 .mobile-service-card.is-active .mobile-card-title {
   color: #ffffff;
 }
+
+.mobile-service-card .mobile-card-desc {
+  color: #71717a;
+  transition: color 0.25s ease-out;
+}
+
+.mobile-service-card.is-active .mobile-card-desc {
+  color: #d4d4d8;
+}
+
+/* Sleek dark scrollbar for Service Drawer */
+.custom-drawer-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.custom-drawer-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-drawer-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+}
+.custom-drawer-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 181, 226, 0.4);
+}

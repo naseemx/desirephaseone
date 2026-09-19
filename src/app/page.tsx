@@ -7,6 +7,7 @@ import { ProcessSection } from "@/components/process-section";
 import { Footer } from "@/components/footer";
 import { Preloader } from "@/components/preloader";
 import { CustomCursor } from "@/components/ui/custom-cursor";
+import { FloatingWhatsApp } from "@/components/floating-whatsapp";
 
 export default function Home() {
   const [loadingProgress, setLoadingProgress] = useState(0);
@@ -36,6 +37,9 @@ export default function Home() {
 
       {/* Modern High-Performance Footer placed immediately after the master stage */}
       <Footer />
+
+      {/* Floating WhatsApp Quick Action Button (Visible after hero section scrolling) */}
+      <FloatingWhatsApp />
     </div>
   );
 }

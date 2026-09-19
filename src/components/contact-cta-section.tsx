@@ -32,6 +32,22 @@ export function ContactCtaSection({
   const line1Ref = useRef<HTMLDivElement>(null);
   const line2Ref = useRef<HTMLDivElement>(null);
 
+  // Computes offscreen X position past the left edge of the viewport
+  const getLeftOffscreenX = (el: HTMLElement | null) => {
+    if (typeof window === "undefined") return -1200;
+    const vw = window.innerWidth;
+    const elW = el?.offsetWidth || 300;
+    return -(vw / 2 + elW / 2 + 60);
+  };
+
+  // Computes offscreen X position past the right edge of the viewport
+  const getRightOffscreenX = (el: HTMLElement | null) => {
+    if (typeof window === "undefined") return 1200;
+    const vw = window.innerWidth;
+    const elW = el?.offsetWidth || 300;
+    return (vw / 2 + elW / 2 + 60);
+  };
+
   // Controlled mode: triggered when visible prop is explicitly passed
   useGSAP(
     () => {
@@ -54,74 +70,74 @@ export function ContactCtaSection({
           force3D: true,
         });
 
-        // Line 1: slides in from left to middle
+        // Line 1: slides in from left edge to middle
         gsap.fromTo(
           l0,
-          { xPercent: -100, opacity: 0 },
+          { x: () => getLeftOffscreenX(l0), opacity: 0 },
           {
-            xPercent: 0,
+            x: 0,
             opacity: 1,
-            duration: 1.1,
-            ease: "power2.out",
-            delay: 0.15,
+            duration: 1.15,
+            ease: "power3.out",
+            delay: 0.1,
             force3D: true,
           }
         );
 
-        // Line 2: slides in from right to middle
+        // Line 2: slides in from right edge to middle
         gsap.fromTo(
           l1,
-          { xPercent: 100, opacity: 0 },
+          { x: () => getRightOffscreenX(l1), opacity: 0 },
           {
-            xPercent: 0,
+            x: 0,
             opacity: 1,
-            duration: 1.1,
-            ease: "power2.out",
-            delay: 0.35,
+            duration: 1.15,
+            ease: "power3.out",
+            delay: 0.28,
             force3D: true,
           }
         );
 
-        // Line 3: slides in from left to middle
+        // Line 3: slides in from left edge to middle
         gsap.fromTo(
           l2,
-          { xPercent: -100, opacity: 0 },
+          { x: () => getLeftOffscreenX(l2), opacity: 0 },
           {
-            xPercent: 0,
+            x: 0,
             opacity: 1,
-            duration: 1.1,
-            ease: "power2.out",
-            delay: 0.55,
+            duration: 1.15,
+            ease: "power3.out",
+            delay: 0.46,
             force3D: true,
           }
         );
       } else {
-        // Text lines slide outwards and fade out
+        // Text lines slide outwards toward their edges and fade out
         gsap.to(l0, {
-          xPercent: -40,
+          x: () => getLeftOffscreenX(l0) * 0.45,
           opacity: 0,
-          duration: 0.6,
+          duration: 0.5,
           ease: "power2.in",
           force3D: true,
         });
         gsap.to(l1, {
-          xPercent: 40,
+          x: () => getRightOffscreenX(l1) * 0.45,
           opacity: 0,
-          duration: 0.6,
+          duration: 0.5,
           ease: "power2.in",
           force3D: true,
         });
         gsap.to(l2, {
-          xPercent: -40,
+          x: () => getLeftOffscreenX(l2) * 0.45,
           opacity: 0,
-          duration: 0.6,
+          duration: 0.5,
           ease: "power2.in",
           force3D: true,
         });
         gsap.to(content, {
           opacity: 0,
           scale: 0.95,
-          duration: 0.6,
+          duration: 0.5,
           ease: "power2.inOut",
           force3D: true,
         });
@@ -160,10 +176,58 @@ export function ContactCtaSection({
           const { isMobile } = (context.conditions || {}) as { isMobile?: boolean };
           const scrollDistance = isMobile ? 1200 : 1800;
 
-          gsap.set(l0, { xPercent: -100, opacity: 0, force3D: true });
-          gsap.set(l1, { xPercent: 100, opacity: 0, force3D: true });
-          gsap.set(l2, { xPercent: -100, opacity: 0, force3D: true });
+          gsap.set(l0, { x: () => getLeftOffscreenX(l0), opacity: 0, force3D: true });
+          gsap.set(l1, { x: () => getRightOffscreenX(l1), opacity: 0, force3D: true });
+          gsap.set(l2, { x: () => getLeftOffscreenX(l2), opacity: 0, force3D: true });
           gsap.set(content, { opacity: 0, scale: 0.95, force3D: true });
+
+          let ctaState: "hidden" | "visible" = "hidden";
+
+          const playAutoReveal = () => {
+            if (ctaState === "visible") return;
+            ctaState = "visible";
+            gsap.killTweensOf([content, l0, l1, l2]);
+            gsap.to(content, { opacity: 1, scale: 1, duration: 0.8, ease: "power2.out", force3D: true });
+            gsap.fromTo(
+              l0,
+              { x: () => getLeftOffscreenX(l0), opacity: 0 },
+              { x: 0, opacity: 1, duration: 1.15, ease: "power3.out", delay: 0.08, force3D: true }
+            );
+            gsap.fromTo(
+              l1,
+              { x: () => getRightOffscreenX(l1), opacity: 0 },
+              { x: 0, opacity: 1, duration: 1.15, ease: "power3.out", delay: 0.24, force3D: true }
+            );
+            gsap.fromTo(
+              l2,
+              { x: () => getLeftOffscreenX(l2), opacity: 0 },
+              { x: 0, opacity: 1, duration: 1.15, ease: "power3.out", delay: 0.40, force3D: true }
+            );
+          };
+
+          const playAutoOutro = () => {
+            if (ctaState === "hidden") return;
+            ctaState = "hidden";
+            gsap.killTweensOf([content, l0, l1, l2]);
+            gsap.to(l0, { x: () => getLeftOffscreenX(l0) * 0.45, opacity: 0, duration: 0.5, ease: "power2.in", force3D: true });
+            gsap.to(l1, { x: () => getRightOffscreenX(l1) * 0.45, opacity: 0, duration: 0.5, ease: "power2.in", force3D: true });
+            gsap.to(l2, { x: () => getLeftOffscreenX(l2) * 0.45, opacity: 0, duration: 0.5, ease: "power2.in", force3D: true });
+            gsap.to(content, {
+              opacity: 0,
+              scale: 0.95,
+              duration: 0.5,
+              ease: "power2.inOut",
+              force3D: true,
+              onComplete: () => {
+                if (ctaState === "hidden") {
+                  gsap.set(l0, { x: () => getLeftOffscreenX(l0), opacity: 0, force3D: true });
+                  gsap.set(l1, { x: () => getRightOffscreenX(l1), opacity: 0, force3D: true });
+                  gsap.set(l2, { x: () => getLeftOffscreenX(l2), opacity: 0, force3D: true });
+                  gsap.set(content, { opacity: 0, scale: 0.95, force3D: true });
+                }
+              },
+            });
+          };
 
           const tl = gsap.timeline({
             defaults: { immediateRender: false },
@@ -176,26 +240,36 @@ export function ContactCtaSection({
               anticipatePin: 1,
               fastScrollEnd: true,
               preventOverlaps: true,
+              onEnter: () => {
+                playAutoReveal();
+              },
+              onLeaveBack: () => {
+                playAutoOutro();
+              },
+              onUpdate: (self) => {
+                if (self.progress >= 0.70 && self.direction === 1) {
+                  playAutoOutro();
+                } else if (self.progress < 0.60 && self.direction === -1) {
+                  playAutoReveal();
+                }
+              },
             },
           });
 
-          // Phase 1: Section fades in and text lines slide from sides to middle
-          tl.to(content, { opacity: 1, scale: 1, ease: "power2.out", duration: 1.2, force3D: true }, 0);
-          tl.to(l0, { xPercent: 0, opacity: 1, ease: "power2.out", duration: 1.4, force3D: true }, 0.1);
-          tl.to(l1, { xPercent: 0, opacity: 1, ease: "power2.out", duration: 1.4, force3D: true }, 0.35);
-          tl.to(l2, { xPercent: 0, opacity: 1, ease: "power2.out", duration: 1.4, force3D: true }, 0.6);
+          // Phase 1: Hold moment while revealed automatically (t = 0.0 -> 1.8)
+          tl.to({}, { duration: 1.8 }, 0);
 
-          // Phase 2: Middle aligned hold moment
-          tl.to({}, { duration: 1.8 }, 2.0);
+          // Phase 2: Section fades out completely as user scrolls to exit (t = 1.8 -> 3.0)
+          tl.to(content, { opacity: 0, scale: 0.94, ease: "power2.inOut", duration: 1.2, force3D: true }, 1.8);
+          tl.to({}, { duration: 0.4 }, 3.0);
 
-          // Phase 3: Text animation fades out & slides outwards
-          tl.to(l0, { xPercent: -40, opacity: 0, ease: "power2.in", duration: 1.2, force3D: true }, 3.8);
-          tl.to(l1, { xPercent: 40, opacity: 0, ease: "power2.in", duration: 1.2, force3D: true }, 3.9);
-          tl.to(l2, { xPercent: -40, opacity: 0, ease: "power2.in", duration: 1.2, force3D: true }, 4.0);
-
-          // Phase 4: Section fades out completely
-          tl.to(content, { opacity: 0, scale: 0.94, ease: "power2.inOut", duration: 1.4, force3D: true }, 4.1);
-          tl.to({}, { duration: 0.6 }, 5.5);
+          // Trigger immediately ONLY if already active on mount (e.g. page reload)
+          if (typeof window !== "undefined" && section) {
+            const rect = section.getBoundingClientRect();
+            if (rect.top <= 50 && rect.bottom > 200 && window.scrollY > 100) {
+              playAutoReveal();
+            }
+          }
         }
       );
 
@@ -228,36 +302,36 @@ export function ContactCtaSection({
       {/* Editorial Content Container - Centered */}
       <div
         ref={contentRef}
-        className="cta-content-wrapper relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 flex flex-col items-center justify-center will-change-transform"
+        className="cta-content-wrapper relative z-10 w-full flex flex-col items-center justify-center will-change-transform"
         style={{ transformOrigin: "50% 50%" }}
       >
-        <div className="w-full flex flex-col items-center text-center font-red-hat-display font-black italic uppercase tracking-tighter leading-[0.88] text-4xl sm:text-6xl md:text-7xl lg:text-[94px] xl:text-[118px] 2xl:text-[136px] text-zinc-100">
+        <div className="w-full flex flex-col items-center text-center font-red-hat-display font-black italic tracking-tighter leading-[0.92] text-3xl sm:text-5xl md:text-6xl lg:text-[84px] xl:text-[104px] 2xl:text-[124px] text-zinc-100">
           
-          {/* LINE 1: Sign in (centered, slides in from left) */}
+          {/* LINE 1: Sign in (centered, slides in from left edge) */}
           <div className="w-full overflow-hidden py-1 sm:py-2 flex justify-center text-center">
             <div
               ref={line0Ref}
-              className="cta-line-inner cta-line-0 will-change-transform inline-block text-center"
+              className="cta-line-inner cta-line-0 will-change-transform inline-block text-center whitespace-nowrap"
             >
               Sign in
             </div>
           </div>
 
-          {/* LINE 2: to future with (centered, slides in from right) */}
+          {/* LINE 2: to future with (centered, slides in from right edge) */}
           <div className="w-full overflow-hidden py-1 sm:py-2 flex justify-center text-center">
             <div
               ref={line1Ref}
-              className="cta-line-inner cta-line-1 will-change-transform inline-block text-center"
+              className="cta-line-inner cta-line-1 will-change-transform inline-block text-center whitespace-nowrap"
             >
               to future with
             </div>
           </div>
 
-          {/* LINE 3: dzyr digital visuals (centered, slides in from left) */}
+          {/* LINE 3: dzyr digital visuals (centered, slides in from left edge) */}
           <div className="w-full overflow-hidden py-1 sm:py-2 flex justify-center text-center">
             <div
               ref={line2Ref}
-              className="cta-line-inner cta-line-2 will-change-transform inline-block text-center"
+              className="cta-line-inner cta-line-2 will-change-transform inline-block text-center whitespace-nowrap"
             >
               <span className="text-[#00b5e2]">dzyr</span> digital visuals
             </div>

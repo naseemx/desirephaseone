@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { AmbientStars } from "@/components/ui/ambient-stars";
 import { SERVICES, ServiceItem } from "@/data/service";
 import { MoveHorizontal } from "lucide-react";
+import { ServiceDrawer } from "@/components/service-drawer";
 
 export type { ServiceItem };
 
@@ -24,9 +23,13 @@ const CARDS: ServiceItem[] = SERVICES;
  */
 export interface ServiceHomeProps {
   isStageMode?: boolean;
+  scrollProgressRef?: React.RefObject<number>;
 }
 
-export function ServiceHome({ isStageMode = false }: ServiceHomeProps = {}) {
+export function ServiceHome({
+  isStageMode = false,
+  scrollProgressRef,
+}: ServiceHomeProps = {}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
 
@@ -88,7 +91,7 @@ export function ServiceHome({ isStageMode = false }: ServiceHomeProps = {}) {
     // Desktop (2 rows): cards sized 200-236px width
     if (!isMobile) {
       const cardWidth = Math.min(236, Math.max(200, 200 + ((w - 768) / 600) * 26));
-      const cardHeight = Math.round(cardWidth * 1.16);
+      const cardHeight = Math.round(cardWidth * 1.22);
       const gap = 36;
       const pitch = cardWidth + gap;
       const rowGap = 40;
@@ -148,39 +151,21 @@ export function ServiceHome({ isStageMode = false }: ServiceHomeProps = {}) {
   }, [dimensions.width, dimensions.height]);
 
   // Card distribution: 2 rows across all screen sizes (mobile & desktop)
-  // Row 1 (top): 8 primary services
-  // Row 2 (bottom): 8 exhibition, branding & fabrication services
+  // Dynamically driven by line: 1 (top row) vs line: 2 (bottom row) in src/data/service.ts
   const { topRowCards, bottomRowCards } = useMemo(() => {
+    const line1 = CARDS.filter((c) => (c.line ?? c.row ?? 1) === 1);
+    const line2 = CARDS.filter((c) => (c.line ?? c.row) === 2);
     return {
-      topRowCards: CARDS.slice(0, 8),
-      bottomRowCards: CARDS.slice(8, 16),
+      topRowCards: line1.length > 0 ? line1 : CARDS.slice(0, 8),
+      bottomRowCards: line2.length > 0 ? line2 : CARDS.slice(8, 16),
     };
   }, []);
 
   const topCardRefs = useRef<(HTMLElement | null)[]>([]);
   const bottomCardRefs = useRef<(HTMLElement | null)[]>([]);
-
-  // Physics & Animation State
-  const offsetRef = useRef(0);
-  const velocityRef = useRef(0);
-  const isDraggingRef = useRef(false);
-  const isVerticalScrollRef = useRef(false);
-  const isDragMovedRef = useRef(false);
-  const dragDistanceRef = useRef(0);
-  const dragStartXRef = useRef(0);
-  const dragStartYRef = useRef(0);
-  const router = useRouter();
-  const lastPointerXRef = useRef(0);
-  const lastPointerTimeRef = useRef(0);
   const isHoveredRef = useRef(false);
-
   const [hoveredCardId, setHoveredCardId] = useState<string | null>(null);
-
-  // Auto-scroll speed configuration
-  const autoSpeed = useMemo(() => {
-    const base = layout.isMobile ? 0.28 : 0.42;
-    return base;
-  }, [layout.isMobile]);
+  const [selectedService, setSelectedService] = useState<ServiceItem | null>(null);
 
   // Main 60fps/120fps physics and 3D positioning animation loop (Desktop only)
   useEffect(() => {
@@ -194,23 +179,6 @@ export function ServiceHome({ isStageMode = false }: ServiceHomeProps = {}) {
       lastTime = now;
       const t = now * 0.001;
 
-      // ─────────────────────────────────────────────────────────────────────────
-      // 1. CAROUSEL SCROLL PHYSICS & LOOPING CALCULATIONS
-      // ─────────────────────────────────────────────────────────────────────────
-      if (!isDraggingRef.current) {
-        if (!isHoveredRef.current || layout.isMobile) {
-          offsetRef.current += autoSpeed;
-        }
-
-        // Inertia damping
-        if (Math.abs(velocityRef.current) > 0.01) {
-          offsetRef.current += velocityRef.current;
-          velocityRef.current *= 0.94;
-        } else {
-          velocityRef.current = 0;
-        }
-      }
-
       const {
         cardWidth,
         cardHeight,
@@ -223,43 +191,50 @@ export function ServiceHome({ isStageMode = false }: ServiceHomeProps = {}) {
         isMobile,
       } = layout;
 
-      const topPeriod = topRowCards.length * pitch;
-      const bottomPeriod = bottomRowCards.length > 0 ? bottomRowCards.length * pitch : 1;
-      const currentOffset = offsetRef.current;
+      // Starting positions: comfortably away from the left edge so Card 0 is completely visible
+      const totalWidth = viewportHalfWidth * 2;
+      const leftMargin = Math.max(120, (totalWidth - 1240) / 2 + 60);
+      const cardLeftEdge = -viewportHalfWidth + leftMargin;
+      const startX = cardLeftEdge + cardWidth * 0.5;
+      const bottomStartX = startX + 40;
+
+      // Total travel distance: scroll moves through all 8 cards once without repetition
+      const totalScrollTravel = (topRowCards.length - 1.5) * pitch;
+      const scrollProgress = Math.max(0, Math.min(1, scrollProgressRef?.current ?? 0));
+      const scrollDrivenOffset = scrollProgress * totalScrollTravel;
+
+      // Subtle ambient breathing float when idle (pauses on card hover)
+      const idleDrift = isHoveredRef.current ? 0 : Math.sin(t * 0.7) * 12;
+      const currentOffset = scrollDrivenOffset + idleDrift;
 
       const Z = viewportHalfWidth;
       const visibleThreshold = viewportHalfWidth + cardWidth + 50;
 
-      // Position Top Row (or Single Row on mobile)
+      // Position Top Row (Finite track - 8 cards shown once, no repetition)
       topRowCards.forEach((_, idx) => {
         const el = topCardRefs.current[idx];
         if (!el) return;
 
-        const baseX = (idx - topRowCards.length / 2) * pitch;
-        const rawX = baseX - currentOffset;
-        const wrappedX =
-          (((rawX + topPeriod / 2) % topPeriod) + topPeriod) % topPeriod -
-          topPeriod / 2;
+        const x = startX + idx * pitch - currentOffset;
 
         // Frustum culling: skip offscreen cards
-        if (Math.abs(wrappedX) > visibleThreshold) {
+        if (Math.abs(x) > visibleThreshold) {
           el.style.opacity = "0";
           el.style.pointerEvents = "none";
           return;
         }
         el.style.pointerEvents = "auto";
 
-        const normX = Math.max(-1.5, Math.min(1.5, wrappedX / Math.max(Z, 1)));
+        const normX = Math.max(-1.5, Math.min(1.5, x / Math.max(Z, 1)));
         const curveY = curveAmount * normX * normX;
         const tangentAngle =
-          Math.atan((-2 * curveAmount * wrappedX) / (Z * Z)) * curveRotationMul;
+          Math.atan((-2 * curveAmount * x) / (Z * Z)) * curveRotationMul;
         const tiltRad = Math.max(
           -curveMaxTiltRad,
           Math.min(curveMaxTiltRad, tangentAngle)
         );
         const floatY = 6.5 * Math.sin(t * 1.35 + idx * 0.85);
 
-        const x = wrappedX;
         const y = -cardHeight * 0.5 - rowGap * 0.5 - curveY + (isMobile ? 0 : floatY);
         const rotZ = isMobile ? 0 : tiltRad * (180 / Math.PI);
         const rotY = isMobile ? normX * 4 : normX * 12;
@@ -267,43 +242,38 @@ export function ServiceHome({ isStageMode = false }: ServiceHomeProps = {}) {
 
         const absNormX = Math.abs(normX);
         const cardOpacity =
-          absNormX > 0.82 ? Math.max(0.18, 1 - (absNormX - 0.82) * 1.4) : 1;
+          absNormX > 0.92 ? Math.max(0.2, 1 - (absNormX - 0.92) * 2.0) : 1;
 
         el.style.transform = `translate3d(${x}px, ${y}px, 0px) rotateZ(${rotZ}deg) rotateY(${rotY}deg) scale(${scale})`;
         el.style.opacity = cardOpacity.toFixed(3);
       });
 
-      // Position Bottom Row (Rendered on both mobile & desktop)
+      // Position Bottom Row (Finite track - 8 cards shown once, no repetition)
       if (bottomRowCards.length > 0) {
         bottomRowCards.forEach((_, idx) => {
           const el = bottomCardRefs.current[idx];
           if (!el) return;
 
-          const baseX = (idx - bottomRowCards.length / 2) * pitch + (isMobile ? pitch * 0.5 : 100);
-          const rawX = baseX - currentOffset;
-          const wrappedX =
-            (((rawX + bottomPeriod / 2) % bottomPeriod) + bottomPeriod) %
-              bottomPeriod -
-            bottomPeriod / 2;
+          const x = bottomStartX + idx * pitch - currentOffset;
 
-          if (Math.abs(wrappedX) > visibleThreshold) {
+          if (Math.abs(x) > visibleThreshold) {
             el.style.opacity = "0";
             el.style.pointerEvents = "none";
             return;
           }
           el.style.pointerEvents = "auto";
 
-          const normX = Math.max(-1.5, Math.min(1.5, wrappedX / Math.max(Z, 1)));
+          const normX = Math.max(-1.5, Math.min(1.5, x / Math.max(Z, 1)));
           const curveY = curveAmount * normX * normX;
           const tangentAngle =
-            Math.atan((-2 * curveAmount * wrappedX) / (Z * Z)) * curveRotationMul;
+            Math.atan((-2 * curveAmount * x) / (Z * Z)) * curveRotationMul;
           const tiltRad = Math.max(
             -curveMaxTiltRad,
             Math.min(curveMaxTiltRad, tangentAngle)
           );
           const floatY = 6.5 * Math.sin(t * 1.25 + (idx + 10) * 0.72);
 
-          const x = wrappedX;
+          const xPos = x;
           const y = cardHeight * 0.5 + rowGap * 0.5 - curveY + (isMobile ? 0 : floatY);
           const rotZ = isMobile ? 0 : tiltRad * (180 / Math.PI);
           const rotY = isMobile ? normX * 4 : normX * 12;
@@ -311,9 +281,9 @@ export function ServiceHome({ isStageMode = false }: ServiceHomeProps = {}) {
 
           const absNormX = Math.abs(normX);
           const cardOpacity =
-            absNormX > 0.82 ? Math.max(0.18, 1 - (absNormX - 0.82) * 1.4) : 1;
+            absNormX > 0.92 ? Math.max(0.2, 1 - (absNormX - 0.92) * 2.0) : 1;
 
-          el.style.transform = `translate3d(${x}px, ${y}px, 0px) rotateZ(${rotZ}deg) rotateY(${rotY}deg) scale(${scale})`;
+          el.style.transform = `translate3d(${xPos}px, ${y}px, 0px) rotateZ(${rotZ}deg) rotateY(${rotY}deg) scale(${scale})`;
           el.style.opacity = cardOpacity.toFixed(3);
         });
       }
@@ -323,114 +293,16 @@ export function ServiceHome({ isStageMode = false }: ServiceHomeProps = {}) {
 
     animId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(animId);
-  }, [isInView, layout, topRowCards, bottomRowCards, autoSpeed]);
+  }, [isInView, layout, topRowCards, bottomRowCards]);
 
-  // Touch & Pointer Drag Interactions
-  const handlePointerDown = useCallback((e: React.PointerEvent) => {
-    if ((e.target as HTMLElement).closest("button")) return;
-
-    isDraggingRef.current = true;
-    isVerticalScrollRef.current = false;
-    isDragMovedRef.current = false;
-    dragDistanceRef.current = 0;
-    dragStartXRef.current = e.clientX;
-    dragStartYRef.current = e.clientY;
-    lastPointerXRef.current = e.clientX;
-    lastPointerTimeRef.current = performance.now();
-    velocityRef.current = 0;
-    // NOTE: We do NOT call setPointerCapture here on pointerdown.
-    // Calling setPointerCapture before any drag movement intercepts and destroys child click events.
-  }, []);
-
-  const handlePointerMove = useCallback((e: React.PointerEvent) => {
-    if (!isDraggingRef.current) return;
-
-    const dx = e.clientX - lastPointerXRef.current;
-    const dy = e.clientY - dragStartYRef.current;
-    const totalDx = e.clientX - dragStartXRef.current;
-    const totalDist = Math.hypot(totalDx, dy);
-    dragDistanceRef.current = totalDist;
-
-    // Only flag as a drag movement if the pointer has actually moved more than 6 pixels!
-    if (totalDist > 6) {
-      isDragMovedRef.current = true;
-      if (e.pointerType !== "touch") {
-        try {
-          if (!(e.currentTarget as HTMLElement).hasPointerCapture(e.pointerId)) {
-            (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-          }
-        } catch {}
-      }
-    }
-
-    // Disambiguate vertical page scrolling from horizontal carousel drag
-    if (e.pointerType === "touch" && !isVerticalScrollRef.current) {
-      if (Math.abs(dy) > Math.abs(totalDx) && Math.abs(dy) > 10) {
-        isVerticalScrollRef.current = true;
-        isDraggingRef.current = false;
-        return;
-      }
-    }
-
-    if (isVerticalScrollRef.current) return;
-
-    offsetRef.current -= dx;
-
-    const now = performance.now();
-    const dt = now - lastPointerTimeRef.current;
-    if (dt > 8) {
-      velocityRef.current = -dx * (16 / dt) * 0.65;
-      lastPointerXRef.current = e.clientX;
-      lastPointerTimeRef.current = now;
-    }
-  }, []);
-
-  const handlePointerUp = useCallback((e: React.PointerEvent) => {
-    isDraggingRef.current = false;
-    isVerticalScrollRef.current = false;
-    try {
-      if ((e.currentTarget as HTMLElement).hasPointerCapture?.(e.pointerId)) {
-        (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
-      }
-    } catch {}
-
-    // Reset isDragMovedRef after a brief window to allow click events to evaluate
-    setTimeout(() => {
-      isDragMovedRef.current = false;
-      dragDistanceRef.current = 0;
-    }, 120);
-  }, []);
-
-  const handlePointerCancel = useCallback(() => {
-    isDraggingRef.current = false;
-    isVerticalScrollRef.current = false;
-    isDragMovedRef.current = false;
-    dragDistanceRef.current = 0;
-  }, []);
-
-  // Wheel Horizontal Scrubbing
-  const handleWheel = useCallback((e: React.WheelEvent) => {
-    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
-      offsetRef.current += e.deltaX * 0.85;
-    } else if (e.shiftKey) {
-      offsetRef.current += e.deltaY * 0.85;
-    }
-  }, []);
-
-  const handleCardClick = (e: React.MouseEvent, card: ServiceItem) => {
-    if (isDragMovedRef.current || dragDistanceRef.current > 6) {
-      e.preventDefault();
-      e.stopPropagation();
-      return;
-    }
-    router.push(`/servicepage/${card.id}`);
+  const handleCardClick = (card: ServiceItem) => {
+    setSelectedService(card);
   };
 
   return (
     <section
       ref={containerRef}
       id="servicehome"
-      onWheel={handleWheel}
       className={`relative w-full overflow-hidden select-none bg-[#09090b] text-zinc-100 flex flex-col items-center justify-center ${
         isStageMode
           ? "h-full min-h-screen py-4 sm:py-6"
@@ -457,65 +329,73 @@ export function ServiceHome({ isStageMode = false }: ServiceHomeProps = {}) {
       {/* Atmospheric Starfield Particles */}
       <AmbientStars count={layout.isMobile ? 40 : 160} />
 
-      {/* Header Info Bar matching brand cyan */}
-      <div className="relative z-30 mx-auto max-w-7xl px-4 sm:px-6 w-full flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-3 text-center sm:text-left mb-4 sm:mb-8">
-        <div className="flex items-center gap-2 sm:gap-2.5">
-          <span className="relative flex h-2 w-2 sm:h-2.5 sm:w-2.5">
+      {/* Desktop Header Info Bar */}
+      <div className="hidden md:flex relative z-30 mx-auto max-w-7xl px-4 sm:px-6 w-full flex-row items-center justify-between gap-3 text-left mb-4 sm:mb-8">
+        <div className="flex items-center gap-2.5">
+          <span className="relative flex h-2.5 w-2.5">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00b5e2] opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 sm:h-2.5 sm:w-2.5 bg-[#00b5e2]" />
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#00b5e2]" />
           </span>
           <p className="text-xs sm:text-sm font-medium tracking-wide text-zinc-300">
             <span className="text-[#00b5e2] font-semibold">Our Services</span> — Specialized LED Display Solutions
           </p>
         </div>
 
-        <div className="flex items-center gap-2 text-zinc-400 text-[11px] sm:text-xs md:text-sm bg-black/40 backdrop-blur-md px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full border border-white/10 shadow-sm">
-          <MoveHorizontal className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#00b5e2] shrink-0" />
-          <span className="hidden sm:inline">Drag or scroll horizontally to explore services</span>
-          <span className="sm:hidden">Scroll down to explore services</span>
+        <div className="flex items-center gap-2 text-zinc-400 text-xs md:text-sm bg-black/40 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/10 shadow-sm">
+          <MoveHorizontal className="w-4 h-4 text-[#00b5e2] shrink-0" />
+          <span>Scroll down to explore services</span>
         </div>
       </div>
 
-      {/* Left Edge Vignette Mask */}
+      {/* Mobile Header: Matches process-section.tsx mobile narrative design */}
+      <div className="flex md:hidden relative z-30 flex-shrink-0 flex-col items-start text-left w-full max-w-lg mx-auto px-9 sm:px-10 mb-4">
+        {/* Eyebrow badge */}
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/[0.04] border border-white/10 mb-2.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-[var(--brand-cyan)] animate-pulse" />
+          <span className="text-[10px] sm:text-[11px] uppercase tracking-widest text-zinc-300 font-semibold">
+            Our Services
+          </span>
+        </div>
+
+        {/* Headline */}
+        <h2 className="text-2xl sm:text-3xl font-bold leading-[1.12] text-zinc-100 tracking-tight">
+          Specialized LED display solutions.
+        </h2>
+
+        {/* Description */}
+        <p className="text-xs sm:text-sm text-zinc-400 font-normal leading-relaxed mt-1.5 max-w-sm">
+          Architectural engineering and bespoke visual technology built for impact.
+        </p>
+      </div>
+
+      {/* Left Edge Vignette Mask - slim boundary fade */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute top-0 bottom-0 left-0 z-20 w-8 sm:w-24 md:w-48 lg:w-[clamp(6rem,24vw,32rem)] sm:backdrop-blur-[12px] transition-opacity duration-300"
+        className="pointer-events-none absolute top-0 bottom-0 left-0 z-20 w-8 sm:w-16 md:w-20 lg:w-28 transition-opacity duration-300"
         style={{
           background:
-            "linear-gradient(90deg, rgba(9, 9, 11, 0.98) 0%, rgba(9, 9, 11, 0.75) 45%, transparent 100%)",
-          WebkitMaskImage:
-            "linear-gradient(90deg, #000 0%, rgba(0, 0, 0, 0.8) 35%, rgba(0, 0, 0, 0.35) 65%, transparent 100%)",
-          maskImage:
-            "linear-gradient(90deg, #000 0%, rgba(0, 0, 0, 0.8) 35%, rgba(0, 0, 0, 0.35) 65%, transparent 100%)",
+            "linear-gradient(90deg, rgba(9, 9, 11, 0.95) 0%, rgba(9, 9, 11, 0.4) 50%, transparent 100%)",
         }}
       />
 
-      {/* Right Edge Vignette Mask */}
+      {/* Right Edge Vignette Mask - slim boundary fade */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute top-0 bottom-0 right-0 z-20 w-8 sm:w-24 md:w-48 lg:w-[clamp(6rem,24vw,32rem)] sm:backdrop-blur-[12px] transition-opacity duration-300"
+        className="pointer-events-none absolute top-0 bottom-0 right-0 z-20 w-8 sm:w-16 md:w-20 lg:w-28 transition-opacity duration-300"
         style={{
           background:
-            "linear-gradient(270deg, rgba(9, 9, 11, 0.98) 0%, rgba(9, 9, 11, 0.75) 45%, transparent 100%)",
-          WebkitMaskImage:
-            "linear-gradient(270deg, #000 0%, rgba(0, 0, 0, 0.8) 35%, rgba(0, 0, 0, 0.35) 65%, transparent 100%)",
-          maskImage:
-            "linear-gradient(270deg, #000 0%, rgba(0, 0, 0, 0.8) 35%, rgba(0, 0, 0, 0.35) 65%, transparent 100%)",
+            "linear-gradient(270deg, rgba(9, 9, 11, 0.95) 0%, rgba(9, 9, 11, 0.4) 50%, transparent 100%)",
         }}
       />
 
-      {/* DESKTOP VIEWPORT (hidden md:flex): 3D Curved Ribbon with mouse drag & tilt */}
+      {/* DESKTOP VIEWPORT (hidden md:flex): 3D Curved Ribbon */}
       <div
         ref={viewportRef}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerCancel}
         className={`hidden md:flex relative w-full ${
           isStageMode
             ? "h-[390px] sm:h-[480px] md:h-[560px] lg:h-[620px]"
             : "h-[420px] sm:h-[540px] md:h-[620px] lg:h-[680px]"
-        } items-center justify-center overflow-visible z-10 touch-pan-y`}
+        } items-center justify-center overflow-visible z-10`}
         style={{
           perspective: "1400px",
           perspectiveOrigin: "50% 50%",
@@ -527,14 +407,15 @@ export function ServiceHome({ isStageMode = false }: ServiceHomeProps = {}) {
         >
           {/* TOP ROW CARDS (Line 1: 8 Primary Services) */}
           {topRowCards.map((card, idx) => (
-            <Link
+            <div
               key={`top-${card.id}-${idx}`}
-              href={`/servicepage/${card.id}`}
+              role="button"
+              tabIndex={0}
               data-cursor="card"
               ref={(el) => {
                 topCardRefs.current[idx] = el;
               }}
-              className="absolute pointer-events-auto will-change-transform touch-manipulation cursor-pointer block select-none"
+              className="absolute pointer-events-auto will-change-transform touch-manipulation cursor-pointer block select-none text-left"
               style={{
                 width: `${layout.cardWidth}px`,
                 height: `${layout.cardHeight}px`,
@@ -542,7 +423,13 @@ export function ServiceHome({ isStageMode = false }: ServiceHomeProps = {}) {
                 top: `${-layout.cardHeight / 2}px`,
                 transformStyle: "preserve-3d",
               }}
-              onClick={(e) => handleCardClick(e, card)}
+              onClick={() => handleCardClick(card)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleCardClick(card);
+                }
+              }}
               onPointerEnter={() => setHoveredCardId(card.id)}
               onPointerLeave={() => {
                 setHoveredCardId((current) =>
@@ -554,19 +441,20 @@ export function ServiceHome({ isStageMode = false }: ServiceHomeProps = {}) {
                 card={card}
                 isHovered={hoveredCardId === card.id}
               />
-            </Link>
+            </div>
           ))}
 
           {/* BOTTOM ROW CARDS (Line 2: 8 Exhibition, Branding & Fabrication Services) */}
           {bottomRowCards.map((card, idx) => (
-            <Link
+            <div
               key={`bottom-${card.id}-${idx}`}
-              href={`/servicepage/${card.id}`}
+              role="button"
+              tabIndex={0}
               data-cursor="card"
               ref={(el) => {
                 bottomCardRefs.current[idx] = el;
               }}
-              className="absolute pointer-events-auto will-change-transform touch-manipulation cursor-pointer block select-none"
+              className="absolute pointer-events-auto will-change-transform touch-manipulation cursor-pointer block select-none text-left"
               style={{
                 width: `${layout.cardWidth}px`,
                 height: `${layout.cardHeight}px`,
@@ -574,7 +462,13 @@ export function ServiceHome({ isStageMode = false }: ServiceHomeProps = {}) {
                 top: `${-layout.cardHeight / 2}px`,
                 transformStyle: "preserve-3d",
               }}
-              onClick={(e) => handleCardClick(e, card)}
+              onClick={() => handleCardClick(card)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleCardClick(card);
+                }
+              }}
               onPointerEnter={() => setHoveredCardId(card.id)}
               onPointerLeave={() => {
                 setHoveredCardId((current) =>
@@ -586,7 +480,7 @@ export function ServiceHome({ isStageMode = false }: ServiceHomeProps = {}) {
                 card={card}
                 isHovered={hoveredCardId === card.id}
               />
-            </Link>
+            </div>
           ))}
         </div>
       </div>
@@ -594,8 +488,8 @@ export function ServiceHome({ isStageMode = false }: ServiceHomeProps = {}) {
       {/* MOBILE VIEWPORT (flex md:hidden): Dedicated Scroll-Driven Horizontal Track */}
       <div className="flex md:hidden relative w-full flex-col justify-center items-center overflow-hidden z-10 py-1">
         {/* Moving cards track container */}
-        <div className="relative w-full overflow-hidden px-5">
-          <div className="mobile-service-cards-track flex flex-col gap-3.5 will-change-transform py-1">
+        <div className="relative w-full overflow-hidden">
+          <div className="mobile-service-cards-track flex flex-col gap-3.5 w-max will-change-transform py-1">
             {/* Row 1: 8 Primary LED & Interactive Solutions */}
             <div className="flex gap-3.5 items-center flex-nowrap">
               {topRowCards.map((card, idx) => (
@@ -604,6 +498,7 @@ export function ServiceHome({ isStageMode = false }: ServiceHomeProps = {}) {
                   card={card}
                   index={idx}
                   isTop
+                  onSelect={handleCardClick}
                 />
               ))}
             </div>
@@ -615,12 +510,20 @@ export function ServiceHome({ isStageMode = false }: ServiceHomeProps = {}) {
                   card={card}
                   index={idx}
                   isTop={false}
+                  onSelect={handleCardClick}
                 />
               ))}
             </div>
           </div>
         </div>
       </div>
+
+      {/* SIDE DRAWER FOR SERVICE DETAILS */}
+      <ServiceDrawer
+        service={selectedService}
+        onClose={() => setSelectedService(null)}
+        onSelectService={(card) => setSelectedService(card)}
+      />
     </section>
   );
 }
@@ -633,27 +536,37 @@ function MobileServiceCard({
   card,
   index,
   isTop,
+  onSelect,
 }: {
   card: ServiceItem;
   index: number;
   isTop: boolean;
+  onSelect: (card: ServiceItem) => void;
 }) {
   const hasImage = Boolean(card.image);
 
   return (
-    <Link
-      href={`/servicepage/${card.id}`}
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => onSelect(card)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onSelect(card);
+        }
+      }}
       className={`mobile-service-card ${
         isTop ? "mobile-card-top" : "mobile-card-bottom"
       } ${
         index === 0 ? "is-active" : ""
-      } group relative w-[270px] sm:w-[290px] h-[200px] sm:h-[215px] rounded-[14px] border border-white/10 bg-[#0b1319]/95 p-3 flex flex-col justify-between overflow-hidden shrink-0 select-none shadow-[0_8px_24px_rgba(0,0,0,0.6)] active:scale-[0.98]`}
+      } group relative w-[270px] sm:w-[290px] h-[212px] sm:h-[228px] rounded-[14px] border border-white/10 bg-[#0b1319]/95 p-3 flex flex-col justify-between overflow-hidden shrink-0 select-none shadow-[0_8px_24px_rgba(0,0,0,0.6)] active:scale-[0.98] cursor-pointer text-left`}
     >
       {/* Subtle brand glow on active */}
       <div className="pointer-events-none absolute -inset-[1px] rounded-[14px] opacity-0 group-[.is-active]:opacity-100 transition-opacity duration-400 bg-gradient-to-br from-[#00b5e2]/30 via-transparent to-transparent" />
 
       {/* Media Frame (Image) */}
-      <div className="relative z-10 w-full aspect-[16/9] max-h-[110px] sm:max-h-[120px] rounded-[8px] overflow-hidden bg-black/50 shrink-0 border border-white/5 pointer-events-none">
+      <div className="relative z-10 w-full aspect-[16/9] max-h-[102px] sm:max-h-[112px] rounded-[8px] overflow-hidden bg-black/50 shrink-0 border border-white/5 pointer-events-none">
         {hasImage ? (
           <img
             src={card.image}
@@ -671,17 +584,22 @@ function MobileServiceCard({
       </div>
 
       {/* Service Title & Category Container */}
-      <div className="relative z-10 flex flex-col justify-end mt-1.5 flex-1 min-h-0 overflow-hidden pointer-events-none">
+      <div className="relative z-10 flex flex-col justify-end mt-1 flex-1 min-h-0 overflow-hidden pointer-events-none">
         {card.category && (
-          <span className="mobile-card-cat text-[9.5px] sm:text-[10px] tracking-wider uppercase font-semibold mb-0.5 truncate pointer-events-none">
+          <span className="mobile-card-cat text-[9px] sm:text-[9.5px] tracking-wider uppercase font-semibold mb-0.5 truncate pointer-events-none">
             {card.category}
           </span>
         )}
-        <h3 className="mobile-card-title text-[13px] sm:text-[14.5px] font-bold leading-tight tracking-normal line-clamp-2 pointer-events-none">
+        <h3 className="mobile-card-title text-[12.5px] sm:text-[13.5px] font-bold leading-tight tracking-normal line-clamp-1 pointer-events-none">
           {card.title}
         </h3>
+        {card.description && (
+          <p className="mobile-card-desc text-[9.5px] sm:text-[10.5px] font-normal leading-snug mt-0.5 sm:mt-1 line-clamp-2 pointer-events-none">
+            {card.description}
+          </p>
+        )}
       </div>
-    </Link>
+    </div>
   );
 }
 
@@ -789,15 +707,20 @@ function CardContent({
       </div>
 
       {/* Service Title & Category Container in Project Font */}
-      <div className="relative z-10 flex flex-col justify-end mt-1 sm:mt-3 flex-1 min-h-0 overflow-hidden pointer-events-none">
+      <div className="relative z-10 flex flex-col justify-end mt-1 sm:mt-2.5 flex-1 min-h-0 overflow-hidden pointer-events-none">
         {card.category && (
-          <span className="text-[8px] sm:text-[10px] tracking-wider uppercase text-[#00b5e2]/80 font-semibold mb-0.5 sm:mb-1 truncate pointer-events-none">
+          <span className="text-[8.5px] sm:text-[10px] tracking-wider uppercase text-[#00b5e2]/80 font-semibold mb-0.5 sm:mb-1 truncate pointer-events-none">
             {card.category}
           </span>
         )}
-        <h3 className="text-[11.5px] sm:text-[16px] font-bold leading-tight sm:leading-snug tracking-normal text-white line-clamp-2 group-hover:text-cyan-100 transition-colors duration-300 pointer-events-none">
+        <h3 className="text-[12px] sm:text-[14.5px] font-bold leading-tight sm:leading-snug tracking-normal text-white line-clamp-2 group-hover:text-cyan-100 transition-colors duration-300 pointer-events-none">
           {card.title}
         </h3>
+        {card.description && (
+          <p className="text-[9.5px] sm:text-[11px] font-normal leading-relaxed text-zinc-400 mt-1 sm:mt-1.5 line-clamp-2 pointer-events-none group-hover:text-zinc-300 transition-colors duration-300">
+            {card.description}
+          </p>
+        )}
       </div>
     </div>
   );

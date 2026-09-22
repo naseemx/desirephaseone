@@ -64,17 +64,10 @@ export function ServiceHome({
 
   useEffect(() => {
     const handleResize = () => {
-      if (containerRef.current) {
-        setDimensions({
-          width: containerRef.current.clientWidth || window.innerWidth,
-          height: containerRef.current.clientHeight || 780,
-        });
-      } else {
-        setDimensions({
-          width: window.innerWidth,
-          height: window.innerHeight,
-        });
-      }
+      setDimensions({
+        width: typeof window !== "undefined" ? window.innerWidth : 1200,
+        height: typeof window !== "undefined" ? window.innerHeight : 800,
+      });
     };
 
     handleResize();
@@ -90,23 +83,31 @@ export function ServiceHome({
 
     // Desktop (2 rows): cards sized dynamically based on width & height for a zoomed-in, prominent look
     if (!isMobile) {
-      // Available vertical height budget for ribbon (leaving room for header + padding)
-      const availableRibbonH = Math.max(520, h - 140);
-      const rowGap = 36;
-      // Guarantee the 2 rows fit inside the vertical budget
-      const maxCardHeightFromH = Math.floor((availableRibbonH - rowGap) / 2);
+      // Top navbar clearance (~72px) + header info bar (~44px) + bottom clearance (~30px) = ~160px
+      const verticalReserved = 160;
+      const availableRibbonH = Math.max(440, h - verticalReserved);
 
-      // Width-based sizing: scale between 270px and 330px for a more zoomed-in presence
-      const widthBasedCardW = Math.min(330, Math.max(265, Math.round(265 + ((w - 768) / 672) * 55)));
-      const idealCardHeight = Math.round(widthBasedCardW * 1.20);
+      // Safe row gap: must be at least 58px to 76px so that 3D rotated cards never collide
+      const baseRowGap = Math.max(58, Math.min(76, Math.round(availableRibbonH * 0.11)));
 
-      // Take the smaller of ideal height or height budget to prevent any screen overflow
+      // Guarantee 2 rows + rowGap fit comfortably inside the vertical budget
+      const maxCardHeightFromH = Math.floor((availableRibbonH - baseRowGap) / 2);
+
+      // Width-based sizing: keep cards zoomed in and prominent (scale 230px to 290px)
+      const widthBasedCardW = Math.min(290, Math.max(230, Math.round(230 + ((w - 768) / 672) * 50)));
+      const idealCardHeight = Math.round(widthBasedCardW * 1.16);
+
+      // Take the smaller of ideal height or height budget to prevent any screen collision
       const cardHeight = Math.min(idealCardHeight, maxCardHeightFromH);
       const cardWidth = cardHeight < idealCardHeight
-        ? Math.round(cardHeight / 1.20)
+        ? Math.round(cardHeight / 1.16)
         : widthBasedCardW;
 
-      const gap = 38;
+      // Recalculate rowGap with remaining vertical space, maintaining generous breathing room
+      const remainingH = availableRibbonH - cardHeight * 2;
+      const rowGap = Math.max(58, Math.min(76, remainingH));
+
+      const gap = Math.max(28, Math.min(38, Math.round(cardWidth * 0.13)));
       const pitch = cardWidth + gap;
       const p = w >= 1280 ? 1 : Math.pow((w - 768) / 512, 2);
 
@@ -118,9 +119,9 @@ export function ServiceHome({
         pitch,
         rowGap,
         viewportHalfWidth: Math.max(w, 1) / 2,
-        curveAmount: 8 + 36 * p,
-        curveMaxTiltRad: 0.10 + 0.20 * p,
-        curveRotationMul: 0.60 + 0.35 * p,
+        curveAmount: 6 + 18 * p,
+        curveMaxTiltRad: 0.06 + 0.08 * p, // gentle tilt (max ~8 deg) so card corners do not protrude into adjacent row
+        curveRotationMul: 0.40 + 0.20 * p,
       };
     }
 
@@ -130,8 +131,6 @@ export function ServiceHome({
 
     // The viewport ribbon area on mobile has a usable height.
     // We need: 2 * cardHeight + rowGap to fit inside the ribbon viewport.
-    // Ribbon viewport on mobile = ~420px (leaving space for header + section padding).
-    // Use the actual viewport height to compute the budget.
     const ribbonBudget = Math.min(420, Math.round(h * 0.52));
     const mobileRowGap = 24;
     const maxCardHeight = Math.floor((ribbonBudget - mobileRowGap) / 2);
@@ -206,13 +205,27 @@ export function ServiceHome({
 
       // Starting positions: comfortably away from the left edge so Card 0 is completely visible
       const totalWidth = viewportHalfWidth * 2;
-      const leftMargin = Math.max(70, (totalWidth - 1280) / 2 + 35);
-      const cardLeftEdge = -viewportHalfWidth + leftMargin;
+      const horizontalMargin = Math.max(48, Math.min(84, Math.round(totalWidth * 0.045)));
+      const cardLeftEdge = -viewportHalfWidth + horizontalMargin;
       const startX = cardLeftEdge + cardWidth * 0.5;
       const bottomStartX = startX + 36;
 
-      // Total travel distance: scroll moves through all 8 cards once without repetition
-      const totalScrollTravel = (topRowCards.length - 1.5) * pitch;
+      // Calculate the exact travel distance so the carousel stops with the final cards (Image 1 reference)
+      // cleanly framed across the screen, with the last card stopping at the right margin.
+      // This prevents the carousel from over-scrolling into empty space (Image 2 bug).
+      const lastTopIdx = Math.max(0, topRowCards.length - 1);
+      const lastBottomIdx = Math.max(0, bottomRowCards.length - 1);
+      const initialRight_top = startX + lastTopIdx * pitch + cardWidth * 0.5;
+      const initialRight_bottom =
+        bottomRowCards.length > 0
+          ? bottomStartX + lastBottomIdx * pitch + cardWidth * 0.5
+          : initialRight_top;
+
+      // Target right boundary: symmetric with left margin
+      const targetRightEdge = viewportHalfWidth - horizontalMargin;
+      const maxLastCardRightEdge = Math.max(initialRight_top, initialRight_bottom);
+      const totalScrollTravel = Math.max(0, maxLastCardRightEdge - targetRightEdge);
+
       const scrollProgress = Math.max(0, Math.min(1, scrollProgressRef?.current ?? 0));
       const scrollDrivenOffset = scrollProgress * totalScrollTravel;
 
@@ -246,12 +259,16 @@ export function ServiceHome({
           -curveMaxTiltRad,
           Math.min(curveMaxTiltRad, tangentAngle)
         );
-        const floatY = 6.5 * Math.sin(t * 1.35 + idx * 0.85);
+        const floatY = 3.5 * Math.sin(t * 1.25 + idx * 0.85);
 
-        const y = -cardHeight * 0.5 - rowGap * 0.5 - curveY + (isMobile ? 0 : floatY);
+        // Dynamically compute safe half-row clearance accounting for 3D tilt corner projection
+        const cornerTiltExpansion = Math.abs(Math.sin(tiltRad)) * (cardWidth * 0.5);
+        const safeHalfRowGap = rowGap * 0.5 + cornerTiltExpansion * 1.1;
+
+        const y = -cardHeight * 0.5 - safeHalfRowGap - curveY + (isMobile ? 0 : floatY);
         const rotZ = isMobile ? 0 : tiltRad * (180 / Math.PI);
-        const rotY = isMobile ? normX * 4 : normX * 12;
-        const scale = 1.03 - Math.abs(normX) * (isMobile ? 0.04 : 0.07);
+        const rotY = isMobile ? normX * 3.5 : normX * 10;
+        const scale = 1.02 - Math.abs(normX) * (isMobile ? 0.04 : 0.06);
 
         const absNormX = Math.abs(normX);
         const cardOpacity =
@@ -284,13 +301,17 @@ export function ServiceHome({
             -curveMaxTiltRad,
             Math.min(curveMaxTiltRad, tangentAngle)
           );
-          const floatY = 6.5 * Math.sin(t * 1.25 + (idx + 10) * 0.72);
+          const floatY = 3.5 * Math.sin(t * 1.15 + (idx + 10) * 0.72);
+
+          // Dynamically compute safe half-row clearance accounting for 3D tilt corner projection
+          const cornerTiltExpansion = Math.abs(Math.sin(tiltRad)) * (cardWidth * 0.5);
+          const safeHalfRowGap = rowGap * 0.5 + cornerTiltExpansion * 1.1;
 
           const xPos = x;
-          const y = cardHeight * 0.5 + rowGap * 0.5 - curveY + (isMobile ? 0 : floatY);
+          const y = cardHeight * 0.5 + safeHalfRowGap - curveY + (isMobile ? 0 : floatY);
           const rotZ = isMobile ? 0 : tiltRad * (180 / Math.PI);
-          const rotY = isMobile ? normX * 4 : normX * 12;
-          const scale = 1.03 - Math.abs(normX) * (isMobile ? 0.04 : 0.07);
+          const rotY = isMobile ? normX * 3.5 : normX * 10;
+          const scale = 1.02 - Math.abs(normX) * (isMobile ? 0.04 : 0.06);
 
           const absNormX = Math.abs(normX);
           const cardOpacity =
@@ -316,10 +337,10 @@ export function ServiceHome({
     <section
       ref={containerRef}
       id="servicehome"
-      className={`relative w-full overflow-hidden select-none bg-[#09090b] text-zinc-100 flex flex-col items-center justify-center ${
+      className={`relative w-full overflow-hidden select-none bg-[#09090b] text-zinc-100 flex flex-col items-center justify-center md:justify-between ${
         isStageMode
-          ? "h-full min-h-screen py-2 sm:py-4"
-          : "min-h-[520px] sm:min-h-screen justify-between pt-8 pb-10 sm:py-16 md:py-20 lg:py-24"
+          ? "h-full min-h-screen py-2 sm:py-4 md:pt-20 md:pb-5"
+          : "min-h-[520px] sm:min-h-screen justify-between pt-8 pb-10 md:pt-20 md:pb-5"
       }`}
       style={{
         backgroundColor: "#09090b",
@@ -343,7 +364,7 @@ export function ServiceHome({
       <AmbientStars count={layout.isMobile ? 40 : 160} />
 
       {/* Desktop Header Info Bar */}
-      <div className="hidden md:flex relative z-30 mx-auto max-w-7xl px-4 sm:px-6 w-full flex-row items-center justify-between gap-3 text-left mb-3 sm:mb-5 lg:mb-6">
+      <div className="hidden md:flex relative z-30 mx-auto max-w-7xl px-4 sm:px-6 w-full flex-row items-center justify-between gap-3 text-left mb-2 sm:mb-3 shrink-0">
         <div className="flex items-center gap-2.5">
           <span className="relative flex h-2.5 w-2.5">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00b5e2] opacity-75" />
@@ -404,11 +425,7 @@ export function ServiceHome({
       {/* DESKTOP VIEWPORT (hidden md:flex): 3D Curved Ribbon */}
       <div
         ref={viewportRef}
-        className={`hidden md:flex relative w-full ${
-          isStageMode
-            ? "h-[450px] sm:h-[540px] md:h-[660px] lg:h-[740px] xl:h-[800px]"
-            : "h-[460px] sm:h-[580px] md:h-[700px] lg:h-[780px] xl:h-[840px]"
-        } items-center justify-center overflow-visible z-10`}
+        className="hidden md:flex relative w-full flex-1 items-center justify-center overflow-visible z-10 my-auto min-h-[420px]"
         style={{
           perspective: "1300px",
           perspectiveOrigin: "50% 50%",

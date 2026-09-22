@@ -1251,6 +1251,13 @@ export function ProcessSection() {
 
         // 8. Phase 6: Mobile ServiceHome horizontal cards track - stepped movement where each card stops in the center (t = 9.9 -> 18.0)
         if (mobileServiceTrack) {
+          // Explicitly lock x to Column 0 when ServiceHome fades in so Column 0 is centered from the start
+          mobileTl.set(
+            mobileServiceTrack,
+            { x: () => getColumnCenterTrackX(0), force3D: true },
+            9.1
+          );
+
           const moveDuration = 0.55;
           const normalHold = 0.5;
           const finalHold = 0.75;

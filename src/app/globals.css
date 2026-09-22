@@ -1,11 +1,11 @@
-@import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Quicksand:wght@500;600;700&family=Red+Hat+Display:ital,wght@0,300..900;1,300..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Quicksand:wght@300;400;500;600;700&family=Red+Hat+Display:ital,wght@0,300..900;1,300..900&display=swap");
 @import "tailwindcss";
 @import "lenis/dist/lenis.css";
 
 :root {
   --background: #09090b;
   --foreground: #fafafa;
-  --font-varela-round: var(--font-varela-round, "Varela Round", sans-serif);
+  --font-quicksand: var(--font-quicksand, "Quicksand", sans-serif);
 
   /* Primary Accent: Cyan (C:80 M:0 Y:0 K:0) -> #00B5E2 */
   --brand-cyan: #00B5E2;
@@ -19,16 +19,15 @@
   /* Editorial Fonts */
   --font-instrument-serif: "Instrument Serif", Georgia, serif;
   --font-red-hat-display: "Red Hat Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-quicksand: var(--font-quicksand, "Quicksand", sans-serif);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-varela-round);
+  --font-sans: var(--font-quicksand);
+  --font-quicksand: var(--font-quicksand);
   --font-instrument: var(--font-instrument-serif);
   --font-editorial-sans: var(--font-red-hat-display);
-  --font-quicksand: var(--font-quicksand);
 
   --color-brand-cyan: var(--brand-cyan);
   --color-brand-grey-20: var(--brand-grey-20);
@@ -46,7 +45,7 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-varela-round), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-quicksand), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   overflow-x: clip;
 }
 

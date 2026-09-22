@@ -81,34 +81,30 @@ export function ServiceHome({
     const h = dimensions.height;
     const isMobile = w < 768;
 
-    // Desktop (2 rows): cards sized dynamically based on width & height for a zoomed-in, prominent look
+    // Desktop (2 rows): precisely 4 cards visible across the screen at any moment
     if (!isMobile) {
-      // Top navbar clearance (~72px) + header info bar (~44px) + bottom clearance (~30px) = ~160px
+      // 4 cards visible at any moment across desktop screen sizes:
+      // pitch = width / 4.35 guarantees that 4 full cards span the viewport + 5th peeking slightly
+      const pitch = Math.max(260, Math.min(460, Math.round(w / 4.35)));
+      const gap = Math.max(22, Math.min(38, Math.round(pitch * 0.08)));
+      const cardWidth = pitch - gap;
+
+      // Vertical budgeting: ensure 2 rows + rowGap fit comfortably inside available viewport height
       const verticalReserved = 160;
       const availableRibbonH = Math.max(440, h - verticalReserved);
 
-      // Safe row gap: must be at least 58px to 76px so that 3D rotated cards never collide
-      const baseRowGap = Math.max(58, Math.min(76, Math.round(availableRibbonH * 0.11)));
-
-      // Guarantee 2 rows + rowGap fit comfortably inside the vertical budget
+      // Safe row gap: 54px to 80px depending on screen height
+      const baseRowGap = Math.max(54, Math.min(80, Math.round(availableRibbonH * 0.10)));
       const maxCardHeightFromH = Math.floor((availableRibbonH - baseRowGap) / 2);
 
-      // Width-based sizing: keep cards zoomed in and prominent (scale 230px to 290px)
-      const widthBasedCardW = Math.min(290, Math.max(230, Math.round(230 + ((w - 768) / 672) * 50)));
-      const idealCardHeight = Math.round(widthBasedCardW * 1.16);
-
-      // Take the smaller of ideal height or height budget to prevent any screen collision
+      // Card height proportional to width (~0.80 to 0.85 of cardWidth for sleek widescreen cards)
+      const idealCardHeight = Math.min(340, Math.max(190, Math.round(cardWidth * 0.82)));
       const cardHeight = Math.min(idealCardHeight, maxCardHeightFromH);
-      const cardWidth = cardHeight < idealCardHeight
-        ? Math.round(cardHeight / 1.16)
-        : widthBasedCardW;
 
       // Recalculate rowGap with remaining vertical space, maintaining generous breathing room
       const remainingH = availableRibbonH - cardHeight * 2;
-      const rowGap = Math.max(58, Math.min(76, remainingH));
+      const rowGap = Math.max(baseRowGap, remainingH);
 
-      const gap = Math.max(28, Math.min(38, Math.round(cardWidth * 0.13)));
-      const pitch = cardWidth + gap;
       const p = w >= 1280 ? 1 : Math.pow((w - 768) / 512, 2);
 
       return {
@@ -119,9 +115,9 @@ export function ServiceHome({
         pitch,
         rowGap,
         viewportHalfWidth: Math.max(w, 1) / 2,
-        curveAmount: 6 + 18 * p,
-        curveMaxTiltRad: 0.06 + 0.08 * p, // gentle tilt (max ~8 deg) so card corners do not protrude into adjacent row
-        curveRotationMul: 0.40 + 0.20 * p,
+        curveAmount: 5 + 15 * p,
+        curveMaxTiltRad: 0.05 + 0.06 * p, // gentle tilt (max ~6.5 deg) so card corners do not protrude into adjacent row
+        curveRotationMul: 0.35 + 0.18 * p,
       };
     }
 
@@ -208,7 +204,7 @@ export function ServiceHome({
       const horizontalMargin = Math.max(48, Math.min(84, Math.round(totalWidth * 0.045)));
       const cardLeftEdge = -viewportHalfWidth + horizontalMargin;
       const startX = cardLeftEdge + cardWidth * 0.5;
-      const bottomStartX = startX + 36;
+      const bottomStartX = startX + Math.round(pitch * 0.12);
 
       // Calculate the exact travel distance so the carousel stops with the final cards (Image 1 reference)
       // cleanly framed across the screen, with the last card stopping at the right margin.
@@ -445,7 +441,7 @@ export function ServiceHome({
               ref={(el) => {
                 topCardRefs.current[idx] = el;
               }}
-              className="absolute pointer-events-auto will-change-transform touch-manipulation cursor-pointer block select-none text-left"
+              className="absolute pointer-events-auto will-change-transform touch-manipulation cursor-pointer block select-none text-left overflow-hidden rounded-[14px]"
               style={{
                 width: `${layout.cardWidth}px`,
                 height: `${layout.cardHeight}px`,
@@ -484,7 +480,7 @@ export function ServiceHome({
               ref={(el) => {
                 bottomCardRefs.current[idx] = el;
               }}
-              className="absolute pointer-events-auto will-change-transform touch-manipulation cursor-pointer block select-none text-left"
+              className="absolute pointer-events-auto will-change-transform touch-manipulation cursor-pointer block select-none text-left overflow-hidden rounded-[14px]"
               style={{
                 width: `${layout.cardWidth}px`,
                 height: `${layout.cardHeight}px`,
@@ -714,8 +710,8 @@ function CardContent({
         aria-hidden="true"
       />
 
-      {/* Media Frame (Image) */}
-      <div className="relative z-10 w-full aspect-[16/10] max-h-[90px] sm:max-h-none rounded-[8px] sm:rounded-[10px] overflow-hidden bg-black/40 shrink-0 border border-white/5 pointer-events-none">
+      {/* Media Frame (Image) - flexible height bounded to card budget */}
+      <div className="relative z-10 w-full rounded-[8px] sm:rounded-[10px] overflow-hidden bg-black/40 border border-white/5 pointer-events-none flex-1 min-h-[65px] max-h-[160px]">
         {hasImage ? (
           <img
             src={card.image}
@@ -737,17 +733,17 @@ function CardContent({
       </div>
 
       {/* Service Title & Category Container in Project Font */}
-      <div className="relative z-10 flex flex-col justify-end mt-1.5 sm:mt-2.5 flex-1 min-h-0 overflow-hidden pointer-events-none">
+      <div className="relative z-10 flex flex-col justify-end mt-1.5 sm:mt-2 shrink-0 min-h-0 pointer-events-none">
         {card.category && (
-          <span className="text-[9px] sm:text-[10.5px] tracking-wider uppercase text-[#00b5e2]/80 font-semibold mb-0.5 sm:mb-1 truncate pointer-events-none">
+          <span className="text-[9px] sm:text-[10px] tracking-wider uppercase text-[#00b5e2]/80 font-semibold mb-0.5 truncate pointer-events-none">
             {card.category}
           </span>
         )}
-        <h3 className="text-[13px] sm:text-[15.5px] font-bold leading-tight sm:leading-snug tracking-normal text-white line-clamp-2 group-hover:text-cyan-100 transition-colors duration-300 pointer-events-none">
+        <h3 className="text-[12.5px] sm:text-[15px] font-bold leading-tight tracking-normal text-white line-clamp-1 sm:line-clamp-2 group-hover:text-cyan-100 transition-colors duration-300 pointer-events-none">
           {card.title}
         </h3>
         {card.description && (
-          <p className="text-[10px] sm:text-[12px] font-normal leading-relaxed text-zinc-400 mt-1 sm:mt-1.5 line-clamp-2 pointer-events-none group-hover:text-zinc-300 transition-colors duration-300">
+          <p className="text-[9.5px] sm:text-[11.5px] font-normal leading-relaxed text-zinc-400 mt-0.5 sm:mt-1 line-clamp-2 pointer-events-none group-hover:text-zinc-300 transition-colors duration-300">
             {card.description}
           </p>
         )}

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Varela_Round } from "next/font/google";
+import { Quicksand, Varela_Round } from "next/font/google";
 import { SmoothScroll } from "@/components/providers/smooth-scroll";
 import "./globals.css";
 
@@ -7,6 +7,11 @@ const varelaRound = Varela_Round({
   weight: "400",
   subsets: ["latin"],
   variable: "--font-varela-round",
+});
+
+const quicksand = Quicksand({
+  subsets: ["latin"],
+  variable: "--font-quicksand",
 });
 
 export const metadata: Metadata = {
@@ -61,7 +66,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${varelaRound.variable} dark antialiased`}
+      className={`${varelaRound.variable} ${quicksand.variable} dark antialiased`}
     >
       <body className="min-h-screen bg-[#09090b] text-[var(--brand-grey-20)] selection:bg-[var(--brand-cyan)] selection:text-black">
         <SmoothScroll>{children}</SmoothScroll>

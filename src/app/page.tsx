@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { Navbar } from "@/components/navbar";
 import { HeroCanvas } from "@/components/hero-canvas";
 import { ProcessSection } from "@/components/process-section";
-import { Footer } from "@/components/footer";
 import { Preloader } from "@/components/preloader";
 import { CustomCursor } from "@/components/ui/custom-cursor";
 import { FloatingWhatsApp } from "@/components/floating-whatsapp";
@@ -32,11 +31,8 @@ export default function Home() {
         onLoaded={() => setLoadingProgress(100)}
       />
 
-      {/* Unified Master Stage: Contact CTA -> Process Section -> Service Home -> Contact Form (In-Place Center Crossfades) */}
+      {/* Unified Master Stage: Contact CTA -> Process Section -> Service Home -> Mission Vision -> Contact Form & Footer */}
       <ProcessSection />
-
-      {/* Modern High-Performance Footer placed immediately after the master stage */}
-      <Footer />
 
       {/* Floating WhatsApp Quick Action Button (Visible after hero section scrolling) */}
       <FloatingWhatsApp />

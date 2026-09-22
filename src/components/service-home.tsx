@@ -88,13 +88,26 @@ export function ServiceHome({
     const h = dimensions.height;
     const isMobile = w < 768;
 
-    // Desktop (2 rows): cards sized 200-236px width
+    // Desktop (2 rows): cards sized dynamically based on width & height for a zoomed-in, prominent look
     if (!isMobile) {
-      const cardWidth = Math.min(236, Math.max(200, 200 + ((w - 768) / 600) * 26));
-      const cardHeight = Math.round(cardWidth * 1.22);
-      const gap = 36;
+      // Available vertical height budget for ribbon (leaving room for header + padding)
+      const availableRibbonH = Math.max(520, h - 140);
+      const rowGap = 36;
+      // Guarantee the 2 rows fit inside the vertical budget
+      const maxCardHeightFromH = Math.floor((availableRibbonH - rowGap) / 2);
+
+      // Width-based sizing: scale between 270px and 330px for a more zoomed-in presence
+      const widthBasedCardW = Math.min(330, Math.max(265, Math.round(265 + ((w - 768) / 672) * 55)));
+      const idealCardHeight = Math.round(widthBasedCardW * 1.20);
+
+      // Take the smaller of ideal height or height budget to prevent any screen overflow
+      const cardHeight = Math.min(idealCardHeight, maxCardHeightFromH);
+      const cardWidth = cardHeight < idealCardHeight
+        ? Math.round(cardHeight / 1.20)
+        : widthBasedCardW;
+
+      const gap = 38;
       const pitch = cardWidth + gap;
-      const rowGap = 40;
       const p = w >= 1280 ? 1 : Math.pow((w - 768) / 512, 2);
 
       return {
@@ -105,9 +118,9 @@ export function ServiceHome({
         pitch,
         rowGap,
         viewportHalfWidth: Math.max(w, 1) / 2,
-        curveAmount: 10 + 54 * p,
-        curveMaxTiltRad: 0.11 + 0.25 * p,
-        curveRotationMul: 0.62 + 0.38 * p,
+        curveAmount: 8 + 36 * p,
+        curveMaxTiltRad: 0.10 + 0.20 * p,
+        curveRotationMul: 0.60 + 0.35 * p,
       };
     }
 
@@ -193,10 +206,10 @@ export function ServiceHome({
 
       // Starting positions: comfortably away from the left edge so Card 0 is completely visible
       const totalWidth = viewportHalfWidth * 2;
-      const leftMargin = Math.max(120, (totalWidth - 1240) / 2 + 60);
+      const leftMargin = Math.max(70, (totalWidth - 1280) / 2 + 35);
       const cardLeftEdge = -viewportHalfWidth + leftMargin;
       const startX = cardLeftEdge + cardWidth * 0.5;
-      const bottomStartX = startX + 40;
+      const bottomStartX = startX + 36;
 
       // Total travel distance: scroll moves through all 8 cards once without repetition
       const totalScrollTravel = (topRowCards.length - 1.5) * pitch;
@@ -238,11 +251,11 @@ export function ServiceHome({
         const y = -cardHeight * 0.5 - rowGap * 0.5 - curveY + (isMobile ? 0 : floatY);
         const rotZ = isMobile ? 0 : tiltRad * (180 / Math.PI);
         const rotY = isMobile ? normX * 4 : normX * 12;
-        const scale = 1 - Math.abs(normX) * (isMobile ? 0.04 : 0.08);
+        const scale = 1.03 - Math.abs(normX) * (isMobile ? 0.04 : 0.07);
 
         const absNormX = Math.abs(normX);
         const cardOpacity =
-          absNormX > 0.92 ? Math.max(0.2, 1 - (absNormX - 0.92) * 2.0) : 1;
+          absNormX > 0.94 ? Math.max(0.2, 1 - (absNormX - 0.94) * 2.0) : 1;
 
         el.style.transform = `translate3d(${x}px, ${y}px, 0px) rotateZ(${rotZ}deg) rotateY(${rotY}deg) scale(${scale})`;
         el.style.opacity = cardOpacity.toFixed(3);
@@ -277,11 +290,11 @@ export function ServiceHome({
           const y = cardHeight * 0.5 + rowGap * 0.5 - curveY + (isMobile ? 0 : floatY);
           const rotZ = isMobile ? 0 : tiltRad * (180 / Math.PI);
           const rotY = isMobile ? normX * 4 : normX * 12;
-          const scale = 1 - Math.abs(normX) * (isMobile ? 0.04 : 0.08);
+          const scale = 1.03 - Math.abs(normX) * (isMobile ? 0.04 : 0.07);
 
           const absNormX = Math.abs(normX);
           const cardOpacity =
-            absNormX > 0.92 ? Math.max(0.2, 1 - (absNormX - 0.92) * 2.0) : 1;
+            absNormX > 0.94 ? Math.max(0.2, 1 - (absNormX - 0.94) * 2.0) : 1;
 
           el.style.transform = `translate3d(${xPos}px, ${y}px, 0px) rotateZ(${rotZ}deg) rotateY(${rotY}deg) scale(${scale})`;
           el.style.opacity = cardOpacity.toFixed(3);
@@ -305,8 +318,8 @@ export function ServiceHome({
       id="servicehome"
       className={`relative w-full overflow-hidden select-none bg-[#09090b] text-zinc-100 flex flex-col items-center justify-center ${
         isStageMode
-          ? "h-full min-h-screen py-4 sm:py-6"
-          : "min-h-[520px] sm:min-h-screen justify-between pt-10 pb-12 sm:py-20 md:py-24 lg:py-28"
+          ? "h-full min-h-screen py-2 sm:py-4"
+          : "min-h-[520px] sm:min-h-screen justify-between pt-8 pb-10 sm:py-16 md:py-20 lg:py-24"
       }`}
       style={{
         backgroundColor: "#09090b",
@@ -330,7 +343,7 @@ export function ServiceHome({
       <AmbientStars count={layout.isMobile ? 40 : 160} />
 
       {/* Desktop Header Info Bar */}
-      <div className="hidden md:flex relative z-30 mx-auto max-w-7xl px-4 sm:px-6 w-full flex-row items-center justify-between gap-3 text-left mb-4 sm:mb-8">
+      <div className="hidden md:flex relative z-30 mx-auto max-w-7xl px-4 sm:px-6 w-full flex-row items-center justify-between gap-3 text-left mb-3 sm:mb-5 lg:mb-6">
         <div className="flex items-center gap-2.5">
           <span className="relative flex h-2.5 w-2.5">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00b5e2] opacity-75" />
@@ -393,11 +406,11 @@ export function ServiceHome({
         ref={viewportRef}
         className={`hidden md:flex relative w-full ${
           isStageMode
-            ? "h-[390px] sm:h-[480px] md:h-[560px] lg:h-[620px]"
-            : "h-[420px] sm:h-[540px] md:h-[620px] lg:h-[680px]"
+            ? "h-[450px] sm:h-[540px] md:h-[660px] lg:h-[740px] xl:h-[800px]"
+            : "h-[460px] sm:h-[580px] md:h-[700px] lg:h-[780px] xl:h-[840px]"
         } items-center justify-center overflow-visible z-10`}
         style={{
-          perspective: "1400px",
+          perspective: "1300px",
           perspectiveOrigin: "50% 50%",
         }}
       >
@@ -650,7 +663,7 @@ function CardContent({
       ref={cardRef}
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
-      className={`group relative w-full h-full rounded-[12px] border border-white/10 bg-[#0b1319]/95 p-2.5 sm:p-3.5 flex flex-col justify-between overflow-hidden select-none transition-[transform,box-shadow,border-color] duration-500 ease-out text-left touch-manipulation ${
+      className={`group relative w-full h-full rounded-[14px] border border-white/10 bg-[#0b1319]/95 p-3 sm:p-4 flex flex-col justify-between overflow-hidden select-none transition-[transform,box-shadow,border-color] duration-500 ease-out text-left touch-manipulation ${
         isHovered ? "scale-[1.02] z-30 shadow-[0_12px_36px_rgba(0,0,0,0.7)] border-[#00b5e2]/40" : ""
       }`}
       style={{
@@ -662,7 +675,7 @@ function CardContent({
     >
       {/* Dynamic Radial Border Glow Layer (Brand Cyan #00b5e2) */}
       <div
-        className="pointer-events-none absolute -inset-[1px] rounded-[12px] transition-opacity duration-500"
+        className="pointer-events-none absolute -inset-[1px] rounded-[14px] transition-opacity duration-500"
         style={{
           opacity: isHovered ? 1 : 0,
           padding: "1.5px",
@@ -676,16 +689,16 @@ function CardContent({
 
       {/* Surface Spotlight Overlay (Brand Cyan) */}
       <div
-        className="pointer-events-none absolute inset-0 z-10 transition-opacity duration-500 ease-out rounded-[12px]"
+        className="pointer-events-none absolute inset-0 z-10 transition-opacity duration-500 ease-out rounded-[14px]"
         style={{
           opacity: isHovered ? 0.6 : 0,
-          background: `radial-gradient(circle 160px at ${localMouse.pxX}px ${localMouse.pxY}px, rgba(0, 181, 226, 0.2) 0%, rgba(0, 181, 226, 0.04) 50%, transparent 80%)`,
+          background: `radial-gradient(circle 180px at ${localMouse.pxX}px ${localMouse.pxY}px, rgba(0, 181, 226, 0.2) 0%, rgba(0, 181, 226, 0.04) 50%, transparent 80%)`,
         }}
         aria-hidden="true"
       />
 
       {/* Media Frame (Image) */}
-      <div className="relative z-10 w-full aspect-[16/10] max-h-[90px] sm:max-h-none rounded-[6px] sm:rounded-[8px] overflow-hidden bg-black/40 shrink-0 border border-white/5 pointer-events-none">
+      <div className="relative z-10 w-full aspect-[16/10] max-h-[90px] sm:max-h-none rounded-[8px] sm:rounded-[10px] overflow-hidden bg-black/40 shrink-0 border border-white/5 pointer-events-none">
         {hasImage ? (
           <img
             src={card.image}
@@ -707,17 +720,17 @@ function CardContent({
       </div>
 
       {/* Service Title & Category Container in Project Font */}
-      <div className="relative z-10 flex flex-col justify-end mt-1 sm:mt-2.5 flex-1 min-h-0 overflow-hidden pointer-events-none">
+      <div className="relative z-10 flex flex-col justify-end mt-1.5 sm:mt-2.5 flex-1 min-h-0 overflow-hidden pointer-events-none">
         {card.category && (
-          <span className="text-[8.5px] sm:text-[10px] tracking-wider uppercase text-[#00b5e2]/80 font-semibold mb-0.5 sm:mb-1 truncate pointer-events-none">
+          <span className="text-[9px] sm:text-[10.5px] tracking-wider uppercase text-[#00b5e2]/80 font-semibold mb-0.5 sm:mb-1 truncate pointer-events-none">
             {card.category}
           </span>
         )}
-        <h3 className="text-[12px] sm:text-[14.5px] font-bold leading-tight sm:leading-snug tracking-normal text-white line-clamp-2 group-hover:text-cyan-100 transition-colors duration-300 pointer-events-none">
+        <h3 className="text-[13px] sm:text-[15.5px] font-bold leading-tight sm:leading-snug tracking-normal text-white line-clamp-2 group-hover:text-cyan-100 transition-colors duration-300 pointer-events-none">
           {card.title}
         </h3>
         {card.description && (
-          <p className="text-[9.5px] sm:text-[11px] font-normal leading-relaxed text-zinc-400 mt-1 sm:mt-1.5 line-clamp-2 pointer-events-none group-hover:text-zinc-300 transition-colors duration-300">
+          <p className="text-[10px] sm:text-[12px] font-normal leading-relaxed text-zinc-400 mt-1 sm:mt-1.5 line-clamp-2 pointer-events-none group-hover:text-zinc-300 transition-colors duration-300">
             {card.description}
           </p>
         )}

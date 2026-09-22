@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Red+Hat+Display:ital,wght@0,300..900;1,300..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Quicksand:wght@500;600;700&family=Red+Hat+Display:ital,wght@0,300..900;1,300..900&display=swap");
 @import "tailwindcss";
 @import "lenis/dist/lenis.css";
 
@@ -19,6 +19,7 @@
   /* Editorial Fonts */
   --font-instrument-serif: "Instrument Serif", Georgia, serif;
   --font-red-hat-display: "Red Hat Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-quicksand: var(--font-quicksand, "Quicksand", sans-serif);
 }
 
 @theme inline {
@@ -27,6 +28,7 @@
   --font-sans: var(--font-varela-round);
   --font-instrument: var(--font-instrument-serif);
   --font-editorial-sans: var(--font-red-hat-display);
+  --font-quicksand: var(--font-quicksand);
 
   --color-brand-cyan: var(--brand-cyan);
   --color-brand-grey-20: var(--brand-grey-20);
@@ -54,6 +56,10 @@ body {
 
 .font-red-hat-display {
   font-family: var(--font-red-hat-display);
+}
+
+.font-quicksand {
+  font-family: var(--font-quicksand);
 }
 
 @media (pointer: fine) {
@@ -149,3 +155,22 @@ body {
 .custom-drawer-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 181, 226, 0.4);
 }
+
+/* Minimal Glowing Optical Laser Line with Slower, Ultra-Smooth Blinking */
+@keyframes beam-blink-smooth {
+  0%, 100% {
+    opacity: 0.3;
+    filter: drop-shadow(0 0 2px rgba(0, 229, 255, 0.3));
+    transform: scaleY(0.85);
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.95)) drop-shadow(0 0 20px rgba(0, 181, 226, 0.65));
+    transform: scaleY(1.1);
+  }
+}
+
+.animate-beam-blink-smooth {
+  animation: beam-blink-smooth 4.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+

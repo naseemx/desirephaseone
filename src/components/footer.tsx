@@ -4,7 +4,11 @@ import React from "react";
 import Image from "next/image";
 import { ArrowUp, Mail, Phone } from "lucide-react";
 
-export function Footer() {
+export interface FooterProps {
+  isStageMode?: boolean;
+}
+
+export function Footer({ isStageMode = false }: FooterProps = {}) {
   const scrollToTop = () => {
     if (typeof window !== "undefined") {
       const lenis = (window as unknown as { lenis?: { scrollTo: (target: number) => void } }).lenis;
@@ -16,12 +20,35 @@ export function Footer() {
     }
   };
 
+  const servicesCol1 = [
+    { title: "Customized LED Screens", href: "#servicehome" },
+    { title: "Smart Flexible Displays", href: "#servicehome" },
+    { title: "Outdoor Digital Screens", href: "#servicehome" },
+    { title: "Indoor Commercial Screens", href: "#servicehome" },
+  ];
+
+  const servicesCol2 = [
+    { title: "Transparent & Mesh Displays", href: "#servicehome" },
+    { title: "Interactive Displays", href: "#servicehome" },
+    { title: "Custom Digital Kiosks", href: "#servicehome" },
+    { title: "Signs and Displays", href: "#servicehome" },
+  ];
+
   const socialLinks = [
+    {
+      name: "Facebook",
+      href: "https://facebook.com",
+      icon: (
+        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+        </svg>
+      ),
+    },
     {
       name: "Instagram",
       href: "https://instagram.com",
       icon: (
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
           <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
           <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
@@ -29,19 +56,19 @@ export function Footer() {
       ),
     },
     {
-      name: "YouTube",
-      href: "https://youtube.com",
+      name: "LinkedIn",
+      href: "https://linkedin.com",
       icon: (
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
         </svg>
       ),
     },
     {
-      name: "Twitter",
+      name: "X",
       href: "https://x.com",
       icon: (
-        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+        <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
           <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
         </svg>
       ),
@@ -50,37 +77,117 @@ export function Footer() {
       name: "WhatsApp",
       href: "https://wa.me/971501234567?text=Hello%20Desire%20Digital%20team,%20I%20would%20like%20to%20inquire%20about%20your%20services.",
       icon: (
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
           <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.225 8.225 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.196 8.196 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24m4.52 11.64c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.25-.75-.67-1.26-1.5-1.4-1.75-.15-.25-.02-.39.11-.51.11-.11.25-.29.37-.44.13-.14.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.49-.4-.42-.56-.43h-.48c-.16 0-.43.06-.66.31-.22.25-.86.84-.86 2.05s.88 2.38 1 2.55c.13.17 1.73 2.64 4.19 3.7.59.25 1.05.4 1.41.51.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.07-.1-.23-.17-.48-.29" />
         </svg>
       ),
-    },
-    {
-      name: "Call Us",
-      href: "tel:+971501234567",
-      icon: <Phone className="w-4 h-4" />,
     },
   ];
 
   return (
     <footer
       id="footer"
-      className="relative border-t border-white/10 bg-[#06080d] text-zinc-400 select-none overflow-hidden"
+      className="relative w-full bg-transparent text-zinc-400 select-none overflow-hidden"
     >
-      {/* Top subtle brand glow */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-[#00b5e2]/30 to-transparent" />
+      {/* ── Minimal Optical Laser Gradient Line (Tapered ends with middle thickness & smooth slow blinking) ── */}
+      <div className="relative w-full flex items-center justify-center pointer-events-none pt-1 pb-2 sm:pb-3 overflow-visible">
+        <svg
+          viewBox="0 0 1200 20"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="w-[90%] max-w-4xl lg:max-w-5xl h-3 sm:h-3.5 overflow-visible pointer-events-none animate-beam-blink-smooth"
+          preserveAspectRatio="none"
+        >
+          <defs>
+            {/* Core Linear Gradient: Transparent -> Electric Cyan -> Pure White Hotspot -> Electric Cyan -> Transparent */}
+            <linearGradient id="opticalFlareCore" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#00e5ff" stopOpacity="0" />
+              <stop offset="25%" stopColor="#00e5ff" stopOpacity="0.4" />
+              <stop offset="47%" stopColor="#00f0ff" stopOpacity="0.95" />
+              <stop offset="50%" stopColor="#ffffff" stopOpacity="1" />
+              <stop offset="53%" stopColor="#00f0ff" stopOpacity="0.95" />
+              <stop offset="75%" stopColor="#00e5ff" stopOpacity="0.4" />
+              <stop offset="100%" stopColor="#00e5ff" stopOpacity="0" />
+            </linearGradient>
 
-      <div className="mx-auto max-w-7xl px-6 py-12 sm:py-16 lg:px-10">
-        {/* Main Grid: Brand & Contact Info, Quick Navigation, Social & Call */}
-        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-12 lg:gap-8 pb-12 border-b border-white/[0.08]">
-          {/* Col 1: Brand & Logos (5 cols on lg) */}
-          <div className="lg:col-span-5 flex flex-col items-start space-y-4">
+            {/* Aura Gradient for outer glow */}
+            <linearGradient id="opticalFlareAura" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#00b5e2" stopOpacity="0" />
+              <stop offset="30%" stopColor="#00e5ff" stopOpacity="0.3" />
+              <stop offset="50%" stopColor="#00f0ff" stopOpacity="0.8" />
+              <stop offset="70%" stopColor="#00e5ff" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="#00b5e2" stopOpacity="0" />
+            </linearGradient>
+
+            <filter id="opticalGlowFilter" x="-10%" y="-100%" width="120%" height="300%">
+              <feGaussianBlur stdDeviation="2.5" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+
+          {/* Layer 1: Ambient Outer Aura (softly glowing tapered lens spindle) */}
+          <path
+            d="M 0 10 Q 600 4.5, 1200 10 Q 600 15.5, 0 10 Z"
+            fill="url(#opticalFlareAura)"
+            filter="url(#opticalGlowFilter)"
+            opacity="0.75"
+          />
+
+          {/* Layer 2: Core Flare Body (razor-sharp ends at 0 & 1200, small elegant thickness at 600) */}
+          <path
+            d="M 10 10 Q 600 7.8, 1190 10 Q 600 12.2, 10 10 Z"
+            fill="url(#opticalFlareCore)"
+          />
+
+          {/* Layer 3: Ultra-fine central filament for piercing laser brilliance */}
+          <line
+            x1="100"
+            y1="10"
+            x2="1100"
+            y2="10"
+            stroke="url(#opticalFlareCore)"
+            strokeWidth="0.8"
+            opacity="0.9"
+          />
+        </svg>
+      </div>
+
+      <div
+        className={
+          isStageMode
+            ? "mx-auto max-w-7xl px-5 sm:px-8 lg:px-10 py-3 sm:py-4 lg:py-3.5"
+            : "mx-auto max-w-7xl px-6 py-10 sm:py-14 lg:px-10"
+        }
+      >
+        {/* Main 4-Column Layout: Brand Intro | Our Services (2 Cols) | Social Media | Quick Contact */}
+        <div
+          className={
+            isStageMode
+              ? "grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-12 lg:gap-8 pb-3 sm:pb-4"
+              : "grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-12 lg:gap-8 pb-8"
+          }
+        >
+          {/* Col 1: Logo & Company Description (3 cols on desktop) */}
+          <div
+            className={`lg:col-span-3 flex flex-col items-start ${
+              isStageMode ? "space-y-2.5" : "space-y-3.5"
+            }`}
+          >
             <a
               href="#hero"
               className="flex items-center gap-2.5 sm:gap-3 transition-opacity hover:opacity-90 active:scale-[0.98]"
               aria-label="Home"
             >
-              <div className="relative h-[24px] sm:h-[28px] w-[62px] sm:w-[72px] shrink-0">
+              <div
+                className={`relative shrink-0 ${
+                  isStageMode
+                    ? "h-[24px] sm:h-[26px] w-[62px] sm:w-[68px]"
+                    : "h-[26px] sm:h-[30px] w-[66px] sm:w-[76px]"
+                }`}
+              >
                 <Image
                   src="/companylogo.png"
                   alt="Desire Advertising"
@@ -91,7 +198,13 @@ export function Footer() {
 
               <div className="h-3.5 sm:h-4 w-[1px] bg-white/20 shrink-0" />
 
-              <div className="relative h-[15px] sm:h-[17px] w-[85px] sm:w-[98px] shrink-0">
+              <div
+                className={`relative shrink-0 ${
+                  isStageMode
+                    ? "h-[15px] sm:h-[16px] w-[85px] sm:w-[92px]"
+                    : "h-[16px] sm:h-[18px] w-[90px] sm:w-[102px]"
+                }`}
+              >
                 <Image
                   src="/brandlogo.png"
                   alt="Dzyr Digital"
@@ -101,74 +214,65 @@ export function Footer() {
               </div>
             </a>
 
-            <p className="text-xs sm:text-[13px] text-zinc-400 leading-relaxed max-w-sm font-normal">
-              Innovative digital LED displays, interactive visual systems, and bespoke turnkey fabrication solutions across the UAE and GCC.
+            <p
+              className={`text-zinc-400 leading-relaxed max-w-xs font-normal ${
+                isStageMode
+                  ? "text-xs sm:text-[12.5px] line-clamp-3"
+                  : "text-xs sm:text-[13px]"
+              }`}
+            >
+              With decades of expertise, Desire Advertising LLC &amp; Dzyr Digital have been your trusted partner in visual communication, cutting-edge LED displays, signage, and turnkey media solutions.
             </p>
+          </div>
 
-            {/* Quick Links: Email & Phone Number */}
-            <div className="pt-2 flex flex-col space-y-2.5">
-              <a
-                href="mailto:info@dzyrdigital.com"
-                className="inline-flex items-center gap-2.5 text-xs sm:text-sm text-zinc-300 hover:text-[#00b5e2] transition-colors group"
-              >
-                <div className="w-7 h-7 rounded-full bg-white/[0.04] border border-white/10 group-hover:border-[#00b5e2]/40 group-hover:bg-[#00b5e2]/10 flex items-center justify-center transition-all">
-                  <Mail className="w-3.5 h-3.5 text-[#00b5e2]" />
-                </div>
-                <span>info@dzyrdigital.com</span>
-              </a>
+          {/* Col 2: Our Services (2 Columns like the navbar - 5 cols on desktop) */}
+          <div
+            className={`lg:col-span-5 flex flex-col ${
+              isStageMode ? "space-y-2.5" : "space-y-3.5"
+            }`}
+          >
+            <h4 className="text-xs sm:text-[13px] font-bold text-white tracking-wide">
+              Our Services
+            </h4>
+            <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-xs sm:text-[12.5px]">
+              {/* Column 1 of Services */}
+              <div className="flex flex-col space-y-2">
+                {servicesCol1.map((service) => (
+                  <a
+                    key={service.title}
+                    href={service.href}
+                    className="text-zinc-400 hover:text-white transition-colors"
+                  >
+                    {service.title}
+                  </a>
+                ))}
+              </div>
 
-              <a
-                href="tel:+971501234567"
-                className="inline-flex items-center gap-2.5 text-xs sm:text-sm text-zinc-300 hover:text-[#00b5e2] transition-colors group"
-              >
-                <div className="w-7 h-7 rounded-full bg-white/[0.04] border border-white/10 group-hover:border-[#00b5e2]/40 group-hover:bg-[#00b5e2]/10 flex items-center justify-center transition-all">
-                  <Phone className="w-3.5 h-3.5 text-[#00b5e2]" />
-                </div>
-                <span>+971 50 123 4567</span>
-              </a>
+              {/* Column 2 of Services */}
+              <div className="flex flex-col space-y-2">
+                {servicesCol2.map((service) => (
+                  <a
+                    key={service.title}
+                    href={service.href}
+                    className="text-zinc-400 hover:text-white transition-colors"
+                  >
+                    {service.title}
+                  </a>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Col 2: Quick Navigation (3 cols on lg) */}
-          <div className="lg:col-span-3 flex flex-col space-y-3">
-            <span className="text-xs uppercase tracking-widest text-zinc-500 font-semibold">
-              Quick Links
-            </span>
-            <nav className="flex flex-col space-y-2 text-xs sm:text-[13px]">
-              <a
-                href="#hero"
-                className="text-zinc-400 hover:text-white transition-colors py-0.5"
-              >
-                Home
-              </a>
-              <a
-                href="#servicehome"
-                className="text-zinc-400 hover:text-white transition-colors py-0.5"
-              >
-                Specialized Services
-              </a>
-              <a
-                href="#contact"
-                className="text-zinc-400 hover:text-white transition-colors py-0.5"
-              >
-                Contact Us
-              </a>
-            </nav>
-          </div>
-
-          {/* Col 3: Social Profile Icons in Brand Color & Call Button (4 cols on lg) */}
-          <div className="lg:col-span-4 flex flex-col space-y-4">
-            <div>
-              <span className="text-xs uppercase tracking-widest text-zinc-500 font-semibold">
-                Connect With Us
-              </span>
-              <p className="text-xs text-zinc-400 mt-1">
-                Reach out directly via our social channels or quick call.
-              </p>
-            </div>
-
-            {/* Social Icons in Brand Color (#00B5E2) */}
-            <div className="flex items-center flex-wrap gap-2.5 pt-1">
+          {/* Col 3: Social Media (2 cols on desktop) */}
+          <div
+            className={`lg:col-span-2 flex flex-col ${
+              isStageMode ? "space-y-2.5" : "space-y-3.5"
+            }`}
+          >
+            <h4 className="text-xs sm:text-[13px] font-bold text-white tracking-wide">
+              Social Media
+            </h4>
+            <div className="flex items-center flex-wrap gap-2 pt-0.5">
               {socialLinks.map((social) => (
                 <a
                   key={social.name}
@@ -177,26 +281,99 @@ export function Footer() {
                   rel={social.href.startsWith("http") ? "noopener noreferrer" : undefined}
                   aria-label={social.name}
                   title={social.name}
-                  className="w-10 h-10 rounded-full border border-[#00b5e2]/30 bg-[#00b5e2]/10 text-[#00b5e2] flex items-center justify-center transition-all duration-300 hover:bg-[#00b5e2] hover:text-black hover:border-[#00b5e2] hover:shadow-[0_0_18px_rgba(0,181,226,0.5)] hover:-translate-y-0.5 active:scale-95 cursor-pointer"
+                  className={`rounded-full border border-white/15 bg-white/[0.04] text-zinc-300 flex items-center justify-center transition-all duration-300 hover:bg-[#00b5e2] hover:text-black hover:border-[#00b5e2] hover:shadow-[0_0_15px_rgba(0,181,226,0.45)] hover:-translate-y-0.5 active:scale-95 cursor-pointer ${
+                    isStageMode ? "w-8 h-8" : "w-8.5 h-8.5"
+                  }`}
                 >
                   {social.icon}
                 </a>
               ))}
             </div>
           </div>
+
+          {/* Col 4: Quick Contact (2 cols on desktop) */}
+          <div
+            className={`lg:col-span-2 flex flex-col ${
+              isStageMode ? "space-y-2.5" : "space-y-3.5"
+            }`}
+          >
+            <h4 className="text-xs sm:text-[13px] font-bold text-white tracking-wide">
+              Quick Contact
+            </h4>
+
+            <div
+              className={`flex flex-col text-zinc-400 ${
+                isStageMode ? "space-y-1.5 text-xs sm:text-[12.5px]" : "space-y-2 text-xs sm:text-[13px]"
+              }`}
+            >
+              <div>
+                <p className="text-white font-medium">Desire Advertising LLC</p>
+                <p className="text-zinc-400 text-[11.5px] sm:text-xs">PO BOX 32180, Dubai, U.A.E</p>
+              </div>
+
+              {/* Contact links with inline icons */}
+              <div className="pt-0.5 flex flex-col space-y-1.5">
+                <a
+                  href="mailto:inquiry@dzyrdigital.com"
+                  className="inline-flex items-center gap-1.5 text-zinc-300 hover:text-[#00b5e2] transition-colors"
+                >
+                  <Mail className="w-3.5 h-3.5 text-[#00b5e2] shrink-0" />
+                  <span>inquiry@dzyrdigital.com</span>
+                </a>
+
+                <a
+                  href="tel:+971501234567"
+                  className="inline-flex items-center gap-1.5 text-zinc-300 hover:text-[#00b5e2] transition-colors"
+                >
+                  <Phone className="w-3.5 h-3.5 text-[#00b5e2] shrink-0" />
+                  <span>+971 50 123 4567</span>
+                </a>
+
+                <a
+                  href="https://wa.me/971557601095"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-zinc-300 hover:text-[#00b5e2] transition-colors"
+                >
+                  <svg className="w-3.5 h-3.5 text-[#00b5e2] shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.225 8.225 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.196 8.196 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24m4.52 11.64c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.25-.75-.67-1.26-1.5-1.4-1.75-.15-.25-.02-.39.11-.51.11-.11.25-.29.37-.44.13-.14.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.49-.4-.42-.56-.43h-.48c-.16 0-.43.06-.66.31-.22.25-.86.84-.86 2.05s.88 2.38 1 2.55c.13.17 1.73 2.64 4.19 3.7.59.25 1.05.4 1.41.51.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.07-.1-.23-.17-.48-.29" />
+                  </svg>
+                  <span>+971 55 760 1095</span>
+                </a>
+
+                <a
+                  href="https://wa.me/971507601518"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-zinc-300 hover:text-[#00b5e2] transition-colors"
+                >
+                  <svg className="w-3.5 h-3.5 text-[#00b5e2] shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.225 8.225 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.196 8.196 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24m4.52 11.64c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.25-.75-.67-1.26-1.5-1.4-1.75-.15-.25-.02-.39.11-.51.11-.11.25-.29.37-.44.13-.14.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.49-.4-.42-.56-.43h-.48c-.16 0-.43.06-.66.31-.22.25-.86.84-.86 2.05s.88 2.38 1 2.55c.13.17 1.73 2.64 4.19 3.7.59.25 1.05.4 1.41.51.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.07-.1-.23-.17-.48-.29" />
+                  </svg>
+                  <span>+971 50 760 1518</span>
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Bottom Bar: Copyright & Back to Top */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-500">
-          <p>© {new Date().getFullYear()} Desire Advertising LLC & Dzyr Digital. All rights reserved.</p>
+        <div
+          className={`flex flex-col sm:flex-row items-center justify-between gap-3 text-zinc-500 ${
+            isStageMode ? "pt-3.5 sm:pt-4 text-xs" : "pt-6 text-xs"
+          }`}
+        >
+          <p>© {new Date().getFullYear()} Desire Advertising LLC &amp; Dzyr Digital. All rights reserved.</p>
 
           <button
             onClick={scrollToTop}
-            className="group flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-xs text-zinc-400 transition-all hover:border-[#00b5e2]/50 hover:bg-white/[0.06] hover:text-white active:scale-95 cursor-pointer"
+            className={`group flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] text-zinc-400 transition-all hover:border-[#00b5e2]/50 hover:bg-white/[0.06] hover:text-white active:scale-95 cursor-pointer ${
+              isStageMode ? "px-3 py-1 text-xs" : "px-4 py-2 text-xs"
+            }`}
             aria-label="Back to top"
           >
             <span>Back to top</span>
-            <ArrowUp className="h-3.5 w-3.5 text-[#00b5e2] transition-transform group-hover:-translate-y-0.5" />
+            <ArrowUp className="h-3 w-3 text-[#00b5e2] transition-transform group-hover:-translate-y-0.5" />
           </button>
         </div>
       </div>

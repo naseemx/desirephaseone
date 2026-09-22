@@ -305,7 +305,7 @@ export function ContactCtaSection({
         className="cta-content-wrapper relative z-10 w-full flex flex-col items-center justify-center will-change-transform"
         style={{ transformOrigin: "50% 50%" }}
       >
-        <div className="w-full flex flex-col items-center text-center font-red-hat-display font-black italic tracking-tighter leading-[0.92] text-3xl sm:text-5xl md:text-6xl lg:text-[84px] xl:text-[104px] 2xl:text-[124px] text-zinc-100">
+        <div className="w-full flex flex-col items-center text-center font-quicksand font-bold italic tracking-tight leading-[0.95] text-3xl sm:text-5xl md:text-6xl lg:text-[84px] xl:text-[104px] 2xl:text-[124px] text-zinc-100">
           
           {/* LINE 1: Sign in (centered, slides in from left edge) */}
           <div className="w-full overflow-hidden py-1 sm:py-2 flex justify-center text-center">
@@ -333,7 +333,7 @@ export function ContactCtaSection({
               ref={line2Ref}
               className="cta-line-inner cta-line-2 will-change-transform inline-block text-center whitespace-nowrap"
             >
-              <span className="text-[#00b5e2]">dzyr</span> digital visuals
+              <span className="text-[#00b5e2]">dzyr digital</span> visuals
             </div>
           </div>
 

@@ -15,7 +15,7 @@ import { ContactCtaSection } from "@/components/contact-cta-section";
 import { ServiceHome } from "@/components/service-home";
 import { MissionVisionSection } from "@/components/mission-vision-section";
 import { ContactForm } from "@/components/contact-form";
-import { GeoLocationSection } from "@/components/geo-location-section";
+import { Footer } from "@/components/footer";
 
 const PROCESS_STEPS: ProcessStepData[] = [
   {
@@ -64,7 +64,6 @@ export function ProcessSection() {
   const serviceLayerRef = useRef<HTMLDivElement>(null);
   const missionLayerRef = useRef<HTMLDivElement>(null);
   const contactLayerRef = useRef<HTMLDivElement>(null);
-  const locationLayerRef = useRef<HTMLDivElement>(null);
   const centerLineRef = useRef<HTMLDivElement>(null);
   const starRef = useRef<HTMLDivElement>(null);
   const desktopServiceScrollRef = useRef<number>(0);
@@ -126,7 +125,6 @@ export function ProcessSection() {
         const serviceLayer = serviceLayerRef.current;
         const missionLayer = missionLayerRef.current;
         const contactLayer = contactLayerRef.current;
-        const locationLayer = locationLayerRef.current;
         const centerLine = centerLineRef.current;
         const star = starRef.current;
         const heading = headingRef.current;
@@ -265,9 +263,6 @@ export function ProcessSection() {
         if (contactLayer) {
           gsap.set(contactLayer, { opacity: 0, scale: 0.96, pointerEvents: "none", force3D: true });
         }
-        if (locationLayer) {
-          gsap.set(locationLayer, { opacity: 0, scale: 0.96, pointerEvents: "none", force3D: true });
-        }
         desktopServiceScrollRef.current = 0;
 
         gsap.set(centerLine, {
@@ -311,7 +306,7 @@ export function ProcessSection() {
           gsap.set(el, { opacity: 0.25, scale: 0.98, force3D: true });
         });
 
-        // Master scrubbed timeline: 9600px provides snappy, responsive progressive storytelling
+        // Master scrubbed timeline: Snappy, responsive progressive storytelling
         // Phase 1-3: CTA Intro & Crossfade into Process (0 -> 3.8s)
         // Phase 4: Process Storytelling (3.8 -> 11.0s)
         // Phase 4.5: Step 04 reading hold (11.0 -> 11.5s)
@@ -324,12 +319,9 @@ export function ProcessSection() {
         // Phase 7c: MissionVision reading hold (21.3 -> 23.8s)
         // Phase 7d: MissionVision clean fade-out (23.8 -> 24.6s)
         // Phase 7e: ContactForm smooth fade-in after MissionVision completely dissolves (24.7 -> 25.6s)
-        // Phase 8a: ContactForm reading & interaction hold (25.6 -> 28.1s)
-        // Phase 8b: ContactForm clean fade-out (28.1 -> 28.9s)
-        // Phase 9a: GeoLocationSection smooth fade-in (29.0 -> 29.9s)
-        // Phase 9b: GeoLocationSection reading hold (29.9 -> 32.4s)
-        // Phase 10: Buffer before Footer unpin (32.4 -> 32.8s)
-        const scrollDistance = 12000;
+        // Phase 8: ContactForm reading & interaction hold until unpinning to Footer (25.6 -> 28.5s)
+        // Phase 9: Buffer before Footer unpin (28.5 -> 28.9s)
+        const scrollDistance = 10500;
 
         const tl = gsap.timeline({
           defaults: { immediateRender: false },
@@ -356,49 +348,37 @@ export function ProcessSection() {
               } else if (self.progress < 0.08 && self.direction === -1) {
                 playAutoCtaIntro();
               }
-              if (ctaLayer && processContent && serviceLayer && missionLayer && contactLayer && locationLayer) {
+              if (ctaLayer && processContent && serviceLayer && missionLayer && contactLayer) {
                 if (self.progress < 0.12) {
                   ctaLayer.style.pointerEvents = "auto";
                   processContent.style.pointerEvents = "none";
                   serviceLayer.style.pointerEvents = "none";
                   missionLayer.style.pointerEvents = "none";
                   contactLayer.style.pointerEvents = "none";
-                  locationLayer.style.pointerEvents = "none";
-                } else if (self.progress >= 0.12 && self.progress < 0.38) {
+                } else if (self.progress >= 0.12 && self.progress < 0.42) {
                   ctaLayer.style.pointerEvents = "none";
                   processContent.style.pointerEvents = "auto";
                   serviceLayer.style.pointerEvents = "none";
                   missionLayer.style.pointerEvents = "none";
                   contactLayer.style.pointerEvents = "none";
-                  locationLayer.style.pointerEvents = "none";
-                } else if (self.progress >= 0.38 && self.progress < 0.62) {
+                } else if (self.progress >= 0.42 && self.progress < 0.69) {
                   ctaLayer.style.pointerEvents = "none";
                   processContent.style.pointerEvents = "none";
                   serviceLayer.style.pointerEvents = "auto";
                   missionLayer.style.pointerEvents = "none";
                   contactLayer.style.pointerEvents = "none";
-                  locationLayer.style.pointerEvents = "none";
-                } else if (self.progress >= 0.62 && self.progress < 0.75) {
+                } else if (self.progress >= 0.69 && self.progress < 0.84) {
                   ctaLayer.style.pointerEvents = "none";
                   processContent.style.pointerEvents = "none";
                   serviceLayer.style.pointerEvents = "none";
                   missionLayer.style.pointerEvents = "auto";
                   contactLayer.style.pointerEvents = "none";
-                  locationLayer.style.pointerEvents = "none";
-                } else if (self.progress >= 0.75 && self.progress < 0.88) {
-                  ctaLayer.style.pointerEvents = "none";
-                  processContent.style.pointerEvents = "none";
-                  serviceLayer.style.pointerEvents = "none";
-                  missionLayer.style.pointerEvents = "none";
-                  contactLayer.style.pointerEvents = "auto";
-                  locationLayer.style.pointerEvents = "none";
                 } else {
                   ctaLayer.style.pointerEvents = "none";
                   processContent.style.pointerEvents = "none";
                   serviceLayer.style.pointerEvents = "none";
                   missionLayer.style.pointerEvents = "none";
-                  contactLayer.style.pointerEvents = "none";
-                  locationLayer.style.pointerEvents = "auto";
+                  contactLayer.style.pointerEvents = "auto";
                 }
               }
 
@@ -712,42 +692,15 @@ export function ProcessSection() {
         }
 
         // ─────────────────────────────────────────────────────────────────
-        // PHASE 8a: ContactForm reading & interaction hold (t = 25.6 -> 28.1)
+        // PHASE 8: ContactForm reading & interaction hold (t = 25.6 -> 28.5)
+        // ContactForm remains visible and interactive without fading out
         // ─────────────────────────────────────────────────────────────────
-        tl.to({}, { duration: 2.5 }, 25.6);
+        tl.to({}, { duration: 2.9 }, 25.6);
 
         // ─────────────────────────────────────────────────────────────────
-        // PHASE 8b: ContactForm cleanly & smoothly fades out (t = 28.1 -> 28.9)
+        // PHASE 9: Buffer before smooth unpinning directly to Footer (t = 28.5 -> 28.9)
         // ─────────────────────────────────────────────────────────────────
-        if (contactLayer) {
-          tl.to(
-            contactLayer,
-            { opacity: 0, scale: 0.94, duration: 0.8, ease: "power1.inOut", force3D: true },
-            28.1
-          );
-        }
-
-        // ─────────────────────────────────────────────────────────────────
-        // PHASE 9a: GeoLocationSection smoothly fades in ONLY AFTER ContactForm completely dissolves (t = 29.0 -> 29.9)
-        // ─────────────────────────────────────────────────────────────────
-        if (locationLayer) {
-          tl.fromTo(
-            locationLayer,
-            { opacity: 0, scale: 0.96 },
-            { opacity: 1, scale: 1.0, duration: 0.9, ease: "power1.inOut", force3D: true },
-            29.0
-          );
-        }
-
-        // ─────────────────────────────────────────────────────────────────
-        // PHASE 9b: GeoLocationSection reading hold (t = 29.9 -> 32.4)
-        // ─────────────────────────────────────────────────────────────────
-        tl.to({}, { duration: 2.5 }, 29.9);
-
-        // ─────────────────────────────────────────────────────────────────
-        // PHASE 10: Buffer before smooth unpinning directly to Footer (t = 32.4 -> 32.8)
-        // ─────────────────────────────────────────────────────────────────
-        tl.to({}, { duration: 0.4 }, 32.4);
+        tl.to({}, { duration: 0.4 }, 28.5);
 
         // Trigger auto reveal immediately ONLY if actually active on mount (e.g. reload or anchor)
         if (typeof window !== "undefined" && section) {
@@ -818,7 +771,6 @@ export function ProcessSection() {
         const serviceLayer = serviceLayerRef.current;
         const missionLayer = missionLayerRef.current;
         const contactLayer = contactLayerRef.current;
-        const locationLayer = locationLayerRef.current;
         const mobileTrack = mobileTrackRef.current;
         const heading = mobileHeadingRef.current;
         const badge = mobileBadgeRef.current;
@@ -939,9 +891,6 @@ export function ProcessSection() {
         if (contactLayer) {
           gsap.set(contactLayer, { opacity: 0, scale: 0.96, pointerEvents: "none", force3D: true });
         }
-        if (locationLayer) {
-          gsap.set(locationLayer, { opacity: 0, scale: 0.96, pointerEvents: "none", force3D: true });
-        }
 
         // Set initial states for mobile narrative
         if (badge) {
@@ -1028,8 +977,8 @@ export function ProcessSection() {
           });
         }
 
-        // Master pinned mobile stage: CTA intro -> Process narrative & steps track -> Process clean fade-out -> ServiceHome smooth fade-in -> ServiceHome cards move and stop in center -> ServiceHome clean fade-out -> MissionVision smooth fade-in -> MissionVision hold & clean fade-out -> ContactForm smooth fade-in -> ContactForm fade-out -> GeoLocationSection smooth fade-in -> GeoLocationSection unpin to Footer
-        const mobileScrollDist = 10200;
+        // Master pinned mobile stage: CTA intro -> Process -> ServiceHome -> MissionVision -> ContactForm (holds until Footer unpin)
+        const mobileScrollDist = 8900;
         // Reset dirty-check refs on mobile init
         mobileActiveStepRef.current = -1;
         mobileActiveColRef.current = -1;
@@ -1058,49 +1007,37 @@ export function ProcessSection() {
               } else if (self.progress < 0.08 && self.direction === -1) {
                 playMobileAutoCtaIntro();
               }
-              if (ctaLayer && processContent && serviceLayer && missionLayer && contactLayer && locationLayer) {
-                if (self.progress < 0.10) {
+              if (ctaLayer && processContent && serviceLayer && missionLayer && contactLayer) {
+                if (self.progress < 0.11) {
                   ctaLayer.style.pointerEvents = "auto";
                   processContent.style.pointerEvents = "none";
                   serviceLayer.style.pointerEvents = "none";
                   missionLayer.style.pointerEvents = "none";
                   contactLayer.style.pointerEvents = "none";
-                  locationLayer.style.pointerEvents = "none";
-                } else if (self.progress >= 0.10 && self.progress < 0.35) {
+                } else if (self.progress >= 0.11 && self.progress < 0.33) {
                   ctaLayer.style.pointerEvents = "none";
                   processContent.style.pointerEvents = "auto";
                   serviceLayer.style.pointerEvents = "none";
                   missionLayer.style.pointerEvents = "none";
                   contactLayer.style.pointerEvents = "none";
-                  locationLayer.style.pointerEvents = "none";
-                } else if (self.progress >= 0.35 && self.progress < 0.61) {
+                } else if (self.progress >= 0.33 && self.progress < 0.69) {
                   ctaLayer.style.pointerEvents = "none";
                   processContent.style.pointerEvents = "none";
                   serviceLayer.style.pointerEvents = "auto";
                   missionLayer.style.pointerEvents = "none";
                   contactLayer.style.pointerEvents = "none";
-                  locationLayer.style.pointerEvents = "none";
-                } else if (self.progress >= 0.61 && self.progress < 0.74) {
+                } else if (self.progress >= 0.69 && self.progress < 0.84) {
                   ctaLayer.style.pointerEvents = "none";
                   processContent.style.pointerEvents = "none";
                   serviceLayer.style.pointerEvents = "none";
                   missionLayer.style.pointerEvents = "auto";
                   contactLayer.style.pointerEvents = "none";
-                  locationLayer.style.pointerEvents = "none";
-                } else if (self.progress >= 0.74 && self.progress < 0.87) {
-                  ctaLayer.style.pointerEvents = "none";
-                  processContent.style.pointerEvents = "none";
-                  serviceLayer.style.pointerEvents = "none";
-                  missionLayer.style.pointerEvents = "none";
-                  contactLayer.style.pointerEvents = "auto";
-                  locationLayer.style.pointerEvents = "none";
                 } else {
                   ctaLayer.style.pointerEvents = "none";
                   processContent.style.pointerEvents = "none";
                   serviceLayer.style.pointerEvents = "none";
                   missionLayer.style.pointerEvents = "none";
-                  contactLayer.style.pointerEvents = "none";
-                  locationLayer.style.pointerEvents = "auto";
+                  contactLayer.style.pointerEvents = "auto";
                 }
               }
 
@@ -1387,33 +1324,12 @@ export function ProcessSection() {
           );
         }
 
-        // 9f. Phase 8a: Mobile ContactForm reading & interaction hold (t = 23.9 -> 26.4)
-        mobileTl.to({}, { duration: 2.5 }, 23.9);
+        // 9f. Phase 8: Mobile ContactForm reading & interaction hold (t = 23.9 -> 26.6)
+        // ContactForm remains visible and interactive without fading out
+        mobileTl.to({}, { duration: 2.7 }, 23.9);
 
-        // 9g. Phase 8b: Mobile ContactForm cleanly & smoothly fades out (t = 26.4 -> 27.2)
-        if (contactLayer) {
-          mobileTl.to(
-            contactLayer,
-            { opacity: 0, scale: 0.94, duration: 0.8, ease: "power1.inOut", force3D: true },
-            26.4
-          );
-        }
-
-        // 10a. Phase 9a: Mobile GeoLocationSection smoothly fades in ONLY AFTER ContactForm completely dissolves (t = 27.3 -> 28.1)
-        if (locationLayer) {
-          mobileTl.fromTo(
-            locationLayer,
-            { opacity: 0, scale: 0.96 },
-            { opacity: 1, scale: 1.0, duration: 0.8, ease: "power1.inOut", force3D: true },
-            27.3
-          );
-        }
-
-        // 10b. Phase 9b: Mobile GeoLocationSection reading hold (t = 28.1 -> 30.6)
-        mobileTl.to({}, { duration: 2.5 }, 28.1);
-
-        // 11. Phase 10: Mobile buffer before smooth unpinning to Footer (t = 30.6 -> 31.0)
-        mobileTl.to({}, { duration: 0.4 }, 30.6);
+        // 10. Phase 9: Mobile buffer before smooth unpinning to Footer (t = 26.6 -> 27.0)
+        mobileTl.to({}, { duration: 0.4 }, 26.6);
 
         // Trigger auto reveal immediately ONLY if actually active on mount
         if (typeof window !== "undefined" && section) {
@@ -1730,22 +1646,21 @@ export function ProcessSection() {
         <MissionVisionSection isStageMode />
       </div>
 
-      {/* Pinned Contact Form Layer - In-place center crossfade */}
+      {/* Pinned Contact Form & Footer Layer - Seen simultaneously on desktop screen */}
       <div
         ref={contactLayerRef}
-        className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none h-screen w-full overflow-hidden"
+        className="absolute inset-0 z-20 flex flex-col justify-between pointer-events-none h-screen w-full select-none overflow-y-auto lg:overflow-hidden"
         style={{ opacity: 0, transformOrigin: "50% 50%", willChange: "transform, opacity" }}
       >
-        <ContactForm isStageMode />
-      </div>
+        {/* Upper Region: Contact Form (centered in upper area, red box in diagram) */}
+        <div className="w-full flex-1 flex flex-col items-center justify-center pt-14 sm:pt-16 lg:pt-14 pb-2 px-3 sm:px-6 relative z-20">
+          <ContactForm isStageMode />
+        </div>
 
-      {/* Pinned Geo Location Layer - In-place center crossfade */}
-      <div
-        ref={locationLayerRef}
-        className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none h-screen w-full overflow-hidden"
-        style={{ opacity: 0, transformOrigin: "50% 50%", willChange: "transform, opacity" }}
-      >
-        <GeoLocationSection isStageMode />
+        {/* Lower Region: Footer (anchored at bottom, green marking in diagram) */}
+        <div className="w-full relative z-20">
+          <Footer isStageMode />
+        </div>
       </div>
     </section>
   );

@@ -61,16 +61,16 @@ export function Navbar({ visible = true }: NavbarProps) {
           : "opacity-0 -translate-y-4 pointer-events-none"
       }`}
     >
-      <nav className="flex h-16 sm:h-20 w-full items-center justify-between px-9 sm:px-10 lg:px-12">
+      <nav className="flex h-16 sm:h-24 w-full items-center justify-between px-9 sm:px-10 lg:px-12">
         {/* Left: Brand Logo & Company Logo */}
         <div className="flex items-center gap-3 sm:gap-4">
           <a
             href="#hero"
-            className="flex items-center gap-2.5 sm:gap-3 transition-opacity hover:opacity-90 active:scale-[0.98]"
+            className="flex items-center gap-2.5 sm:gap-4 transition-opacity hover:opacity-90 active:scale-[0.98]"
             aria-label="Home"
           >
             {/* companylogo.png (Desire Advertising) */}
-            <div className="relative h-[28px] sm:h-[33px] w-[71px] sm:w-[84px] shrink-0">
+            <div className="relative h-[28px] sm:h-[50px] w-[71px] sm:w-[126px] shrink-0">
               <Image
                 src="/companylogo.png"
                 alt="Company Logo"
@@ -81,10 +81,10 @@ export function Navbar({ visible = true }: NavbarProps) {
             </div>
 
             {/* Subtle vertical divider */}
-            <div className="h-[18px] sm:h-[20px] w-[1px] bg-white/25 shrink-0" />
+            <div className="h-[18px] sm:h-[30px] w-[1px] bg-white/25 shrink-0" />
 
             {/* brandlogo.png (dzyr digital) */}
-            <div className="relative h-[18px] sm:h-[20px] w-[100px] sm:w-[115px] shrink-0">
+            <div className="relative h-[18px] sm:h-[30px] w-[100px] sm:w-[173px] shrink-0">
               <Image
                 src="/brandlogo.png"
                 alt="Brand Logo"

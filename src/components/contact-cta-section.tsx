@@ -174,7 +174,7 @@ export function ContactCtaSection({
         },
         (context) => {
           const { isMobile } = (context.conditions || {}) as { isMobile?: boolean };
-          const scrollDistance = isMobile ? 1200 : 1800;
+          const scrollDistance = isMobile ? 450 : 650;
 
           gsap.set(l0, { x: () => getLeftOffscreenX(l0), opacity: 0, force3D: true });
           gsap.set(l1, { x: () => getRightOffscreenX(l1), opacity: 0, force3D: true });
@@ -236,7 +236,7 @@ export function ContactCtaSection({
               start: "top top",
               end: `+=${scrollDistance}`,
               pin: true,
-              scrub: 0.6,
+              scrub: 0.5,
               anticipatePin: 1,
               fastScrollEnd: true,
               preventOverlaps: true,
@@ -247,21 +247,21 @@ export function ContactCtaSection({
                 playAutoOutro();
               },
               onUpdate: (self) => {
-                if (self.progress >= 0.70 && self.direction === 1) {
+                if (self.progress >= 0.12 && self.direction === 1) {
                   playAutoOutro();
-                } else if (self.progress < 0.60 && self.direction === -1) {
+                } else if (self.progress < 0.08 && self.direction === -1) {
                   playAutoReveal();
                 }
               },
             },
           });
 
-          // Phase 1: Hold moment while revealed automatically (t = 0.0 -> 1.8)
-          tl.to({}, { duration: 1.8 }, 0);
+          // Phase 1: Brief hold moment while revealed automatically (t = 0.0 -> 0.3)
+          tl.to({}, { duration: 0.3 }, 0);
 
-          // Phase 2: Section fades out completely as user scrolls to exit (t = 1.8 -> 3.0)
-          tl.to(content, { opacity: 0, scale: 0.94, ease: "power2.inOut", duration: 1.2, force3D: true }, 1.8);
-          tl.to({}, { duration: 0.4 }, 3.0);
+          // Phase 2: Section fades out promptly as user scrolls to exit (t = 0.3 -> 0.9)
+          tl.to(content, { opacity: 0, scale: 0.94, ease: "power2.inOut", duration: 0.6, force3D: true }, 0.3);
+          tl.to({}, { duration: 0.1 }, 0.9);
 
           // Trigger immediately ONLY if already active on mount (e.g. page reload)
           if (typeof window !== "undefined" && section) {

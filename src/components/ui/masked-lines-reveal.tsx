@@ -39,7 +39,7 @@ export const MaskedLinesReveal = forwardRef<HTMLDivElement, MaskedLinesRevealPro
           >
             <div
               ref={(el) => setLineRef?.(el, idx)}
-              className={`block will-change-transform origin-top-left ${lineClassName}`}
+              className={`desc-line block will-change-transform origin-top-left ${lineClassName}`}
             >
               {lineText}
             </div>

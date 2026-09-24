@@ -69,7 +69,7 @@ export function FloatingWhatsApp({
 
   return (
     <div
-      className={`fixed bottom-6 right-6 sm:bottom-8 sm:right-8 z-40 transition-all duration-500 ease-out select-none ${
+      className={`fixed bottom-5 right-5 sm:bottom-8 sm:right-8 z-50 transition-all duration-500 ease-out select-none ${
         visible
           ? "opacity-100 scale-100 pointer-events-auto translate-y-0"
           : "opacity-0 scale-75 pointer-events-none translate-y-4"
@@ -81,14 +81,14 @@ export function FloatingWhatsApp({
         rel="noopener noreferrer"
         aria-label="Chat with us on WhatsApp"
         title="Chat with us on WhatsApp"
-        className="group relative flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full border border-[#00b5e2]/30 bg-[#06080d]/85 backdrop-blur-md text-[#00b5e2] shadow-lg shadow-black/50 transition-all duration-300 hover:bg-[#00b5e2] hover:text-black hover:border-[#00b5e2] hover:shadow-[0_0_18px_rgba(0,181,226,0.5)] hover:-translate-y-0.5 active:scale-95 cursor-pointer"
+        className="group relative flex h-[52px] w-[52px] sm:h-[60px] sm:w-[60px] items-center justify-center rounded-full border border-[#00b5e2]/40 bg-[#06080d]/90 backdrop-blur-xl text-[#00b5e2] shadow-[0_8px_30px_rgba(0,0,0,0.7),0_0_20px_rgba(0,181,226,0.25)] transition-all duration-300 hover:bg-[#00b5e2] hover:text-black hover:border-[#00b5e2] hover:shadow-[0_0_26px_rgba(0,181,226,0.65)] hover:-translate-y-1 active:scale-95 cursor-pointer shrink-0"
       >
         {/* Subtle brand tint inside */}
-        <span className="absolute inset-0 rounded-full bg-[#00b5e2]/10 transition-opacity group-hover:opacity-0 pointer-events-none" />
+        <span className="absolute inset-0 rounded-full bg-[#00b5e2]/15 transition-opacity group-hover:opacity-0 pointer-events-none" />
 
-        {/* Minimal WhatsApp Icon matching Footer */}
+        {/* WhatsApp Icon */}
         <svg
-          className="relative z-10 w-4 h-4 sm:w-4.5 sm:h-4.5 transition-transform duration-300 group-hover:scale-105"
+          className="relative z-10 w-6 h-6 sm:w-7 sm:h-7 transition-transform duration-300 group-hover:scale-110"
           viewBox="0 0 24 24"
           fill="currentColor"
         >
@@ -96,7 +96,7 @@ export function FloatingWhatsApp({
         </svg>
 
         {/* Minimal Tooltip on Hover */}
-        <span className="hidden sm:inline-block absolute right-full mr-3 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-lg bg-[#06080d]/95 border border-white/10 text-[11px] font-medium text-zinc-300 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none shadow-xl backdrop-blur-md translate-x-1 group-hover:translate-x-0">
+        <span className="hidden sm:inline-block absolute right-full mr-3 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-xl bg-[#06080d]/95 border border-white/15 text-xs font-medium text-zinc-200 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none shadow-2xl backdrop-blur-md translate-x-1 group-hover:translate-x-0">
           WhatsApp
         </span>
       </a>

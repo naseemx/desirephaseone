@@ -4,3 +4,4 @@ export * from "./stroke-button";
 export * from "./ambient-stars";
 export * from "./center-star-divider";
 export * from "./process-step-item";
+export * from "./edge-glass-card";

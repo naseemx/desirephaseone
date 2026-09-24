@@ -18,7 +18,7 @@ export interface ServiceItem {
   description?: string;
 }
 
-export const DEFAULT_SERVICE_IMAGE = "/servicehome/service_card.jpg";
+export const DEFAULT_SERVICE_IMAGE = "/servicehome/firstCard.jpeg";
 
 export const SERVICES: ServiceItem[] = [
   // ─── FIRST LINE / ROW (8 SERVICES) ──────────────────────────────────────────
@@ -28,7 +28,7 @@ export const SERVICES: ServiceItem[] = [
     navbarTitle: "Customized LED Screens",
     line: 1,
     row: 1,
-    image: DEFAULT_SERVICE_IMAGE,
+    image: "/servicehome/firstCard.jpeg",
     category: "Custom Solutions",
     description:
       "Transform your space with our fully customized LED display solutions. We offer full-cycle delivery, from conceptualization through fabrication, structural design, installation, and ongoing optimization which makes LED displays accessible for every architectural environment. Every custom-designed screen adapts to your unique space, whether indoor, outdoor, or specialized environments. Our expertise delivers unlimited visual customization, precise pixel pitches, advanced refresh rates, and innovative structural framing solutions.",
@@ -39,7 +39,7 @@ export const SERVICES: ServiceItem[] = [
     navbarTitle: "Smart Flexible Displays",
     line: 1,
     row: 1,
-    image: DEFAULT_SERVICE_IMAGE,
+    image: "/servicehome/flexibleDisplay.jpeg",
     category: "Flexible LED",
     description:
       "Flexible LED displays engineered to transform architectural spaces with boundless design freedom. Our bendable modular tiles create stunning curved and rounded displays perfectly adapted to pillars, columns, and organic architectural features. Seamlessly wrap your vision around structural elements with concave and convex curves, spherical installations, and flowing digital waves without visual distortion, bringing dynamic environments to life effortlessly.",
@@ -50,7 +50,7 @@ export const SERVICES: ServiceItem[] = [
     navbarTitle: "Outdoor Digital Screens",
     line: 1,
     row: 1,
-    image: DEFAULT_SERVICE_IMAGE,
+    image: "/servicehome/shrinkingOutdoorDisplay.jpeg",
     category: "Outdoor Digital",
     description:
       "We engineer high-brightness, weatherproof outdoor screens built to withstand extreme climates. Designed for highways, building facades, stadiums, and plazas, our displays feature automated brightness and sun readability for ultra-vivid daytime and nighttime visibility. They deliver dynamic content, heavy-duty durability, and low-power operation to maximize advertising reach and product lifespan. Featuring remote monitoring and automated thermal management, they run reliably around the clock with minimal maintenance.",
@@ -61,7 +61,7 @@ export const SERVICES: ServiceItem[] = [
     navbarTitle: "Indoor Commercial Displays",
     line: 1,
     row: 1,
-    image: DEFAULT_SERVICE_IMAGE,
+    image: "/servicehome/indoorCommercialDisplay.jpeg",
     category: "Indoor Commercial",
     description:
       "We deliver ultra high definition indoor commercial display screens featuring superior color calibration, slim physical profiles, high energy efficiency, and seamless video wall configurations for corporate environments, control rooms, luxury retail venues, and broadcast studios, guaranteeing exceptional clarity, wide viewing angles, continuous operation, and effortless centralized content management that keeps your visual communications permanently impactful.",
@@ -72,7 +72,7 @@ export const SERVICES: ServiceItem[] = [
     navbarTitle: "Transparent & Mesh Displays",
     line: 1,
     row: 1,
-    image: DEFAULT_SERVICE_IMAGE,
+    image: "/servicehome/transparentDisplay.jpeg",
     category: "Transparent & Mesh",
     description:
       "We provide cutting-edge indoor and outdoor transparent mesh LED displays that offer high light transmittance, vivid image clarity, and a futuristic aesthetic for glass storefronts, building facades, and luxury showrooms. By blending dynamic digital messaging with real natural ambient lighting, these displays preserve the unobstructed views and interior aesthetics while creating an elevated interactive retail atmosphere for modern venues. Lets transform ordinary architectural glass into high-impact digital canvases without compromising structural integrity.",
@@ -83,7 +83,7 @@ export const SERVICES: ServiceItem[] = [
     navbarTitle: "Interactive Displays",
     line: 1,
     row: 1,
-    image: DEFAULT_SERVICE_IMAGE,
+    image: "/servicehome/interactiveDisplay.jpeg",
     category: "Interactive Tech",
     description:
       "We deploy multi-touch interactive displays featuring ultra-fast response, high precision touch, built-in annotation, and collaborative digital whiteboard software. These versatile systems empower teams to brainstorm ideas effectively and make decisions in real time. Engineered for boardrooms, classrooms, control centers, and public venues, these solutions drive active participation, facilitate dynamic presentations, and boost team collaboration by seamlessly linking physical spaces with modern digital workflows.",
@@ -94,7 +94,7 @@ export const SERVICES: ServiceItem[] = [
     navbarTitle: "Custom Digital Kiosks",
     line: 1,
     row: 1,
-    image: DEFAULT_SERVICE_IMAGE,
+    image: "/servicehome/customKioskiDisplay.jpeg",
     category: "Digital Kiosks",
     description:
       "We craft fully customized digital kiosks equipped with intuitive interactive touch interfaces, heavy-duty protective enclosures, dynamic digital signage software, and professional corporate branding options designed to elevate consumer engagement, streamline wayfinding operations, process self-service transactions efficiently, and provide reliable round-the-clock interactive touch experiences across high-traffic retail malls, airport terminals, corporate lobbies, and public venues throughout the region.",
@@ -105,7 +105,7 @@ export const SERVICES: ServiceItem[] = [
     navbarTitle: "Audiovisual Solutions",
     line: 1,
     row: 1,
-    image: DEFAULT_SERVICE_IMAGE,
+    image: "/servicehome/transform.jpeg",
     category: "Audiovisual Solutions",
     description:
       "We deliver comprehensive audiovisual solutions combining high definition LED screen installation with crystal clear acoustic design. Our fully integrated AV systems transform corporate boardrooms, entertainment venues, commercial spaces, and private residences into immersive environments. Every installation features cutting-edge technology, striking visual displays, and immersive soundscapes with unified control systems.",

@@ -20,41 +20,43 @@ import { Footer } from "@/components/footer";
 const PROCESS_STEPS: ProcessStepData[] = [
   {
     id: "01",
-    title: "Discovery",
+    title: "Audience Identification",
     description:
-      "Understanding your goals, audience, and constraints before touching a single pixel.",
+      "We pinpoint key businesses needing premium LED displays, custom signage, and immersive exhibition structures to maximize exposure.",
   },
   {
     id: "02",
-    title: "Concept & Design",
+    title: "Concept Creation",
     description:
-      "Visual direction, interaction design, and prototyping. You see it before I build it.",
+      "We design visually striking, client-focused concepts tailored to captivate targeted audiences and elevate overall brand presence.",
   },
   {
     id: "03",
-    title: "Development",
+    title: "Flawless Execution",
     description:
-      "Pixel-perfect implementation with performance and attention to detail built in.",
+      "We expertly manufacture, install, and turn artistic concepts into high-performing, physical advertising products and services.",
   },
   {
     id: "04",
-    title: "Launch & Beyond",
+    title: "Enduring Connection",
     description:
-      "Deployment, testing, and support. I don't disappear after the handoff.",
+      "We build lasting partnerships by delivering exceptional post-installation maintenance, reliable long-term service, and ongoing technical support.",
   },
 ];
 
-// Split lines definition for Title matching Ricardo Chance's structure
+// Split lines definition for Title
 const TITLE_LINES = [
-  { words: ["A", "process", "built", "around"] },
-  { words: ["clarity", "and", "craft."] },
+  { words: ["Elevating", "Brands"] },
+  { words: ["Through", "Impactful"] },
+  { words: ["Visual", "Experiences"] },
 ];
 
-// Split lines definition for Description matching Ricardo Chance's masked lines
+// Split lines definition for Description
 const DESC_LINES = [
-  "No surprises, no handoff chaos.",
-  "Just a clear path from the first conversation",
-  "to a product that works.",
+  "We are a premier UAE-based advertising and",
+  "LED screen specialist, transforming bold vision into",
+  "reality through seamlessly integrated, end-to-end",
+  "design, installation, and long-term support solutions.",
 ];
 
 export function ProcessSection() {
@@ -114,7 +116,6 @@ export function ProcessSection() {
           !starRef.current ||
           !headingRef.current ||
           !descriptionRef.current ||
-          !ctaRef.current ||
           !rightTrackRef.current
         )
           return;
@@ -133,7 +134,9 @@ export function ProcessSection() {
         const rectBorder = rectBorderRef.current;
         const rightTrack = rightTrackRef.current;
         const stepEls = stepRefs.current.filter(Boolean) as HTMLDivElement[];
-        const descLines = descLinesRef.current.filter(Boolean) as HTMLDivElement[];
+        const descLines = descriptionRef.current
+          ? Array.from(descriptionRef.current.querySelectorAll<HTMLDivElement>(".desc-line"))
+          : (descLinesRef.current.filter(Boolean) as HTMLDivElement[]);
 
         const ctaContent = ctaLayer?.querySelector<HTMLDivElement>(".cta-content-wrapper");
         const ctaLine0 = ctaLayer?.querySelector<HTMLDivElement>(".cta-line-0");
@@ -153,12 +156,8 @@ export function ProcessSection() {
           (el) => el.offsetTop + el.offsetHeight / 2
         );
 
-        // Initial state: Step 01 starts near bottom
-        const startY = viewportHeight * 0.95 - (stepCenters[0] ?? 0);
-
-        // Final state: Step 04 is past center
-        const endY =
-          centerTarget - (stepCenters[stepCenters.length - 1] ?? 0) - 120;
+        // Initial state: Step 01 starts directly centered at the star
+        const startY = centerTarget - (stepCenters[0] ?? 0);
 
         // ─────────────────────────────────────────────────────────────────────
         // INITIAL STATES AT START (Progress = 0)
@@ -266,22 +265,22 @@ export function ProcessSection() {
         desktopServiceScrollRef.current = 0;
 
         gsap.set(centerLine, {
-          scaleY: 0,
+          scaleY: 1,
           transformOrigin: "bottom center",
           force3D: true,
         });
 
-        gsap.set(star, { scale: 0, opacity: 0, force3D: true });
+        gsap.set(star, { scale: 1, opacity: 1, force3D: true });
 
         if (titleChars.length > 0) {
-          gsap.set(titleChars, { opacity: 0 });
+          gsap.set(titleChars, { opacity: 1 });
         }
 
         if (descLines.length > 0) {
           gsap.set(descLines, {
-            yPercent: 320,
-            rotate: 10,
-            transformOrigin: "top left",
+            yPercent: 0,
+            opacity: 1,
+            clearProps: "transform",
             force3D: true,
           });
         }
@@ -302,26 +301,41 @@ export function ProcessSection() {
 
         gsap.set(rightTrack, { y: startY, force3D: true });
 
-        stepEls.forEach((el) => {
-          gsap.set(el, { opacity: 0.25, scale: 0.98, force3D: true });
+        stepEls.forEach((el, idx) => {
+          if (idx === 0) {
+            el.setAttribute("data-active", "true");
+            el.classList.add("is-active");
+            gsap.set(el, { opacity: 1, scale: 1, force3D: true });
+          } else {
+            el.setAttribute("data-active", "false");
+            el.classList.remove("is-active");
+            gsap.set(el, { opacity: 0.25, scale: 0.98, force3D: true });
+          }
         });
+        activeStepRef.current = 0;
 
         // Master scrubbed timeline: Snappy, responsive progressive storytelling
-        // Phase 1-3: CTA Intro & Crossfade into Process (0 -> 3.8s)
-        // Phase 4: Process Storytelling (3.8 -> 11.0s)
-        // Phase 4.5: Step 04 reading hold (11.0 -> 11.5s)
-        // Phase 5a: ProcessSection clean fade-out (11.5 -> 12.3s)
-        // Phase 5b: ServiceHome smooth fade-in after Process completely dissolves (12.4 -> 13.3s)
-        // Phase 6: ServiceHome scroll-driven cards showcase (13.3 -> 18.8s)
-        // Phase 6b: Final cards reading hold (18.8 -> 19.5s)
-        // Phase 7a: ServiceHome clean fade-out (19.5 -> 20.3s)
-        // Phase 7b: MissionVision smooth fade-in after ServiceHome completely dissolves (20.4 -> 21.3s)
-        // Phase 7c: MissionVision reading hold (21.3 -> 23.8s)
-        // Phase 7d: MissionVision clean fade-out (23.8 -> 24.6s)
-        // Phase 7e: ContactForm smooth fade-in after MissionVision completely dissolves (24.7 -> 25.6s)
-        // Phase 8: ContactForm reading & interaction hold until unpinning to Footer (25.6 -> 28.5s)
-        // Phase 9: Buffer before Footer unpin (28.5 -> 28.9s)
-        const scrollDistance = 10500;
+        // Phase 1-2: ContactCtaSection reading hold (0.0 -> 0.35s)
+        // Phase 3: Immediate Crossfade to ProcessSection (0.35 -> 1.15s)
+        // Phase 4: Step 01 reading hold at the star (1.15 -> 2.55s)
+        // Phase 4.1: Step 01 moves up & dims; Step 02 moves up to the star & blooms (2.55 -> 3.45s)
+        // Phase 4.2: Step 02 reading hold at the star (3.45 -> 4.75s)
+        // Phase 4.3: Step 02 moves up & dims; Step 03 moves up to the star & blooms (4.75 -> 5.65s)
+        // Phase 4.4: Step 03 reading hold at the star (5.65 -> 6.95s)
+        // Phase 4.5: Step 03 moves up & dims; Step 04 moves up to the star & blooms (6.95 -> 7.85s)
+        // Phase 4.6: Step 04 reading hold (7.85 -> 8.85s)
+        // Phase 5a: ProcessSection clean fade-out (8.85 -> 9.65s)
+        // Phase 5b: ServiceHome smooth fade-in after Process completely dissolves (9.75 -> 10.65s)
+        // Phase 6: ServiceHome scroll-driven cards showcase (10.65 -> 16.15s)
+        // Phase 6b: Final cards reading hold (16.15 -> 16.85s)
+        // Phase 7a: ServiceHome clean fade-out (16.85 -> 17.65s)
+        // Phase 7b: MissionVision smooth fade-in after ServiceHome completely dissolves (17.75 -> 18.65s)
+        // Phase 7c: MissionVision reading hold (18.65 -> 21.15s)
+        // Phase 7d: MissionVision clean fade-out (21.15 -> 21.95s)
+        // Phase 7e: ContactForm smooth fade-in after MissionVision completely dissolves (22.05 -> 22.95s)
+        // Phase 8: ContactForm reading & interaction hold until unpinning to Footer (22.95 -> 25.85s)
+        // Phase 9: Buffer before Footer unpin (25.85 -> 26.25s)
+        const scrollDistance = 9550;
 
         const tl = gsap.timeline({
           defaults: { immediateRender: false },
@@ -343,31 +357,31 @@ export function ProcessSection() {
               playAutoCtaOutro();
             },
             onUpdate: (self) => {
-              if (self.progress >= 0.12 && self.direction === 1) {
+              if (self.progress >= 0.015 && self.direction === 1) {
                 playAutoCtaOutro();
-              } else if (self.progress < 0.08 && self.direction === -1) {
+              } else if (self.progress < 0.010 && self.direction === -1) {
                 playAutoCtaIntro();
               }
               if (ctaLayer && processContent && serviceLayer && missionLayer && contactLayer) {
-                if (self.progress < 0.12) {
+                if (self.progress < 0.04) {
                   ctaLayer.style.pointerEvents = "auto";
                   processContent.style.pointerEvents = "none";
                   serviceLayer.style.pointerEvents = "none";
                   missionLayer.style.pointerEvents = "none";
                   contactLayer.style.pointerEvents = "none";
-                } else if (self.progress >= 0.12 && self.progress < 0.42) {
+                } else if (self.progress >= 0.04 && self.progress < 0.37) {
                   ctaLayer.style.pointerEvents = "none";
                   processContent.style.pointerEvents = "auto";
                   serviceLayer.style.pointerEvents = "none";
                   missionLayer.style.pointerEvents = "none";
                   contactLayer.style.pointerEvents = "none";
-                } else if (self.progress >= 0.42 && self.progress < 0.69) {
+                } else if (self.progress >= 0.37 && self.progress < 0.67) {
                   ctaLayer.style.pointerEvents = "none";
                   processContent.style.pointerEvents = "none";
                   serviceLayer.style.pointerEvents = "auto";
                   missionLayer.style.pointerEvents = "none";
                   contactLayer.style.pointerEvents = "none";
-                } else if (self.progress >= 0.69 && self.progress < 0.84) {
+                } else if (self.progress >= 0.67 && self.progress < 0.84) {
                   ctaLayer.style.pointerEvents = "none";
                   processContent.style.pointerEvents = "none";
                   serviceLayer.style.pointerEvents = "none";
@@ -382,15 +396,16 @@ export function ProcessSection() {
                 }
               }
 
-              if (self.progress >= 0.12 && self.progress <= 0.38) {
-                const trackStartProgress = 4.2 / 32.8; // 0.1280
-                const trackEndProgress = 11.0 / 32.8;   // 0.3354
-                const trackProgress = Math.max(
-                  0,
-                  Math.min(1, (self.progress - trackStartProgress) / (trackEndProgress - trackStartProgress))
-                );
-                const currentY = startY + trackProgress * (endY - startY);
-
+              if (self.progress < 0.04 || self.progress > 0.36) {
+                if (activeStepRef.current !== -1) {
+                  activeStepRef.current = -1;
+                  stepEls.forEach((el) => {
+                    el.setAttribute("data-active", "false");
+                    el.classList.remove("is-active");
+                  });
+                }
+              } else {
+                const currentY = Number(gsap.getProperty(rightTrack, "y")) || 0;
                 let newClosest = -1;
                 let minDiff = Infinity;
                 stepCenters.forEach((center, idx) => {
@@ -402,16 +417,25 @@ export function ProcessSection() {
                   }
                 });
 
-                if (newClosest !== activeStepRef.current) {
-                  activeStepRef.current = newClosest;
-                  stepEls.forEach((el, idx) => {
-                    const isActive = idx === newClosest;
-                    el.setAttribute("data-active", isActive ? "true" : "false");
-                    if (isActive) {
-                      el.classList.add("is-active");
-                    } else {
-                      el.classList.remove("is-active");
-                    }
+                const stepThreshold = 160;
+                if (minDiff < stepThreshold) {
+                  if (newClosest !== -1 && newClosest !== activeStepRef.current) {
+                    activeStepRef.current = newClosest;
+                    stepEls.forEach((el, idx) => {
+                      const isActive = idx === newClosest;
+                      el.setAttribute("data-active", isActive ? "true" : "false");
+                      if (isActive) {
+                        el.classList.add("is-active");
+                      } else {
+                        el.classList.remove("is-active");
+                      }
+                    });
+                  }
+                } else if (activeStepRef.current !== -1) {
+                  activeStepRef.current = -1;
+                  stepEls.forEach((el) => {
+                    el.setAttribute("data-active", "false");
+                    el.classList.remove("is-active");
                   });
                 }
               }
@@ -422,15 +446,15 @@ export function ProcessSection() {
         timelineRef.current = tl;
 
         // ─────────────────────────────────────────────────────────────────
-        // PHASE 1-2: CTA reading hold window while revealed automatically (t = 0.0 -> 2.8)
+        // PHASE 1-2: CTA reading hold window while revealed automatically (t = 0.0 -> 0.35)
         // ─────────────────────────────────────────────────────────────────
-        tl.to({}, { duration: 2.8 }, 0);
+        tl.to({}, { duration: 0.35 }, 0);
 
         // ─────────────────────────────────────────────────────────────────
-        // PHASE 3: Immediate Crossfade: As CTA fades out, ProcessSection immediately fades in (t = 2.8 -> 3.8)
+        // PHASE 3: Immediate Crossfade: As CTA fades out, ProcessSection immediately fades in (t = 0.35 -> 1.15)
         // ─────────────────────────────────────────────────────────────────
         if (ctaLayer) {
-          tl.to(ctaLayer, { opacity: 0, scale: 0.92, duration: 1.0, ease: "power2.inOut", force3D: true }, 2.8);
+          tl.to(ctaLayer, { opacity: 0, scale: 0.92, duration: 0.8, ease: "power2.inOut", force3D: true }, 0.35);
         }
 
         // ProcessSection immediately starts fading in in-place as CTA fades out!
@@ -438,189 +462,115 @@ export function ProcessSection() {
           tl.fromTo(
             processContent,
             { opacity: 0, scale: 0.96 },
-            { opacity: 1, scale: 1.0, duration: 1.0, ease: "power2.out", force3D: true },
-            2.8
+            { opacity: 1, scale: 1.0, duration: 0.8, ease: "power2.out", force3D: true },
+            0.35
           );
         }
 
         // ─────────────────────────────────────────────────────────────────
-        // PHASE 4: Process Storytelling Timeline (t = 3.8 -> 11.0)
+        // PHASE 4: Process Storytelling Timeline (t = 3.8 -> 11.5)
         // ─────────────────────────────────────────────────────────────────
-        // 1. Center hairline shoots up quickly (t = 3.8 -> 4.5)
-        tl.fromTo(
-          centerLine,
-          { scaleY: 0, transformOrigin: "bottom center" },
-          {
-            scaleY: 1,
-            duration: 0.7,
-            ease: "power2.out",
-            force3D: true,
-          },
-          3.8
+        // The left narrative, central hairline, and glowing star are already fully visible
+        // when ProcessSection fades in (t = 2.8 -> 3.8), appearing immediately without scroll delays.
+        //
+        // Right track: Step 01 is ALREADY centered at the star from the start.
+        // Hold 0: Step 01 reading pause at the star (t = 3.8 -> 5.2)
+        // Move 1: Step 01 scrolls up & dims; Step 02 scrolls up to the star & blooms (t = 5.2 -> 6.1)
+        // Hold 1: Step 02 reading pause at the star (t = 6.1 -> 7.4)
+        // Move 2: Step 02 scrolls up & dims; Step 03 scrolls up to the star & blooms (t = 7.4 -> 8.3)
+        // Hold 2: Step 03 reading pause at the star (t = 8.3 -> 9.6)
+        // Move 3: Step 03 scrolls up & dims; Step 04 scrolls up to the star & blooms (t = 9.6 -> 10.5)
+        // Hold 3: Step 04 reading pause at the star (t = 10.5 -> 11.5)
+        const stepTargetPositions = stepCenters.map(
+          (center) => centerTarget - center
         );
 
-        // 2. Star blooms at center as line reaches it (t = 4.05 -> 4.55)
-        tl.fromTo(
-          star,
-          { scale: 0, opacity: 0 },
-          {
-            scale: 1,
-            opacity: 1,
-            duration: 0.5,
-            ease: "back.out(1.7)",
-            force3D: true,
-          },
-          4.05
-        );
+        let stepTime = 1.15;
+        const initialHoldDuration = 1.4; // Generous reading pause for Step 01 at the star
+        const moveStepDuration = 0.9;
+        const holdDuration = 1.3;
 
-        // 3. Title typewriter glow (t = 4.05 -> 4.6)
-        if (titleChars.length > 0) {
-          tl.fromTo(
-            titleChars,
-            { opacity: 0 },
-            {
-              opacity: 1,
-              stagger: 0.028,
-              duration: 0.35,
-              ease: "power1.inOut",
-            },
-            4.05
-          );
-        }
+        // Step 01 reading hold at the star
+        tl.to({}, { duration: initialHoldDuration }, stepTime);
+        stepTime += initialHoldDuration;
 
-        // 4. Description lines rising from mask (t = 4.4 -> 5.05)
-        if (descLines.length > 0) {
-          tl.fromTo(
-            descLines,
-            { yPercent: 320, rotate: 10 },
+        // Steps 02, 03, 04 movements and holds
+        for (let idx = 1; idx < stepEls.length; idx++) {
+          const targetY = stepTargetPositions[idx] ?? 0;
+          const prevEl = stepEls[idx - 1];
+          const currEl = stepEls[idx];
+
+          tl.to(
+            rightTrack,
             {
-              yPercent: 0,
-              rotate: 0,
-              stagger: 0.16,
-              duration: 0.65,
-              ease: "power2.out",
+              y: targetY,
+              duration: moveStepDuration,
+              ease: "power2.inOut",
               force3D: true,
             },
-            4.4
-          );
-        }
-
-        // 5. CTA button border draw + text illumination (t = 4.4 -> 5.05)
-        if (rectBorder) {
-          tl.fromTo(
-            rectBorder,
-            { strokeDashoffset: 100 },
-            {
-              strokeDashoffset: 0,
-              duration: 0.65,
-              ease: "power2.out",
-            },
-            4.4
-          );
-        }
-
-        tl.fromTo(
-          cta,
-          { backgroundColor: "rgba(0, 181, 226, 0)" },
-          {
-            backgroundColor: "rgba(0, 181, 226, 0.08)",
-            duration: 0.65,
-            ease: "power2.out",
-          },
-          4.4
-        );
-
-        if (ctaText) {
-          tl.fromTo(
-            ctaText,
-            { opacity: 0.5, y: 4 },
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.65,
-              ease: "power2.out",
-              clearProps: "transform",
-            },
-            4.4
-          );
-        }
-
-        // 6. Right track moves continuously from startY to endY (t = 4.2 -> 11.0)
-        tl.to(
-          rightTrack,
-          {
-            y: endY,
-            duration: 6.8,
-            ease: "none",
-            force3D: true,
-          },
-          4.2
-        );
-
-        // 7. Step blooming & dimming
-        stepEls.forEach((el, idx) => {
-          const stepTargetY = centerTarget - stepCenters[idx];
-          const fraction = (stepTargetY - startY) / (endY - startY);
-          const centerTime = Math.max(5.0, Math.min(10.8, 4.2 + fraction * 6.8));
-
-          tl.fromTo(
-            el,
-            { opacity: 0.25, scale: 0.98, force3D: true },
-            {
-              opacity: 1,
-              scale: 1,
-              duration: 0.9,
-              ease: "power2.out",
-              force3D: true,
-            },
-            Math.max(4.2, centerTime - 0.9)
+            stepTime
           );
 
-          if (idx < stepEls.length - 1) {
+          if (prevEl) {
             tl.to(
-              el,
+              prevEl,
               {
                 opacity: 0.25,
                 scale: 0.98,
-                duration: 0.9,
-                ease: "power2.in",
+                duration: moveStepDuration * 0.85,
+                ease: "power2.inOut",
                 force3D: true,
               },
-              centerTime + 0.5
+              stepTime
             );
           }
-        });
+
+          if (currEl) {
+            tl.to(
+              currEl,
+              {
+                opacity: 1,
+                scale: 1,
+                duration: moveStepDuration * 0.85,
+                ease: "power2.inOut",
+                force3D: true,
+              },
+              stepTime + moveStepDuration * 0.15
+            );
+          }
+
+          stepTime += moveStepDuration;
+
+          const currentHold = idx === stepEls.length - 1 ? 1.0 : holdDuration;
+          tl.to({}, { duration: currentHold }, stepTime);
+          stepTime += currentHold;
+        }
 
         // ─────────────────────────────────────────────────────────────────
-        // PHASE 4.5: Step 04 reading hold (t = 11.0 -> 11.5)
-        // ─────────────────────────────────────────────────────────────────
-        tl.to({}, { duration: 0.5 }, 11.0);
-
-        // ─────────────────────────────────────────────────────────────────
-        // PHASE 5a: ProcessSection cleanly & smoothly fades out (t = 11.5 -> 12.3)
+        // PHASE 5a: ProcessSection cleanly & smoothly fades out (t = 8.85 -> 9.65)
         // ─────────────────────────────────────────────────────────────────
         if (processContent) {
           tl.to(
             processContent,
             { opacity: 0, scale: 0.94, duration: 0.8, ease: "power1.inOut", force3D: true },
-            11.5
+            8.85
           );
         }
 
         // ─────────────────────────────────────────────────────────────────
-        // PHASE 5b: ServiceHome smoothly fades in ONLY AFTER Process completely fades out (t = 12.4 -> 13.3)
+        // PHASE 5b: ServiceHome smoothly fades in ONLY AFTER Process completely fades out (t = 9.75 -> 10.65)
         // ─────────────────────────────────────────────────────────────────
         if (serviceLayer) {
           tl.fromTo(
             serviceLayer,
             { opacity: 0, scale: 0.96 },
             { opacity: 1, scale: 1.0, duration: 0.9, ease: "power1.inOut", force3D: true },
-            12.4
+            9.75
           );
         }
 
         // ─────────────────────────────────────────────────────────────────
-        // PHASE 6: Desktop ServiceHome horizontal cards move right-to-left as user scrolls down (t = 13.3 -> 18.8)
+        // PHASE 6: Desktop ServiceHome horizontal cards move right-to-left as user scrolls down (t = 10.65 -> 16.15)
         // ─────────────────────────────────────────────────────────────────
         const desktopServiceProxy = { progress: 0 };
         tl.fromTo(
@@ -634,73 +584,73 @@ export function ProcessSection() {
               desktopServiceScrollRef.current = desktopServiceProxy.progress;
             },
           },
-          13.3
+          10.65
         );
 
-        // 8b. Reading hold on the final cards (t = 18.8 -> 19.5)
-        tl.to({}, { duration: 0.7 }, 18.8);
+        // 8b. Reading hold on the final cards (t = 16.15 -> 16.85)
+        tl.to({}, { duration: 0.7 }, 16.15);
 
         // ─────────────────────────────────────────────────────────────────
-        // PHASE 7a: ServiceHome cleanly & smoothly fades out after all cards are shown (t = 19.5 -> 20.3)
+        // PHASE 7a: ServiceHome cleanly & smoothly fades out after all cards are shown (t = 16.85 -> 17.65)
         // ─────────────────────────────────────────────────────────────────
         if (serviceLayer) {
           tl.to(
             serviceLayer,
             { opacity: 0, scale: 0.94, duration: 0.8, ease: "power1.inOut", force3D: true },
-            19.5
+            16.85
           );
         }
 
         // ─────────────────────────────────────────────────────────────────
-        // PHASE 7b: MissionVision smoothly fades in ONLY AFTER ServiceHome completely fades out (t = 20.4 -> 21.3)
+        // PHASE 7b: MissionVision smoothly fades in ONLY AFTER ServiceHome completely fades out (t = 17.75 -> 18.65)
         // ─────────────────────────────────────────────────────────────────
         if (missionLayer) {
           tl.fromTo(
             missionLayer,
             { opacity: 0, scale: 0.96 },
             { opacity: 1, scale: 1.0, duration: 0.9, ease: "power1.inOut", force3D: true },
-            20.4
+            17.75
           );
         }
 
         // ─────────────────────────────────────────────────────────────────
-        // PHASE 7c: MissionVision reading hold (t = 21.3 -> 23.8)
+        // PHASE 7c: MissionVision reading hold (t = 18.65 -> 21.15)
         // ─────────────────────────────────────────────────────────────────
-        tl.to({}, { duration: 2.5 }, 21.3);
+        tl.to({}, { duration: 2.5 }, 18.65);
 
         // ─────────────────────────────────────────────────────────────────
-        // PHASE 7d: MissionVision cleanly & smoothly fades out (t = 23.8 -> 24.6)
+        // PHASE 7d: MissionVision cleanly & smoothly fades out (t = 21.15 -> 21.95)
         // ─────────────────────────────────────────────────────────────────
         if (missionLayer) {
           tl.to(
             missionLayer,
             { opacity: 0, scale: 0.94, duration: 0.8, ease: "power1.inOut", force3D: true },
-            23.8
+            21.15
           );
         }
 
         // ─────────────────────────────────────────────────────────────────
-        // PHASE 7e: ContactForm smoothly fades in ONLY AFTER MissionVision completely fades out (t = 24.7 -> 25.6)
+        // PHASE 7e: ContactForm smoothly fades in ONLY AFTER MissionVision completely fades out (t = 22.05 -> 22.95)
         // ─────────────────────────────────────────────────────────────────
         if (contactLayer) {
           tl.fromTo(
             contactLayer,
             { opacity: 0, scale: 0.96 },
             { opacity: 1, scale: 1.0, duration: 0.9, ease: "power1.inOut", force3D: true },
-            24.7
+            22.05
           );
         }
 
         // ─────────────────────────────────────────────────────────────────
-        // PHASE 8: ContactForm reading & interaction hold (t = 25.6 -> 28.5)
+        // PHASE 8: ContactForm reading & interaction hold (t = 22.95 -> 25.85)
         // ContactForm remains visible and interactive without fading out
         // ─────────────────────────────────────────────────────────────────
-        tl.to({}, { duration: 2.9 }, 25.6);
+        tl.to({}, { duration: 2.9 }, 22.95);
 
         // ─────────────────────────────────────────────────────────────────
-        // PHASE 9: Buffer before smooth unpinning directly to Footer (t = 28.5 -> 28.9)
+        // PHASE 9: Buffer before smooth unpinning directly to Footer (t = 25.85 -> 26.25)
         // ─────────────────────────────────────────────────────────────────
-        tl.to({}, { duration: 0.4 }, 28.5);
+        tl.to({}, { duration: 0.4 }, 25.85);
 
         // Trigger auto reveal immediately ONLY if actually active on mount (e.g. reload or anchor)
         if (typeof window !== "undefined" && section) {
@@ -777,7 +727,9 @@ export function ProcessSection() {
         const cta = mobileCtaRef.current;
         const ctaText = mobileCtaTextRef.current;
         const rectBorder = mobileRectBorderRef.current;
-        const descLines = mobileDescLinesRef.current.filter(Boolean) as HTMLDivElement[];
+        const descLines = mobileDescriptionRef.current
+          ? Array.from(mobileDescriptionRef.current.querySelectorAll<HTMLDivElement>(".desc-line"))
+          : (mobileDescLinesRef.current.filter(Boolean) as HTMLDivElement[]);
 
         const ctaContent = ctaLayer?.querySelector<HTMLDivElement>(".cta-content-wrapper");
         const ctaLine0 = ctaLayer?.querySelector<HTMLDivElement>(".cta-line-0");
@@ -894,15 +846,16 @@ export function ProcessSection() {
 
         // Set initial states for mobile narrative
         if (badge) {
-          gsap.set(badge, { opacity: 0, y: 12 });
+          gsap.set(badge, { opacity: 1, y: 0 });
         }
         if (titleChars.length > 0) {
-          gsap.set(titleChars, { opacity: 0 });
+          gsap.set(titleChars, { opacity: 1 });
         }
         if (descLines.length > 0) {
           gsap.set(descLines, {
-            yPercent: 140,
-            opacity: 0,
+            yPercent: 0,
+            opacity: 1,
+            clearProps: "transform",
             force3D: true,
           });
         }
@@ -930,17 +883,21 @@ export function ProcessSection() {
           (el) => el.offsetTop + el.offsetHeight / 2
         );
         const startY = centerTarget - (mobileStepCenters[0] ?? 0);
-        const lastStepCenter =
-          mobileStepCenters[mobileStepCenters.length - 1] ?? (mobileStepCenters[0] ?? 0) + 360;
-        const mobileEndY = centerTarget - lastStepCenter;
 
         if (mobileTrack) {
           gsap.set(mobileTrack, { y: startY, force3D: true });
         }
 
-        mobileSteps.forEach((step) => {
-          gsap.set(step, { opacity: 0.3, force3D: true });
+        mobileSteps.forEach((step, idx) => {
+          if (idx === 0) {
+            step.classList.add("is-active");
+            gsap.set(step, { opacity: 1, force3D: true });
+          } else {
+            step.classList.remove("is-active");
+            gsap.set(step, { opacity: 0.3, force3D: true });
+          }
         });
+        mobileActiveStepRef.current = 0;
 
         const mobileServiceTrack = serviceLayer?.querySelector<HTMLDivElement>(".mobile-service-cards-track");
         const mobileTopCards = serviceLayer?.querySelectorAll<HTMLElement>(".mobile-card-top");
@@ -978,7 +935,7 @@ export function ProcessSection() {
         }
 
         // Master pinned mobile stage: CTA intro -> Process -> ServiceHome -> MissionVision -> ContactForm (holds until Footer unpin)
-        const mobileScrollDist = 8900;
+        const mobileScrollDist = 8100;
         // Reset dirty-check refs on mobile init
         mobileActiveStepRef.current = -1;
         mobileActiveColRef.current = -1;
@@ -1002,31 +959,31 @@ export function ProcessSection() {
               playMobileAutoCtaOutro();
             },
             onUpdate: (self) => {
-              if (self.progress >= 0.12 && self.direction === 1) {
+              if (self.progress >= 0.015 && self.direction === 1) {
                 playMobileAutoCtaOutro();
-              } else if (self.progress < 0.08 && self.direction === -1) {
+              } else if (self.progress < 0.010 && self.direction === -1) {
                 playMobileAutoCtaIntro();
               }
               if (ctaLayer && processContent && serviceLayer && missionLayer && contactLayer) {
-                if (self.progress < 0.11) {
+                if (self.progress < 0.035) {
                   ctaLayer.style.pointerEvents = "auto";
                   processContent.style.pointerEvents = "none";
                   serviceLayer.style.pointerEvents = "none";
                   missionLayer.style.pointerEvents = "none";
                   contactLayer.style.pointerEvents = "none";
-                } else if (self.progress >= 0.11 && self.progress < 0.33) {
+                } else if (self.progress >= 0.035 && self.progress < 0.26) {
                   ctaLayer.style.pointerEvents = "none";
                   processContent.style.pointerEvents = "auto";
                   serviceLayer.style.pointerEvents = "none";
                   missionLayer.style.pointerEvents = "none";
                   contactLayer.style.pointerEvents = "none";
-                } else if (self.progress >= 0.33 && self.progress < 0.69) {
+                } else if (self.progress >= 0.26 && self.progress < 0.66) {
                   ctaLayer.style.pointerEvents = "none";
                   processContent.style.pointerEvents = "none";
                   serviceLayer.style.pointerEvents = "auto";
                   missionLayer.style.pointerEvents = "none";
                   contactLayer.style.pointerEvents = "none";
-                } else if (self.progress >= 0.69 && self.progress < 0.84) {
+                } else if (self.progress >= 0.66 && self.progress < 0.83) {
                   ctaLayer.style.pointerEvents = "none";
                   processContent.style.pointerEvents = "none";
                   serviceLayer.style.pointerEvents = "none";
@@ -1042,15 +999,15 @@ export function ProcessSection() {
               }
 
               // Mobile step highlighting with dirty-check guard
-              if (self.progress >= 0.12 && self.progress <= 0.35) {
-                const trackStartProgress = 3.6 / 31.0; // ~0.1161
-                const trackEndProgress = 8.8 / 31.0;   // ~0.2839
-                const trackProgress = Math.max(
-                  0,
-                  Math.min(1, (self.progress - trackStartProgress) / (trackEndProgress - trackStartProgress))
-                );
-                const currentY = startY + trackProgress * (mobileEndY - startY);
-
+              if (self.progress < 0.035 || self.progress > 0.25) {
+                if (mobileActiveStepRef.current !== -1) {
+                  mobileActiveStepRef.current = -1;
+                  for (let idx = 0; idx < mobileSteps.length; idx++) {
+                    mobileSteps[idx].classList.remove("is-active");
+                  }
+                }
+              } else {
+                const currentY = Number(gsap.getProperty(mobileTrack, "y")) || 0;
                 let newClosest = -1;
                 let minDiff = Infinity;
                 for (let idx = 0; idx < mobileStepCenters.length; idx++) {
@@ -1062,23 +1019,29 @@ export function ProcessSection() {
                   }
                 }
 
-                // Only toggle classes when active step actually changed
-                if (newClosest !== mobileActiveStepRef.current) {
-                  mobileActiveStepRef.current = newClosest;
-                  for (let idx = 0; idx < mobileSteps.length; idx++) {
-                    if (idx === newClosest) {
-                      mobileSteps[idx].classList.add("is-active");
-                    } else {
-                      mobileSteps[idx].classList.remove("is-active");
+                if (minDiff < 100) {
+                  if (newClosest !== -1 && newClosest !== mobileActiveStepRef.current) {
+                    mobileActiveStepRef.current = newClosest;
+                    for (let idx = 0; idx < mobileSteps.length; idx++) {
+                      if (idx === newClosest) {
+                        mobileSteps[idx].classList.add("is-active");
+                      } else {
+                        mobileSteps[idx].classList.remove("is-active");
+                      }
                     }
+                  }
+                } else if (mobileActiveStepRef.current !== -1) {
+                  mobileActiveStepRef.current = -1;
+                  for (let idx = 0; idx < mobileSteps.length; idx++) {
+                    mobileSteps[idx].classList.remove("is-active");
                   }
                 }
               }
 
               // Dynamic 2-card column active color focus on mobile ServiceHome
               if (
-                self.progress >= 0.37 &&
-                self.progress <= 0.77 &&
+                self.progress >= 0.29 &&
+                self.progress <= 0.65 &&
                 mobileTopCards &&
                 mobileBottomCards &&
                 mobileTopCards.length > 0 &&
@@ -1113,7 +1076,7 @@ export function ProcessSection() {
                     }
                   }
                 }
-              } else if (self.progress < 0.37) {
+              } else if (self.progress < 0.29) {
                 if (mobileActiveColRef.current !== 0 && mobileTopCards && mobileBottomCards) {
                   mobileActiveColRef.current = 0;
                   for (let idx = 0; idx < mobileTopCards.length; idx++) {
@@ -1130,12 +1093,12 @@ export function ProcessSection() {
           },
         });
 
-        // 1-2. Hold moment while text intro is revealed automatically (t = 0 to 2.4)
-        mobileTl.to({}, { duration: 2.4 }, 0);
+        // 1-2. Hold moment while text intro is revealed automatically (t = 0 to 0.25)
+        mobileTl.to({}, { duration: 0.25 }, 0);
 
-        // 3. Immediate Crossfade: As CTA fades out, ProcessSection immediately fades in (t = 2.4 -> 3.4)
+        // 3. Immediate Crossfade: As CTA fades out, ProcessSection immediately fades in (t = 0.25 -> 0.90)
         if (ctaLayer) {
-          mobileTl.to(ctaLayer, { opacity: 0, scale: 0.92, duration: 1.0, ease: "power2.inOut", force3D: true }, 2.4);
+          mobileTl.to(ctaLayer, { opacity: 0, scale: 0.92, duration: 0.65, ease: "power2.inOut", force3D: true }, 0.25);
         }
 
         // Mobile Process Narrative immediately starts fading in in-place as CTA fades out!
@@ -1143,125 +1106,107 @@ export function ProcessSection() {
           mobileTl.fromTo(
             processContent,
             { opacity: 0, scale: 0.96 },
-            { opacity: 1, scale: 1.0, duration: 1.0, ease: "power2.out", force3D: true },
-            2.4
+            { opacity: 1, scale: 1.0, duration: 0.65, ease: "power2.out", force3D: true },
+            0.25
           );
         }
 
-        // 4. Mobile narrative element reveals (badge, title, desc, cta) (t = 3.2 -> 3.8)
-        if (badge) {
-          mobileTl.fromTo(badge, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 3.2);
-        }
-        if (titleChars.length > 0) {
-          mobileTl.fromTo(titleChars, { opacity: 0 }, { opacity: 1, stagger: 0.024, duration: 0.35, ease: "power1.inOut" }, 3.3);
-        }
-        if (descLines.length > 0) {
-          mobileTl.fromTo(descLines, { yPercent: 140, opacity: 0 }, { yPercent: 0, opacity: 1, stagger: 0.12, duration: 0.55, ease: "power2.out" }, 3.5);
-        }
-        if (rectBorder) {
-          mobileTl.fromTo(rectBorder, { strokeDashoffset: 100 }, { strokeDashoffset: 0, duration: 0.65, ease: "power2.out" }, 3.6);
-        }
-        if (cta) {
-          mobileTl.fromTo(cta, { backgroundColor: "rgba(0, 181, 226, 0)" }, { backgroundColor: "rgba(0, 181, 226, 0.08)", duration: 0.65, ease: "power2.out" }, 3.6);
-        }
-        if (ctaText) {
-          mobileTl.fromTo(ctaText, { opacity: 0.4, y: 4 }, { opacity: 1, y: 0, duration: 0.65, ease: "power2.out", clearProps: "transform" }, 3.6);
-        }
+        // 5. Stepped mobile track movement & reading holds at the star
+        // Step 01 is ALREADY centered at the star from the start.
+        const mobileStepTargetPositions = mobileStepCenters.map(
+          (center) => centerTarget - center
+        );
 
-        // 5. Mobile Track movement (t = 3.8 -> 7.8) - ONLY the steps move up!
-        if (mobileTrack) {
-          mobileTl.fromTo(
+        let mobileStepTime = 0.90;
+        const initialMobileHold = 1.0;
+        const mobileMoveDuration = 0.5;
+        const mobileHoldDuration = 0.8;
+
+        // Step 01 reading hold at the star
+        mobileTl.to({}, { duration: initialMobileHold }, mobileStepTime);
+        mobileStepTime += initialMobileHold;
+
+        for (let idx = 1; idx < mobileSteps.length; idx++) {
+          const targetY = mobileStepTargetPositions[idx] ?? 0;
+          const prevEl = mobileSteps[idx - 1];
+          const currEl = mobileSteps[idx];
+
+          mobileTl.to(
             mobileTrack,
-            { y: startY },
             {
-              y: mobileEndY,
-              duration: 4.0,
-              ease: "none",
+              y: targetY,
+              duration: mobileMoveDuration,
+              ease: "power2.inOut",
               force3D: true,
             },
-            3.8
-          );
-        }
-
-        // 6. Mobile Steps blooming & dimming
-        mobileSteps.forEach((stepEl, idx) => {
-          const stepY = mobileStepCenters[idx] ?? 0;
-          const fraction =
-            (stepY - (mobileStepCenters[0] ?? 0)) /
-            Math.max(1, lastStepCenter - (mobileStepCenters[0] ?? 0));
-          const centerTime = 3.8 + fraction * 4.0;
-
-          mobileTl.fromTo(
-            stepEl,
-            { opacity: 0.3 },
-            {
-              opacity: 1,
-              duration: 0.5,
-              ease: "power1.out",
-              onStart: () => {
-                stepEl.classList.add("is-active");
-              },
-              onReverseComplete: () => {
-                stepEl.classList.remove("is-active");
-              },
-            },
-            Math.max(3.6, centerTime - 0.5)
+            mobileStepTime
           );
 
-          if (idx < mobileSteps.length - 1) {
+          if (prevEl) {
             mobileTl.to(
-              stepEl,
+              prevEl,
               {
                 opacity: 0.3,
-                duration: 0.5,
-                ease: "power1.in",
-                onComplete: () => {
-                  stepEl.classList.remove("is-active");
-                },
-                onReverseComplete: () => {
-                  stepEl.classList.add("is-active");
-                },
+                duration: mobileMoveDuration * 0.85,
+                ease: "power2.inOut",
+                force3D: true,
               },
-              centerTime + 0.3
+              mobileStepTime
             );
           }
-        });
 
-        // Step 04 reading hold on mobile (t = 7.8 -> 8.3)
-        mobileTl.to({}, { duration: 0.5 }, 7.8);
+          if (currEl) {
+            mobileTl.to(
+              currEl,
+              {
+                opacity: 1,
+                duration: mobileMoveDuration * 0.85,
+                ease: "power2.inOut",
+                force3D: true,
+              },
+              mobileStepTime + mobileMoveDuration * 0.15
+            );
+          }
 
-        // 7a. Phase 5a: Mobile ProcessSection cleanly & smoothly fades out (t = 8.3 -> 9.0)
+          mobileStepTime += mobileMoveDuration;
+
+          const currentHold = idx === mobileSteps.length - 1 ? 0.8 : mobileHoldDuration;
+          mobileTl.to({}, { duration: currentHold }, mobileStepTime);
+          mobileStepTime += currentHold;
+        }
+
+        // 7a. Phase 5a: Mobile ProcessSection cleanly & smoothly fades out (t = 5.8 -> 6.5)
         if (processContent) {
           mobileTl.to(
             processContent,
             { opacity: 0, scale: 0.94, duration: 0.7, ease: "power1.inOut", force3D: true },
-            8.3
+            5.8
           );
         }
 
-        // 7b. Phase 5b: Mobile ServiceHome smoothly fades in ONLY AFTER Process completely fades out (t = 9.1 -> 9.9)
+        // 7b. Phase 5b: Mobile ServiceHome smoothly fades in ONLY AFTER Process completely fades out (t = 6.6 -> 7.4)
         if (serviceLayer) {
           mobileTl.fromTo(
             serviceLayer,
             { opacity: 0, scale: 0.96 },
             { opacity: 1, scale: 1.0, duration: 0.8, ease: "power1.inOut", force3D: true },
-            9.1
+            6.6
           );
         }
 
-        // 8. Phase 6: Mobile ServiceHome horizontal cards track - stepped movement where each card stops in the center (t = 9.9 -> 18.0)
+        // 8. Phase 6: Mobile ServiceHome horizontal cards track - stepped movement where each card stops in the center (t = 7.4 -> 15.5)
         if (mobileServiceTrack) {
           // Explicitly lock x to Column 0 when ServiceHome fades in so Column 0 is centered from the start
           mobileTl.set(
             mobileServiceTrack,
             { x: () => getColumnCenterTrackX(0), force3D: true },
-            9.1
+            6.6
           );
 
           const moveDuration = 0.55;
           const normalHold = 0.5;
           const finalHold = 0.75;
-          let currentT = 9.9;
+          let currentT = 7.4;
 
           // Initial hold for Column 0 (already centered on fade-in)
           mobileTl.to({}, { duration: normalHold }, currentT);
@@ -1290,53 +1235,53 @@ export function ProcessSection() {
           }
         }
 
-        // 9a. Phase 7a: Mobile ServiceHome cleanly & smoothly fades out after the end of the cards (t = 18.0 -> 18.8)
+        // 9a. Phase 7a: Mobile ServiceHome cleanly & smoothly fades out after the end of the cards (t = 15.5 -> 16.3)
         if (serviceLayer) {
           mobileTl.to(
             serviceLayer,
             { opacity: 0, scale: 0.94, duration: 0.8, ease: "power1.inOut", force3D: true },
-            18.0
+            15.5
           );
         }
 
-        // 9b. Phase 7b: Mobile MissionVision smoothly fades in ONLY AFTER ServiceHome completely fades out (t = 18.9 -> 19.7)
+        // 9b. Phase 7b: Mobile MissionVision smoothly fades in ONLY AFTER ServiceHome completely fades out (t = 16.4 -> 17.2)
         if (missionLayer) {
           mobileTl.fromTo(
             missionLayer,
             { opacity: 0, scale: 0.96 },
             { opacity: 1, scale: 1.0, duration: 0.8, ease: "power1.inOut", force3D: true },
-            18.9
+            16.4
           );
         }
 
-        // 9c. Phase 7c: Mobile MissionVision reading hold (t = 19.7 -> 22.2)
-        mobileTl.to({}, { duration: 2.5 }, 19.7);
+        // 9c. Phase 7c: Mobile MissionVision reading hold (t = 17.2 -> 19.7)
+        mobileTl.to({}, { duration: 2.5 }, 17.2);
 
-        // 9d. Phase 7d: Mobile MissionVision cleanly & smoothly fades out (t = 22.2 -> 23.0)
+        // 9d. Phase 7d: Mobile MissionVision cleanly & smoothly fades out (t = 19.7 -> 20.5)
         if (missionLayer) {
           mobileTl.to(
             missionLayer,
             { opacity: 0, scale: 0.94, duration: 0.8, ease: "power1.inOut", force3D: true },
-            22.2
+            19.7
           );
         }
 
-        // 9e. Phase 7e: Mobile ContactForm smoothly fades in ONLY AFTER MissionVision completely fades out (t = 23.1 -> 23.9)
+        // 9e. Phase 7e: Mobile ContactForm smoothly fades in ONLY AFTER MissionVision completely fades out (t = 20.6 -> 21.4)
         if (contactLayer) {
           mobileTl.fromTo(
             contactLayer,
             { opacity: 0, scale: 0.96 },
             { opacity: 1, scale: 1.0, duration: 0.8, ease: "power1.inOut", force3D: true },
-            23.1
+            20.6
           );
         }
 
-        // 9f. Phase 8: Mobile ContactForm reading & interaction hold (t = 23.9 -> 26.6)
+        // 9f. Phase 8: Mobile ContactForm reading & interaction hold (t = 21.4 -> 24.1)
         // ContactForm remains visible and interactive without fading out
-        mobileTl.to({}, { duration: 2.7 }, 23.9);
+        mobileTl.to({}, { duration: 2.7 }, 21.4);
 
-        // 10. Phase 9: Mobile buffer before smooth unpinning to Footer (t = 26.6 -> 27.0)
-        mobileTl.to({}, { duration: 0.4 }, 26.6);
+        // 10. Phase 9: Mobile buffer before smooth unpinning to Footer (t = 24.1 -> 24.5)
+        mobileTl.to({}, { duration: 0.4 }, 24.1);
 
         // Trigger auto reveal immediately ONLY if actually active on mount
         if (typeof window !== "undefined" && section) {
@@ -1410,9 +1355,15 @@ export function ProcessSection() {
     const st = timelineRef.current?.scrollTrigger;
     if (!st || typeof window === "undefined") return;
 
-    const stepProgressBenchmarks = [0.19, 0.27, 0.35, 0.42];
+    // Midpoint of each step hold at the star on master 26.25s timeline
+    const stepProgressBenchmarks = [
+      1.85 / 26.25,  // Step 01 pause center at the star
+      4.10 / 26.25,  // Step 02 pause center at the star
+      6.30 / 26.25,  // Step 03 pause center at the star
+      8.35 / 26.25,  // Step 04 pause center at the star
+    ];
     const targetScroll =
-      st.start + stepProgressBenchmarks[idx] * (st.end - st.start);
+      st.start + (stepProgressBenchmarks[idx] ?? 0.19) * (st.end - st.start);
 
     const lenis = (
       window as unknown as { lenis?: { scrollTo: (target: number) => void } }
@@ -1482,20 +1433,12 @@ export function ProcessSection() {
               <MaskedLinesReveal
                 ref={descriptionRef}
                 lines={DESC_LINES}
-                className="text-sm sm:text-base text-zinc-400 font-normal leading-relaxed max-w-sm lg:max-w-md"
+                className="text-sm sm:text-base text-zinc-400 font-normal leading-relaxed max-w-md lg:max-w-lg"
                 setLineRef={(el, idx) => {
                   descLinesRef.current[idx] = el;
                 }}
               />
 
-              {/* Call to Action Button */}
-              <StrokeButton
-                ref={ctaRef}
-                rectRef={rectBorderRef}
-                textRef={ctaTextRef}
-                href="#footer"
-                text="Let's build something"
-              />
             </div>
           </div>
 
@@ -1503,7 +1446,7 @@ export function ProcessSection() {
           <div className="relative h-full overflow-visible flex items-start pl-12 lg:pl-16 pointer-events-auto">
             <div
               ref={rightTrackRef}
-              className="flex flex-col gap-12 will-change-transform w-full"
+              className="relative flex flex-col gap-12 will-change-transform w-full"
             >
               {PROCESS_STEPS.map((step, idx) => (
                 <ProcessStepItem
@@ -1557,16 +1500,6 @@ export function ProcessSection() {
             }}
           />
 
-          {/* Animated Stroke CTA Button */}
-          <div className="mt-3">
-            <StrokeButton
-              ref={mobileCtaRef}
-              rectRef={mobileRectBorderRef}
-              textRef={mobileCtaTextRef}
-              href="#footer"
-              text="Let's build something"
-            />
-          </div>
         </div>
 
         {/* Dynamic Scrolling Steps Window below the pinned top narrative */}

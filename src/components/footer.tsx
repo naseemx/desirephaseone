@@ -2,7 +2,9 @@
 
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { ArrowUp, Mail, Phone } from "lucide-react";
+import { SERVICES } from "@/data/service";
 
 export interface FooterProps {
   isStageMode?: boolean;
@@ -20,18 +22,12 @@ export function Footer({ isStageMode = false }: FooterProps = {}) {
     }
   };
 
-  const servicesCol1 = [
-    { title: "Customized LED Screens", href: "#servicehome" },
-    { title: "Smart Flexible Displays", href: "#servicehome" },
-    { title: "Outdoor Digital Screens", href: "#servicehome" },
-    { title: "Indoor Commercial Screens", href: "#servicehome" },
-  ];
-
-  const servicesCol2 = [
-    { title: "Transparent & Mesh Displays", href: "#servicehome" },
-    { title: "Interactive Displays", href: "#servicehome" },
-    { title: "Custom Digital Kiosks", href: "#servicehome" },
-    { title: "Signs and Displays", href: "#servicehome" },
+  // Group all 16 services into 4 columns of 4 services each
+  const serviceColumns = [
+    SERVICES.slice(0, 4),
+    SERVICES.slice(4, 8),
+    SERVICES.slice(8, 12),
+    SERVICES.slice(12, 16),
   ];
 
   const socialLinks = [
@@ -75,7 +71,7 @@ export function Footer({ isStageMode = false }: FooterProps = {}) {
     },
     {
       name: "WhatsApp",
-      href: "https://wa.me/971501234567?text=Hello%20Desire%20Digital%20team,%20I%20would%20like%20to%20inquire%20about%20your%20services.",
+      href: "https://wa.me/971569905842?text=Hello%20Desire%20Digital%20team,%20I%20would%20like%20to%20inquire%20about%20your%20services.",
       icon: (
         <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
           <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.225 8.225 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.196 8.196 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24m4.52 11.64c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.25-.75-.67-1.26-1.5-1.4-1.75-.15-.25-.02-.39.11-.51.11-.11.25-.29.37-.44.13-.14.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.49-.4-.42-.56-.43h-.48c-.16 0-.43.06-.66.31-.22.25-.86.84-.86 2.05s.88 2.38 1 2.55c.13.17 1.73 2.64 4.19 3.7.59.25 1.05.4 1.41.51.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.07-.1-.23-.17-.48-.29" />
@@ -162,7 +158,7 @@ export function Footer({ isStageMode = false }: FooterProps = {}) {
             : "mx-auto max-w-7xl px-6 py-10 sm:py-14 lg:px-10"
         }
       >
-        {/* Main 4-Column Layout: Brand Intro | Our Services (2 Cols) | Social Media | Quick Contact */}
+        {/* Main 3-Section Layout: Brand & Col 1 Services | Our Services (Cols 2-4) | Quick Contact & Social Media */}
         <div
           className={
             isStageMode
@@ -170,9 +166,9 @@ export function Footer({ isStageMode = false }: FooterProps = {}) {
               : "grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-12 lg:gap-8 pb-8"
           }
         >
-          {/* Col 1: Logo & Company Description (3 cols on desktop) */}
+          {/* Col 1: Logo & First Column of Services (on desktop) */}
           <div
-            className={`lg:col-span-3 flex flex-col items-start ${
+            className={`sm:col-span-1 lg:col-span-3 order-1 flex flex-col items-start ${
               isStageMode ? "space-y-2.5" : "space-y-3.5"
             }`}
           >
@@ -214,65 +210,69 @@ export function Footer({ isStageMode = false }: FooterProps = {}) {
               </div>
             </a>
 
-            <p
-              className={`text-zinc-400 leading-relaxed max-w-xs font-normal ${
-                isStageMode
-                  ? "text-xs sm:text-[12.5px] line-clamp-3"
-                  : "text-xs sm:text-[13px]"
-              }`}
-            >
-              With decades of expertise, Desire Advertising LLC &amp; Dzyr Digital have been your trusted partner in visual communication, cutting-edge LED displays, signage, and turnkey media solutions.
-            </p>
-          </div>
-
-          {/* Col 2: Our Services (2 Columns like the navbar - 5 cols on desktop) */}
-          <div
-            className={`lg:col-span-5 flex flex-col ${
-              isStageMode ? "space-y-2.5" : "space-y-3.5"
-            }`}
-          >
-            <h4 className="text-xs sm:text-[13px] font-bold text-white tracking-wide">
-              Our Services
-            </h4>
-            <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-xs sm:text-[12.5px]">
-              {/* Column 1 of Services */}
-              <div className="flex flex-col space-y-2">
-                {servicesCol1.map((service) => (
-                  <a
-                    key={service.title}
-                    href={service.href}
-                    className="text-zinc-400 hover:text-white transition-colors"
-                  >
-                    {service.title}
-                  </a>
-                ))}
-              </div>
-
-              {/* Column 2 of Services */}
-              <div className="flex flex-col space-y-2">
-                {servicesCol2.map((service) => (
-                  <a
-                    key={service.title}
-                    href={service.href}
-                    className="text-zinc-400 hover:text-white transition-colors"
-                  >
-                    {service.title}
-                  </a>
-                ))}
-              </div>
+            {/* Desktop: First column of services placed directly under the logo */}
+            <div className="hidden lg:flex flex-col space-y-2 text-xs sm:text-[12.5px] pt-0.5">
+              {serviceColumns[0].map((service) => (
+                <Link
+                  key={service.id}
+                  href={`/servicepage/${service.id}`}
+                  className="text-zinc-400 hover:text-white transition-colors leading-snug"
+                >
+                  {service.navbarTitle || service.title}
+                </Link>
+              ))}
             </div>
           </div>
 
-          {/* Col 3: Social Media (2 cols on desktop) */}
+          {/* Col 2: Services (Remaining 3 columns on desktop, all 4 on mobile/tablet) */}
           <div
-            className={`lg:col-span-2 flex flex-col ${
+            className={`sm:col-span-2 lg:col-span-6 order-2 sm:order-3 lg:order-2 flex flex-col ${
+              isStageMode ? "space-y-2.5 lg:pt-[36px]" : "space-y-3.5 lg:pt-[44px]"
+            }`}
+          >
+            {/* Mobile / Tablet (< lg): Display all 4 columns */}
+            <div className="lg:hidden grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-3 sm:gap-y-2 text-xs sm:text-[12.5px]">
+              {serviceColumns.map((col, colIdx) => (
+                <div key={colIdx} className="flex flex-col space-y-2">
+                  {col.map((service) => (
+                    <Link
+                      key={service.id}
+                      href={`/servicepage/${service.id}`}
+                      className="text-zinc-400 hover:text-white transition-colors leading-snug"
+                    >
+                      {service.navbarTitle || service.title}
+                    </Link>
+                  ))}
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop (lg+): Display the remaining 3 columns */}
+            <div className="hidden lg:grid grid-cols-3 gap-x-6 gap-y-2 text-xs sm:text-[12.5px]">
+              {serviceColumns.slice(1).map((col, colIdx) => (
+                <div key={colIdx} className="flex flex-col space-y-2">
+                  {col.map((service) => (
+                    <Link
+                      key={service.id}
+                      href={`/servicepage/${service.id}`}
+                      className="text-zinc-400 hover:text-white transition-colors leading-snug"
+                    >
+                      {service.navbarTitle || service.title}
+                    </Link>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Col 3: Quick Contact with Social Media on top of Desire Advertising LLC in a single line (3 cols on desktop) */}
+          <div
+            className={`sm:col-span-1 lg:col-span-3 order-3 sm:order-2 lg:order-3 flex flex-col ${
               isStageMode ? "space-y-2.5" : "space-y-3.5"
             }`}
           >
-            <h4 className="text-xs sm:text-[13px] font-bold text-white tracking-wide">
-              Social Media
-            </h4>
-            <div className="flex items-center flex-wrap gap-2 pt-0.5">
+            {/* Social Media icons in a single line on top of Desire Advertising LLC */}
+            <div className="flex items-center flex-nowrap gap-2 pt-0.5">
               {socialLinks.map((social) => (
                 <a
                   key={social.name}
@@ -281,25 +281,14 @@ export function Footer({ isStageMode = false }: FooterProps = {}) {
                   rel={social.href.startsWith("http") ? "noopener noreferrer" : undefined}
                   aria-label={social.name}
                   title={social.name}
-                  className={`rounded-full border border-white/15 bg-white/[0.04] text-zinc-300 flex items-center justify-center transition-all duration-300 hover:bg-[#00b5e2] hover:text-black hover:border-[#00b5e2] hover:shadow-[0_0_15px_rgba(0,181,226,0.45)] hover:-translate-y-0.5 active:scale-95 cursor-pointer ${
-                    isStageMode ? "w-8 h-8" : "w-8.5 h-8.5"
+                  className={`rounded-full border border-white/15 bg-white/[0.04] text-zinc-300 flex items-center justify-center shrink-0 transition-all duration-300 hover:bg-[#00b5e2] hover:text-black hover:border-[#00b5e2] hover:shadow-[0_0_15px_rgba(0,181,226,0.45)] hover:-translate-y-0.5 active:scale-95 cursor-pointer ${
+                    isStageMode ? "w-7.5 h-7.5" : "w-8 h-8"
                   }`}
                 >
                   {social.icon}
                 </a>
               ))}
             </div>
-          </div>
-
-          {/* Col 4: Quick Contact (2 cols on desktop) */}
-          <div
-            className={`lg:col-span-2 flex flex-col ${
-              isStageMode ? "space-y-2.5" : "space-y-3.5"
-            }`}
-          >
-            <h4 className="text-xs sm:text-[13px] font-bold text-white tracking-wide">
-              Quick Contact
-            </h4>
 
             <div
               className={`flex flex-col text-zinc-400 ${
@@ -308,29 +297,29 @@ export function Footer({ isStageMode = false }: FooterProps = {}) {
             >
               <div>
                 <p className="text-white font-medium">Desire Advertising LLC</p>
-                <p className="text-zinc-400 text-[11.5px] sm:text-xs">PO BOX 32180, Dubai, U.A.E</p>
+                <p className="text-zinc-400 text-[11.5px] sm:text-xs">Dubai, UAE</p>
               </div>
 
               {/* Contact links with inline icons */}
               <div className="pt-0.5 flex flex-col space-y-1.5">
                 <a
-                  href="mailto:inquiry@dzyrdigital.com"
+                  href="mailto:digital@desire.ae"
                   className="inline-flex items-center gap-1.5 text-zinc-300 hover:text-[#00b5e2] transition-colors"
                 >
                   <Mail className="w-3.5 h-3.5 text-[#00b5e2] shrink-0" />
-                  <span>inquiry@dzyrdigital.com</span>
+                  <span>digital@desire.ae</span>
                 </a>
 
                 <a
-                  href="tel:+971501234567"
+                  href="tel:+971559944475"
                   className="inline-flex items-center gap-1.5 text-zinc-300 hover:text-[#00b5e2] transition-colors"
                 >
                   <Phone className="w-3.5 h-3.5 text-[#00b5e2] shrink-0" />
-                  <span>+971 50 123 4567</span>
+                  <span>+971 55 994 4475</span>
                 </a>
 
                 <a
-                  href="https://wa.me/971557601095"
+                  href="https://wa.me/971569905842"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 text-zinc-300 hover:text-[#00b5e2] transition-colors"
@@ -338,19 +327,7 @@ export function Footer({ isStageMode = false }: FooterProps = {}) {
                   <svg className="w-3.5 h-3.5 text-[#00b5e2] shrink-0" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.225 8.225 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.196 8.196 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24m4.52 11.64c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.25-.75-.67-1.26-1.5-1.4-1.75-.15-.25-.02-.39.11-.51.11-.11.25-.29.37-.44.13-.14.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.49-.4-.42-.56-.43h-.48c-.16 0-.43.06-.66.31-.22.25-.86.84-.86 2.05s.88 2.38 1 2.55c.13.17 1.73 2.64 4.19 3.7.59.25 1.05.4 1.41.51.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.07-.1-.23-.17-.48-.29" />
                   </svg>
-                  <span>+971 55 760 1095</span>
-                </a>
-
-                <a
-                  href="https://wa.me/971507601518"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-zinc-300 hover:text-[#00b5e2] transition-colors"
-                >
-                  <svg className="w-3.5 h-3.5 text-[#00b5e2] shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.225 8.225 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.196 8.196 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24m4.52 11.64c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.25-.75-.67-1.26-1.5-1.4-1.75-.15-.25-.02-.39.11-.51.11-.11.25-.29.37-.44.13-.14.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.49-.4-.42-.56-.43h-.48c-.16 0-.43.06-.66.31-.22.25-.86.84-.86 2.05s.88 2.38 1 2.55c.13.17 1.73 2.64 4.19 3.7.59.25 1.05.4 1.41.51.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.07-.1-.23-.17-.48-.29" />
-                  </svg>
-                  <span>+971 50 760 1518</span>
+                  <span>+971 56 990 5842</span>
                 </a>
               </div>
             </div>

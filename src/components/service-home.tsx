@@ -3,8 +3,9 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { AmbientStars } from "@/components/ui/ambient-stars";
 import { SERVICES, ServiceItem } from "@/data/service";
-import { MoveHorizontal } from "lucide-react";
+import { MoveHorizontal, ArrowRight } from "lucide-react";
 import { ServiceDrawer } from "@/components/service-drawer";
+import { EdgeGlassCard } from "@/components/ui/edge-glass-card";
 
 export type { ServiceItem };
 
@@ -406,26 +407,6 @@ export function ServiceHome({
         </p>
       </div>
 
-      {/* Left Edge Vignette Mask - slim boundary fade */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute top-0 bottom-0 left-0 z-20 w-8 sm:w-16 md:w-20 lg:w-28 transition-opacity duration-300"
-        style={{
-          background:
-            "linear-gradient(90deg, rgba(9, 9, 11, 0.95) 0%, rgba(9, 9, 11, 0.4) 50%, transparent 100%)",
-        }}
-      />
-
-      {/* Right Edge Vignette Mask - slim boundary fade */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute top-0 bottom-0 right-0 z-20 w-8 sm:w-16 md:w-20 lg:w-28 transition-opacity duration-300"
-        style={{
-          background:
-            "linear-gradient(270deg, rgba(9, 9, 11, 0.95) 0%, rgba(9, 9, 11, 0.4) 50%, transparent 100%)",
-        }}
-      />
-
       {/* DESKTOP VIEWPORT (hidden md:flex): 3D Curved Ribbon */}
       <div
         ref={viewportRef}
@@ -435,6 +416,48 @@ export function ServiceHome({
           perspectiveOrigin: "50% 50%",
         }}
       >
+        {/* Left Edge Vignette Mask (z-10): Fades the 3D ribbon cards behind EdgeGlassCard */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute top-0 bottom-0 left-0 z-10 w-8 sm:w-16 md:w-20 lg:w-28 transition-opacity duration-300"
+          style={{
+            background:
+              "linear-gradient(90deg, rgba(9, 9, 11, 0.95) 0%, rgba(9, 9, 11, 0.4) 50%, transparent 100%)",
+          }}
+        />
+
+        {/* Right Edge Vignette Mask (z-10): Fades the 3D ribbon cards on right boundary */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute top-0 bottom-0 right-0 z-10 w-8 sm:w-16 md:w-20 lg:w-28 transition-opacity duration-300"
+          style={{
+            background:
+              "linear-gradient(270deg, rgba(9, 9, 11, 0.95) 0%, rgba(9, 9, 11, 0.4) 50%, transparent 100%)",
+          }}
+        />
+
+        {/* Desktop Left-Edge Glassmorphic Cards (z-30): Positioned OVER the left vignette shadow effect */}
+        <EdgeGlassCard
+          rowNumber={1}
+          label="Specialized led solution display"
+          category="LED Solutions"
+          className="hidden md:flex z-30"
+          style={{
+            top: `calc(50% - max(125px, ${(layout.cardHeight + layout.rowGap) / 2}px))`,
+          }}
+          onClick={() => topRowCards[0] && handleCardClick(topRowCards[0])}
+        />
+        <EdgeGlassCard
+          rowNumber={2}
+          label="Specialized led solution display"
+          category="Display Solutions"
+          className="hidden md:flex z-30"
+          style={{
+            top: `calc(50% + max(125px, ${(layout.cardHeight + layout.rowGap) / 2}px))`,
+          }}
+          onClick={() => bottomRowCards[0] && handleCardClick(bottomRowCards[0])}
+        />
+
         <div
           className="relative w-0 h-0 flex items-center justify-center pointer-events-none"
           style={{ transformStyle: "preserve-3d" }}
@@ -523,6 +546,22 @@ export function ServiceHome({
       <div className="flex md:hidden relative w-full flex-col justify-center items-center overflow-hidden z-10 py-1">
         {/* Moving cards track container */}
         <div className="relative w-full overflow-hidden">
+          {/* Mobile Left-Edge Glassmorphic Cards (Attached to leftmost edge for Line 1 & Line 2, z-30 over shadows) */}
+          <EdgeGlassCard
+            rowNumber={1}
+            label="Specialized led solution display"
+            category="LED Solutions"
+            className="flex md:hidden top-[110px] sm:top-[118px] z-30"
+            onClick={() => topRowCards[0] && handleCardClick(topRowCards[0])}
+          />
+          <EdgeGlassCard
+            rowNumber={2}
+            label="Specialized led solution display"
+            category="Display Solutions"
+            className="flex md:hidden top-[336px] sm:top-[360px] z-30"
+            onClick={() => bottomRowCards[0] && handleCardClick(bottomRowCards[0])}
+          />
+
           <div className="mobile-service-cards-track flex flex-col gap-3.5 w-max will-change-transform py-1">
             {/* Row 1: 8 Primary LED & Interactive Solutions */}
             <div className="flex gap-3.5 items-center flex-nowrap">
@@ -617,21 +656,23 @@ function MobileServiceCard({
         )}
       </div>
 
-      {/* Service Title & Category Container */}
-      <div className="relative z-10 flex flex-col justify-end mt-1 flex-1 min-h-0 overflow-hidden pointer-events-none">
-        {card.category && (
-          <span className="mobile-card-cat text-[9px] sm:text-[9.5px] tracking-wider uppercase font-semibold mb-0.5 truncate pointer-events-none">
-            {card.category}
-          </span>
-        )}
-        <h3 className="mobile-card-title text-[12.5px] sm:text-[13.5px] font-bold leading-tight tracking-normal line-clamp-1 pointer-events-none">
-          {card.title}
-        </h3>
-        {card.description && (
-          <p className="mobile-card-desc text-[9.5px] sm:text-[10.5px] font-normal leading-snug mt-0.5 sm:mt-1 line-clamp-2 pointer-events-none">
-            {card.description}
-          </p>
-        )}
+      {/* Service Title, Category & Read More Container */}
+      <div className="relative z-10 flex flex-col justify-between mt-1 flex-1 min-h-0 overflow-hidden pointer-events-none">
+        <div>
+          {card.category && (
+            <span className="mobile-card-cat text-[9px] sm:text-[9.5px] tracking-wider uppercase font-semibold mb-0.5 block truncate pointer-events-none">
+              {card.category}
+            </span>
+          )}
+          <h3 className="mobile-card-title text-[12.5px] sm:text-[13.5px] font-bold leading-tight tracking-normal line-clamp-1 pointer-events-none">
+            {card.title}
+          </h3>
+        </div>
+
+        <div className="mobile-card-readmore flex items-center gap-1 text-[10px] sm:text-[11px] font-medium text-zinc-400 group-[.is-active]:text-[#00b5e2] transition-colors duration-300 pt-1 pointer-events-none">
+          <span>Read more</span>
+          <ArrowRight className="w-2.5 h-2.5 sm:w-3 sm:h-3 transition-transform duration-300 group-[.is-active]:translate-x-0.5" />
+        </div>
       </div>
     </div>
   );
@@ -740,21 +781,23 @@ function CardContent({
         )}
       </div>
 
-      {/* Service Title & Category Container in Project Font */}
-      <div className="relative z-10 flex flex-col justify-end mt-1.5 sm:mt-2.5 flex-1 min-h-0 overflow-hidden pointer-events-none">
-        {card.category && (
-          <span className="text-[9px] sm:text-[10.5px] tracking-wider uppercase text-[#00b5e2]/80 font-semibold mb-0.5 sm:mb-1 truncate pointer-events-none">
-            {card.category}
-          </span>
-        )}
-        <h3 className="text-[13px] sm:text-[15.5px] font-bold leading-tight sm:leading-snug tracking-normal text-white line-clamp-2 group-hover:text-cyan-100 transition-colors duration-300 pointer-events-none">
-          {card.title}
-        </h3>
-        {card.description && (
-          <p className="text-[10px] sm:text-[12px] font-normal leading-relaxed text-zinc-400 mt-1 sm:mt-1.5 line-clamp-2 pointer-events-none group-hover:text-zinc-300 transition-colors duration-300">
-            {card.description}
-          </p>
-        )}
+      {/* Service Title, Category & Read More Container in Project Font */}
+      <div className="relative z-10 flex flex-col justify-between mt-1.5 sm:mt-2.5 flex-1 min-h-0 overflow-hidden pointer-events-none">
+        <div>
+          {card.category && (
+            <span className="text-[9px] sm:text-[10.5px] tracking-wider uppercase text-[#00b5e2]/80 font-semibold mb-0.5 sm:mb-1 block truncate pointer-events-none">
+              {card.category}
+            </span>
+          )}
+          <h3 className="text-[13px] sm:text-[15.5px] font-bold leading-tight sm:leading-snug tracking-normal text-white line-clamp-2 group-hover:text-cyan-100 transition-colors duration-300 pointer-events-none">
+            {card.title}
+          </h3>
+        </div>
+
+        <div className="flex items-center gap-1.5 text-[11px] sm:text-[12px] font-medium text-zinc-400 group-hover:text-[#00b5e2] transition-colors duration-300 pt-1 pointer-events-none">
+          <span>Read more</span>
+          <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+        </div>
       </div>
     </div>
   );

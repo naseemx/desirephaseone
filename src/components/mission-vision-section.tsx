@@ -48,11 +48,11 @@ export function MissionVisionSection({
         <div className="w-16 sm:w-24 h-[1.5px] bg-gradient-to-r from-transparent via-[#00b5e2]/60 to-transparent mb-6 sm:mb-8" />
 
         {/* Narrative Content */}
-        <div className="space-y-4 sm:space-y-5 text-xs sm:text-sm md:text-base lg:text-[16.5px] text-zinc-300 font-light leading-relaxed sm:leading-relaxed max-w-2xl sm:max-w-3xl">
-          <p>
+        <div className="space-y-4 sm:space-y-5 text-xs sm:text-sm md:text-base lg:text-[16.5px] text-zinc-300 font-light leading-relaxed sm:leading-relaxed max-w-2xl sm:max-w-3xl text-justify [text-align-last:left] [text-justify:inter-word]">
+          <p className="text-justify [text-align-last:left]">
             <span className="text-white font-medium">Desire Advertising LLC</span> stands as your comprehensive partner in visual communication, seamlessly bridging creative vision and technical execution. Specializing in end-to-end media and fabrication solutions, we bring bold concepts to life across every touchpoint. From cutting-edge digital display setups, interactive screens, and custom LED installations to high-impact physical signage, exhibition structures, and full-scale brand identity systems, our team delivers seamless craftsmanship. We blend artistic direction with engineering precision, ensuring your brand commands attention in today’s competitive market.
           </p>
-          <p>
+          <p className="text-justify [text-align-last:left]">
             By integrating traditional advertising assets with advanced digital experiences, <span className="text-white font-medium">Desire Advertising LLC</span> empowers businesses to a dynamic market presence. We remain dedicated to elevating client visibility through tailored design, precision manufacturing, and flawless installation, effectively translating your highest ambitions into tangible, high-performing reality.
           </p>
         </div>

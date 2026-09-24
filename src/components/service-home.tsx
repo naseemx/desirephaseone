@@ -369,17 +369,7 @@ export function ServiceHome({
       <AmbientStars count={layout.isMobile ? 40 : 160} />
 
       {/* Desktop Header Info Bar */}
-      <div className="hidden md:flex relative z-30 mx-auto max-w-7xl px-4 sm:px-6 w-full flex-row items-center justify-between gap-3 text-left mb-2 sm:mb-3 shrink-0">
-        <div className="flex items-center gap-2.5">
-          <span className="relative flex h-2.5 w-2.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00b5e2] opacity-75" />
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#00b5e2]" />
-          </span>
-          <p className="text-xs sm:text-sm font-medium tracking-wide text-zinc-300">
-            <span className="text-[#00b5e2] font-semibold">Our Services</span> — Specialized LED Display Solutions
-          </p>
-        </div>
-
+      <div className="hidden md:flex relative z-30 mx-auto max-w-7xl px-4 sm:px-6 w-full flex-row items-center justify-end gap-3 text-left mb-2 sm:mb-3 shrink-0">
         <div className="flex items-center gap-2 text-zinc-400 text-xs md:text-sm bg-black/40 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/10 shadow-sm">
           <MoveHorizontal className="w-4 h-4 text-[#00b5e2] shrink-0" />
           <span>Scroll down to explore services</span>
@@ -440,22 +430,18 @@ export function ServiceHome({
         <EdgeGlassCard
           rowNumber={1}
           label="Specialized led solution display"
-          category="LED Solutions"
           className="hidden md:flex z-30"
           style={{
             top: `calc(50% - max(125px, ${(layout.cardHeight + layout.rowGap) / 2}px))`,
           }}
-          onClick={() => topRowCards[0] && handleCardClick(topRowCards[0])}
         />
         <EdgeGlassCard
           rowNumber={2}
           label="Specialized led solution display"
-          category="Display Solutions"
           className="hidden md:flex z-30"
           style={{
             top: `calc(50% + max(125px, ${(layout.cardHeight + layout.rowGap) / 2}px))`,
           }}
-          onClick={() => bottomRowCards[0] && handleCardClick(bottomRowCards[0])}
         />
 
         <div
@@ -550,16 +536,12 @@ export function ServiceHome({
           <EdgeGlassCard
             rowNumber={1}
             label="Specialized led solution display"
-            category="LED Solutions"
             className="flex md:hidden top-[110px] sm:top-[118px] z-30"
-            onClick={() => topRowCards[0] && handleCardClick(topRowCards[0])}
           />
           <EdgeGlassCard
             rowNumber={2}
             label="Specialized led solution display"
-            category="Display Solutions"
             className="flex md:hidden top-[336px] sm:top-[360px] z-30"
-            onClick={() => bottomRowCards[0] && handleCardClick(bottomRowCards[0])}
           />
 
           <div className="mobile-service-cards-track flex flex-col gap-3.5 w-max will-change-transform py-1">

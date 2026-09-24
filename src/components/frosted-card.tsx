@@ -61,7 +61,7 @@ export function FrostedCard({
 
         {/* Title */}
         {title && (
-          <h2 className="text-xs sm:text-base lg:text-lg font-bold tracking-tight text-white leading-tight sm:leading-snug">
+          <h2 className="text-xs sm:text-base lg:text-lg font-semibold tracking-tight text-white leading-tight sm:leading-snug">
             {toSentenceCase(title)}
           </h2>
         )}

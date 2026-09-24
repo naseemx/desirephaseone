@@ -305,33 +305,33 @@ export function ContactCtaSection({
         className="cta-content-wrapper relative z-10 w-full flex flex-col items-center justify-center will-change-transform"
         style={{ transformOrigin: "50% 50%" }}
       >
-        <div className="w-full flex flex-col items-center text-center font-quicksand font-bold italic tracking-tight leading-[0.95] text-3xl sm:text-5xl md:text-6xl lg:text-[84px] xl:text-[104px] 2xl:text-[124px] text-zinc-100">
+        <div className="w-full flex flex-col items-center text-center font-quicksand font-semibold not-italic tracking-normal leading-[1.08] sm:leading-[1.1] lg:leading-[1.12] text-3xl sm:text-5xl md:text-6xl lg:text-[84px] xl:text-[104px] 2xl:text-[124px] text-zinc-100">
           
           {/* LINE 1: Sign in (centered, slides in from left edge) */}
-          <div className="w-full overflow-hidden py-1 sm:py-2 flex justify-center text-center">
+          <div className="w-full overflow-visible py-2 sm:py-3 lg:py-4 flex justify-center text-center">
             <div
               ref={line0Ref}
-              className="cta-line-inner cta-line-0 will-change-transform inline-block text-center whitespace-nowrap"
+              className="cta-line-inner cta-line-0 will-change-transform inline-block text-center whitespace-nowrap px-3 sm:px-4 pb-2 sm:pb-3 lg:pb-4"
             >
               Sign in
             </div>
           </div>
 
           {/* LINE 2: to future with (centered, slides in from right edge) */}
-          <div className="w-full overflow-hidden py-1 sm:py-2 flex justify-center text-center">
+          <div className="w-full overflow-visible py-2 sm:py-3 lg:py-4 flex justify-center text-center">
             <div
               ref={line1Ref}
-              className="cta-line-inner cta-line-1 will-change-transform inline-block text-center whitespace-nowrap"
+              className="cta-line-inner cta-line-1 will-change-transform inline-block text-center whitespace-nowrap px-3 sm:px-4 pb-2 sm:pb-3 lg:pb-4"
             >
               to future with
             </div>
           </div>
 
           {/* LINE 3: dzyr digital visuals (centered, slides in from left edge) */}
-          <div className="w-full overflow-hidden py-1 sm:py-2 flex justify-center text-center">
+          <div className="w-full overflow-visible py-2 sm:py-3 lg:py-4 flex justify-center text-center">
             <div
               ref={line2Ref}
-              className="cta-line-inner cta-line-2 will-change-transform inline-block text-center whitespace-nowrap"
+              className="cta-line-inner cta-line-2 will-change-transform inline-block text-center whitespace-nowrap px-3 sm:px-4 pb-2 sm:pb-3 lg:pb-4"
             >
               <span className="text-[#00b5e2]">dzyr digital</span> visuals
             </div>

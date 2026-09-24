@@ -200,7 +200,7 @@ export function ServiceDrawer({
         >
           {/* Master Title */}
           <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight leading-snug">
+            <h2 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight leading-snug">
               {activeService.title}
             </h2>
           </div>

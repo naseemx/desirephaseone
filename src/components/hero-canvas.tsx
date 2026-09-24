@@ -724,7 +724,7 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
           DOMINATING OUTDOOR SPACES
         </span>
         <div className="table w-0 ml-auto">
-          <h1 className="mt-1 sm:mt-1.5 text-base sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
+          <h1 className="mt-1 sm:mt-1.5 text-base sm:text-3xl lg:text-4xl font-semibold tracking-tight text-white leading-tight">
             <span className="block text-right">Custom dynamic</span>
             <span className="block whitespace-nowrap">outdoor LED screens</span>
           </h1>
@@ -747,7 +747,7 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
           SIGN INTO THE FUTURE
         </span>
         <div className="table w-0 sm:block sm:w-auto">
-          <h2 className="mt-1 sm:mt-1.5 text-base sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
+          <h2 className="mt-1 sm:mt-1.5 text-base sm:text-3xl lg:text-4xl font-semibold tracking-tight text-white leading-tight">
             <span className="block whitespace-nowrap">Trusted partner for advertising</span>
             <span className="block">and LED display in UAE</span>
           </h2>
@@ -767,7 +767,7 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
         <span className="text-[9px] sm:text-[11px] font-medium tracking-widest text-[var(--brand-cyan)] uppercase">
           Engineered for impact
         </span>
-        <h2 className="mt-1 sm:mt-1.5 text-base sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight whitespace-nowrap sm:whitespace-normal">
+        <h2 className="mt-1 sm:mt-1.5 text-base sm:text-3xl lg:text-4xl font-semibold tracking-tight text-white leading-tight whitespace-nowrap sm:whitespace-normal">
           <span className="sm:block">Specialized in</span>{" "}
           <span className="sm:block">custom LED display</span>
         </h2>
@@ -842,7 +842,7 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
         <span className="text-[9px] sm:text-[11px] font-medium tracking-widest text-[var(--brand-cyan)] uppercase">
           INTERACTIVE DIGITAL INNOVATION
         </span>
-        <h2 className="mt-1 sm:mt-1.5 text-base sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight whitespace-nowrap sm:whitespace-normal">
+        <h2 className="mt-1 sm:mt-1.5 text-base sm:text-3xl lg:text-4xl font-semibold tracking-tight text-white leading-tight whitespace-nowrap sm:whitespace-normal">
           <span className="sm:block">Specialized creators</span>{" "}
           <span className="sm:block">of custom built Kiosks</span>
         </h2>
@@ -880,7 +880,7 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
         <span className="text-[9px] sm:text-[11px] font-medium tracking-widest text-[var(--brand-cyan)] uppercase whitespace-nowrap">
           Vibrant. Seamless. Unmatched.
         </span>
-        <h2 className="mt-1 sm:mt-1.5 text-base sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight whitespace-nowrap sm:whitespace-normal">
+        <h2 className="mt-1 sm:mt-1.5 text-base sm:text-3xl lg:text-4xl font-semibold tracking-tight text-white leading-tight whitespace-nowrap sm:whitespace-normal">
           <span className="sm:block">Ultra clear indoor</span>{" "}
           <span className="sm:block">LED screen displays.</span>
         </h2>
@@ -921,7 +921,7 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
         <span className="text-[9px] sm:text-[11px] font-medium tracking-widest text-[var(--brand-cyan)] uppercase">
           See through innovation.
         </span>
-        <h2 className="mt-1 sm:mt-1.5 text-[15px] min-[375px]:text-base sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight whitespace-nowrap sm:whitespace-normal">
+        <h2 className="mt-1 sm:mt-1.5 text-[15px] min-[375px]:text-base sm:text-3xl lg:text-4xl font-semibold tracking-tight text-white leading-tight whitespace-nowrap sm:whitespace-normal">
           <span className="sm:block">High-impact indoor and</span>{" "}
           <span className="sm:block">outdoor mesh displays</span>
         </h2>

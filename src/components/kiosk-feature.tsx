@@ -29,7 +29,7 @@ export function KioskFeature({
     >
       {title && (
         <h3
-          className={`text-base sm:text-2xl lg:text-3xl font-bold tracking-tight text-zinc-300 leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)] ${titleClassName}`}
+          className={`text-base sm:text-2xl lg:text-3xl font-semibold tracking-tight text-zinc-300 leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)] ${titleClassName}`}
         >
           {title}
         </h3>

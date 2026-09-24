@@ -115,7 +115,7 @@ export function ServiceDetailView({ service }: ServiceDetailViewProps) {
 
 
         {/* Master Title */}
-        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-[1.12] mb-10 sm:mb-14 max-w-4xl">
+        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-semibold text-white tracking-tight leading-[1.12] mb-10 sm:mb-14 max-w-4xl">
           {service.title}
         </h1>
 

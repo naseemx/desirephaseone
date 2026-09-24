@@ -46,7 +46,7 @@ export const ProcessStepItem = forwardRef<HTMLDivElement, ProcessStepItemProps>(
         </div>
 
         {/* Step Title in Project Font */}
-        <h3 className="step-title text-2xl sm:text-3xl md:text-4xl font-bold leading-tight mb-2 sm:mb-3 transition-all duration-300 text-zinc-400 group-[.is-active]:text-white group-[.is-active]:drop-shadow-[0_0_20px_rgba(255,255,255,0.4)] group-[[data-active=true]]:text-white group-[[data-active=true]]:drop-shadow-[0_0_20px_rgba(255,255,255,0.4)]">
+        <h3 className="step-title text-2xl sm:text-3xl md:text-4xl font-semibold leading-tight mb-2 sm:mb-3 transition-all duration-300 text-zinc-400 group-[.is-active]:text-white group-[.is-active]:drop-shadow-[0_0_20px_rgba(255,255,255,0.4)] group-[[data-active=true]]:text-white group-[[data-active=true]]:drop-shadow-[0_0_20px_rgba(255,255,255,0.4)]">
           {titleWords.map((word, wordIdx) => (
             <span key={wordIdx} className="inline-block whitespace-nowrap">
               {word}

@@ -1426,7 +1426,7 @@ export function ProcessSection() {
               <CharacterReveal
                 ref={headingRef}
                 lines={TITLE_LINES}
-                className="text-3xl sm:text-4xl md:text-5xl lg:text-[50px] font-bold leading-[1.12] text-zinc-100 tracking-tight max-w-md lg:max-w-lg"
+                className="text-3xl sm:text-4xl md:text-5xl lg:text-[50px] font-semibold leading-[1.12] text-zinc-100 tracking-tight max-w-md lg:max-w-lg"
               />
 
               {/* Description in Project Font */}
@@ -1487,7 +1487,7 @@ export function ProcessSection() {
           <CharacterReveal
             ref={mobileHeadingRef}
             lines={TITLE_LINES}
-            className="text-2xl sm:text-3xl font-bold leading-[1.12] text-zinc-100 tracking-tight"
+            className="text-2xl sm:text-3xl font-semibold leading-[1.12] text-zinc-100 tracking-tight"
           />
 
           {/* Description with Masked Lines Reveal */}
@@ -1553,7 +1553,7 @@ export function ProcessSection() {
                 </div>
 
                 {/* Step Title in Project Font */}
-                <h3 className="mobile-step-title text-xl sm:text-2xl font-bold leading-snug text-zinc-400 transition-all duration-500 mb-1 group-[.is-active]:text-white group-[.is-active]:drop-shadow-[0_0_20px_rgba(255,255,255,0.6)] group-[.is-active]:translate-x-1">
+                <h3 className="mobile-step-title text-xl sm:text-2xl font-semibold leading-snug text-zinc-400 transition-all duration-500 mb-1 group-[.is-active]:text-white group-[.is-active]:drop-shadow-[0_0_20px_rgba(255,255,255,0.6)] group-[.is-active]:translate-x-1">
                   {step.title}
                 </h3>
 

@@ -387,7 +387,7 @@ export function ServiceHome({
         </div>
 
         {/* Headline */}
-        <h2 className="text-2xl sm:text-3xl font-bold leading-[1.12] text-zinc-100 tracking-tight">
+        <h2 className="text-2xl sm:text-3xl font-semibold leading-[1.12] text-zinc-100 tracking-tight">
           Specialized LED display solutions.
         </h2>
 
@@ -646,7 +646,7 @@ function MobileServiceCard({
               {card.category}
             </span>
           )}
-          <h3 className="mobile-card-title text-[12.5px] sm:text-[13.5px] font-bold leading-tight tracking-normal line-clamp-1 pointer-events-none">
+          <h3 className="mobile-card-title text-[12.5px] sm:text-[13.5px] font-semibold leading-tight tracking-normal line-clamp-1 pointer-events-none">
             {card.title}
           </h3>
         </div>
@@ -771,7 +771,7 @@ function CardContent({
               {card.category}
             </span>
           )}
-          <h3 className="text-[13px] sm:text-[15.5px] font-bold leading-tight sm:leading-snug tracking-normal text-white line-clamp-2 group-hover:text-cyan-100 transition-colors duration-300 pointer-events-none">
+          <h3 className="text-[13px] sm:text-[15.5px] font-semibold leading-tight sm:leading-snug tracking-normal text-white line-clamp-2 group-hover:text-cyan-100 transition-colors duration-300 pointer-events-none">
             {card.title}
           </h3>
         </div>

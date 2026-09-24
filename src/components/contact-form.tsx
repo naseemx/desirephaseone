@@ -105,7 +105,7 @@ export function ContactForm({ isStageMode = false }: ContactFormProps = {}) {
                 <span className="h-1.5 w-1.5 rounded-full bg-[var(--brand-cyan)] animate-pulse" />
                 Contact Us
               </div>
-              <h3 className="text-lg sm:text-xl lg:text-2xl font-bold tracking-tight text-white">
+              <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold tracking-tight text-white">
                 Send us an inquiry
               </h3>
             </div>

@@ -296,7 +296,7 @@ export function Footer({ isStageMode = false }: FooterProps = {}) {
               }`}
             >
               <div>
-                <p className="text-white font-medium">Desire Advertising LLC</p>
+                <p className="text-white font-semibold">Desire Advertising LLC</p>
                 <p className="text-zinc-400 text-[11.5px] sm:text-xs">Dubai, UAE</p>
               </div>
 

@@ -1,12 +1,38 @@
 import type { Metadata } from "next";
-import { Quicksand } from "next/font/google";
+import localFont from "next/font/local";
 import { SmoothScroll } from "@/components/providers/smooth-scroll";
 import "./globals.css";
 
-const quicksand = Quicksand({
-  subsets: ["latin"],
+const quicksand = localFont({
+  src: [
+    {
+      path: "../../public/Quicksand-Light.ttf",
+      weight: "300",
+      style: "normal",
+    },
+    {
+      path: "../../public/Quicksand-Regular.ttf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../../public/Quicksand-Medium.ttf",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "../../public/Quicksand-SemiBold.ttf",
+      weight: "600",
+      style: "normal",
+    },
+    {
+      path: "../../public/Quicksand-Bold.ttf",
+      weight: "700",
+      style: "normal",
+    },
+  ],
   variable: "--font-quicksand",
-  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {

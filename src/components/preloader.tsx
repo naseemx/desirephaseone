@@ -311,10 +311,10 @@ export function Preloader({ progress = 0, onComplete }: PreloaderProps) {
 
         {/* Loading Progress Percentage Number (shifted right to optically center with logo) */}
         <div className="mt-4 flex items-baseline gap-1 text-xs sm:text-sm font-semibold tracking-wider translate-x-1.5 sm:translate-x-2">
-          <span className="font-mono text-sm sm:text-base text-cyan-300 drop-shadow-[0_0_10px_rgba(103,232,249,0.3)]">
+          <span className="font-semibold tabular-nums text-sm sm:text-base text-cyan-300 drop-shadow-[0_0_10px_rgba(103,232,249,0.3)]">
             {Math.floor(displayProgress)}
           </span>
-          <span className="text-[10px] text-cyan-300/60 font-mono">%</span>
+          <span className="text-[10px] text-cyan-300/60 font-semibold">%</span>
         </div>
       </div>
     </div>

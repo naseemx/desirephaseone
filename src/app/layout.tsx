@@ -1,37 +1,12 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+import { Quicksand } from "next/font/google";
 import { SmoothScroll } from "@/components/providers/smooth-scroll";
 import "./globals.css";
 
-const quicksand = localFont({
-  src: [
-    {
-      path: "../../public/Quicksand-Light.ttf",
-      weight: "300",
-      style: "normal",
-    },
-    {
-      path: "../../public/Quicksand-Regular.ttf",
-      weight: "400",
-      style: "normal",
-    },
-    {
-      path: "../../public/Quicksand-Medium.ttf",
-      weight: "500",
-      style: "normal",
-    },
-    {
-      path: "../../public/Quicksand-SemiBold.ttf",
-      weight: "600",
-      style: "normal",
-    },
-    {
-      path: "../../public/Quicksand-Bold.ttf",
-      weight: "700",
-      style: "normal",
-    },
-  ],
+const quicksand = Quicksand({
+  subsets: ["latin"],
   variable: "--font-quicksand",
+  weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -89,7 +64,7 @@ export default function RootLayout({
       lang="en"
       className={`${quicksand.variable} dark antialiased`}
     >
-      <body className="min-h-screen bg-[#09090b] text-[var(--brand-grey-20)] selection:bg-[var(--brand-cyan)] selection:text-black">
+      <body className={`${quicksand.className} font-sans min-h-screen bg-[#09090b] text-[var(--brand-grey-20)] selection:bg-[var(--brand-cyan)] selection:text-black`}>
         <SmoothScroll>{children}</SmoothScroll>
       </body>
     </html>

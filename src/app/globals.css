@@ -1,10 +1,10 @@
+@import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap");
 @import "tailwindcss";
 @import "lenis/dist/lenis.css";
 
 :root {
   --background: #09090b;
   --foreground: #fafafa;
-  --font-quicksand: var(--font-quicksand, "Quicksand", sans-serif);
 
   /* Primary Accent: Cyan (C:80 M:0 Y:0 K:0) -> #00B5E2 */
   --brand-cyan: #00B5E2;
@@ -23,10 +23,10 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-quicksand);
-  --font-quicksand: var(--font-quicksand);
-  --font-instrument: var(--font-quicksand);
-  --font-editorial-sans: var(--font-quicksand);
+  --font-sans: var(--font-quicksand, "Quicksand", sans-serif);
+  --font-quicksand: var(--font-quicksand, "Quicksand", sans-serif);
+  --font-instrument: var(--font-quicksand, "Quicksand", sans-serif);
+  --font-editorial-sans: var(--font-quicksand, "Quicksand", sans-serif);
 
   --color-brand-cyan: var(--brand-cyan);
   --color-brand-grey-20: var(--brand-grey-20);
@@ -39,19 +39,20 @@
 
 html {
   scroll-behavior: smooth;
+  font-family: var(--font-quicksand, "Quicksand", sans-serif);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-quicksand), "Quicksand", sans-serif;
+  font-family: var(--font-quicksand, "Quicksand", sans-serif);
   overflow-x: clip;
 }
 
 .font-instrument-serif,
 .font-red-hat-display,
 .font-quicksand {
-  font-family: var(--font-quicksand), "Quicksand", sans-serif;
+  font-family: var(--font-quicksand, "Quicksand", sans-serif);
 }
 
 @media (pointer: fine) {

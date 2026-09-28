@@ -59,6 +59,8 @@ const DESC_LINES = [
   "design, installation, and long-term support solutions.",
 ];
 
+const HIDE_SERVICE_SECTION = true;
+
 export function ProcessSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const ctaLayerRef = useRef<HTMLDivElement>(null);
@@ -332,10 +334,10 @@ export function ProcessSection() {
         // Phase 7b: MissionVision smooth fade-in after ServiceHome completely dissolves (17.75 -> 18.65s)
         // Phase 7c: MissionVision reading hold (18.65 -> 21.15s)
         // Phase 7d: MissionVision clean fade-out (21.15 -> 21.95s)
-        // Phase 7e: ContactForm smooth fade-in after MissionVision completely dissolves (22.05 -> 22.95s)
-        // Phase 8: ContactForm reading & interaction hold until unpinning to Footer (22.95 -> 25.85s)
-        // Phase 9: Buffer before Footer unpin (25.85 -> 26.25s)
-        const scrollDistance = 9550;
+        // Phase 7e: ContactForm smooth fade-in after MissionVision completely dissolves
+        // Phase 8: ContactForm reading & interaction hold until unpinning to Footer
+        // Phase 9: Buffer before Footer unpin
+        const scrollDistance = HIDE_SERVICE_SECTION ? 6650 : 9550;
 
         const tl = gsap.timeline({
           defaults: { immediateRender: false },
@@ -362,81 +364,151 @@ export function ProcessSection() {
               } else if (self.progress < 0.010 && self.direction === -1) {
                 playAutoCtaIntro();
               }
-              if (ctaLayer && processContent && serviceLayer && missionLayer && contactLayer) {
-                if (self.progress < 0.04) {
-                  ctaLayer.style.pointerEvents = "auto";
-                  processContent.style.pointerEvents = "none";
-                  serviceLayer.style.pointerEvents = "none";
-                  missionLayer.style.pointerEvents = "none";
-                  contactLayer.style.pointerEvents = "none";
-                } else if (self.progress >= 0.04 && self.progress < 0.37) {
-                  ctaLayer.style.pointerEvents = "none";
-                  processContent.style.pointerEvents = "auto";
-                  serviceLayer.style.pointerEvents = "none";
-                  missionLayer.style.pointerEvents = "none";
-                  contactLayer.style.pointerEvents = "none";
-                } else if (self.progress >= 0.37 && self.progress < 0.67) {
-                  ctaLayer.style.pointerEvents = "none";
-                  processContent.style.pointerEvents = "none";
-                  serviceLayer.style.pointerEvents = "auto";
-                  missionLayer.style.pointerEvents = "none";
-                  contactLayer.style.pointerEvents = "none";
-                } else if (self.progress >= 0.67 && self.progress < 0.84) {
-                  ctaLayer.style.pointerEvents = "none";
-                  processContent.style.pointerEvents = "none";
-                  serviceLayer.style.pointerEvents = "none";
-                  missionLayer.style.pointerEvents = "auto";
-                  contactLayer.style.pointerEvents = "none";
-                } else {
-                  ctaLayer.style.pointerEvents = "none";
-                  processContent.style.pointerEvents = "none";
-                  serviceLayer.style.pointerEvents = "none";
-                  missionLayer.style.pointerEvents = "none";
-                  contactLayer.style.pointerEvents = "auto";
-                }
-              }
-
-              if (self.progress < 0.04 || self.progress > 0.36) {
-                if (activeStepRef.current !== -1) {
-                  activeStepRef.current = -1;
-                  stepEls.forEach((el) => {
-                    el.setAttribute("data-active", "false");
-                    el.classList.remove("is-active");
-                  });
-                }
-              } else {
-                const currentY = Number(gsap.getProperty(rightTrack, "y")) || 0;
-                let newClosest = -1;
-                let minDiff = Infinity;
-                stepCenters.forEach((center, idx) => {
-                  const stepViewportY = currentY + center;
-                  const diff = Math.abs(stepViewportY - centerTarget);
-                  if (diff < minDiff) {
-                    minDiff = diff;
-                    newClosest = idx;
+              if (HIDE_SERVICE_SECTION) {
+                if (ctaLayer && processContent && missionLayer && contactLayer) {
+                  if (self.progress < 0.04) {
+                    ctaLayer.style.pointerEvents = "auto";
+                    processContent.style.pointerEvents = "none";
+                    missionLayer.style.pointerEvents = "none";
+                    contactLayer.style.pointerEvents = "none";
+                  } else if (self.progress >= 0.04 && self.progress < 0.53) {
+                    ctaLayer.style.pointerEvents = "none";
+                    processContent.style.pointerEvents = "auto";
+                    missionLayer.style.pointerEvents = "none";
+                    contactLayer.style.pointerEvents = "none";
+                  } else if (self.progress >= 0.53 && self.progress < 0.77) {
+                    ctaLayer.style.pointerEvents = "none";
+                    processContent.style.pointerEvents = "none";
+                    missionLayer.style.pointerEvents = "auto";
+                    contactLayer.style.pointerEvents = "none";
+                  } else {
+                    ctaLayer.style.pointerEvents = "none";
+                    processContent.style.pointerEvents = "none";
+                    missionLayer.style.pointerEvents = "none";
+                    contactLayer.style.pointerEvents = "auto";
                   }
-                });
+                }
 
-                const stepThreshold = 160;
-                if (minDiff < stepThreshold) {
-                  if (newClosest !== -1 && newClosest !== activeStepRef.current) {
-                    activeStepRef.current = newClosest;
-                    stepEls.forEach((el, idx) => {
-                      const isActive = idx === newClosest;
-                      el.setAttribute("data-active", isActive ? "true" : "false");
-                      if (isActive) {
-                        el.classList.add("is-active");
-                      } else {
-                        el.classList.remove("is-active");
-                      }
+                if (self.progress < 0.04 || self.progress > 0.52) {
+                  if (activeStepRef.current !== -1) {
+                    activeStepRef.current = -1;
+                    stepEls.forEach((el) => {
+                      el.setAttribute("data-active", "false");
+                      el.classList.remove("is-active");
                     });
                   }
-                } else if (activeStepRef.current !== -1) {
-                  activeStepRef.current = -1;
-                  stepEls.forEach((el) => {
-                    el.setAttribute("data-active", "false");
-                    el.classList.remove("is-active");
+                } else {
+                  const currentY = Number(gsap.getProperty(rightTrack, "y")) || 0;
+                  let newClosest = -1;
+                  let minDiff = Infinity;
+                  stepCenters.forEach((center, idx) => {
+                    const stepViewportY = currentY + center;
+                    const diff = Math.abs(stepViewportY - centerTarget);
+                    if (diff < minDiff) {
+                      minDiff = diff;
+                      newClosest = idx;
+                    }
                   });
+
+                  const stepThreshold = 160;
+                  if (minDiff < stepThreshold) {
+                    if (newClosest !== -1 && newClosest !== activeStepRef.current) {
+                      activeStepRef.current = newClosest;
+                      stepEls.forEach((el, idx) => {
+                        const isActive = idx === newClosest;
+                        el.setAttribute("data-active", isActive ? "true" : "false");
+                        if (isActive) {
+                          el.classList.add("is-active");
+                        } else {
+                          el.classList.remove("is-active");
+                        }
+                      });
+                    }
+                  } else if (activeStepRef.current !== -1) {
+                    activeStepRef.current = -1;
+                    stepEls.forEach((el) => {
+                      el.setAttribute("data-active", "false");
+                      el.classList.remove("is-active");
+                    });
+                  }
+                }
+              } else {
+                if (ctaLayer && processContent && serviceLayer && missionLayer && contactLayer) {
+                  if (self.progress < 0.04) {
+                    ctaLayer.style.pointerEvents = "auto";
+                    processContent.style.pointerEvents = "none";
+                    serviceLayer.style.pointerEvents = "none";
+                    missionLayer.style.pointerEvents = "none";
+                    contactLayer.style.pointerEvents = "none";
+                  } else if (self.progress >= 0.04 && self.progress < 0.37) {
+                    ctaLayer.style.pointerEvents = "none";
+                    processContent.style.pointerEvents = "auto";
+                    serviceLayer.style.pointerEvents = "none";
+                    missionLayer.style.pointerEvents = "none";
+                    contactLayer.style.pointerEvents = "none";
+                  } else if (self.progress >= 0.37 && self.progress < 0.67) {
+                    ctaLayer.style.pointerEvents = "none";
+                    processContent.style.pointerEvents = "none";
+                    serviceLayer.style.pointerEvents = "auto";
+                    missionLayer.style.pointerEvents = "none";
+                    contactLayer.style.pointerEvents = "none";
+                  } else if (self.progress >= 0.67 && self.progress < 0.84) {
+                    ctaLayer.style.pointerEvents = "none";
+                    processContent.style.pointerEvents = "none";
+                    serviceLayer.style.pointerEvents = "none";
+                    missionLayer.style.pointerEvents = "auto";
+                    contactLayer.style.pointerEvents = "none";
+                  } else {
+                    ctaLayer.style.pointerEvents = "none";
+                    processContent.style.pointerEvents = "none";
+                    serviceLayer.style.pointerEvents = "none";
+                    missionLayer.style.pointerEvents = "none";
+                    contactLayer.style.pointerEvents = "auto";
+                  }
+                }
+
+                if (self.progress < 0.04 || self.progress > 0.36) {
+                  if (activeStepRef.current !== -1) {
+                    activeStepRef.current = -1;
+                    stepEls.forEach((el) => {
+                      el.setAttribute("data-active", "false");
+                      el.classList.remove("is-active");
+                    });
+                  }
+                } else {
+                  const currentY = Number(gsap.getProperty(rightTrack, "y")) || 0;
+                  let newClosest = -1;
+                  let minDiff = Infinity;
+                  stepCenters.forEach((center, idx) => {
+                    const stepViewportY = currentY + center;
+                    const diff = Math.abs(stepViewportY - centerTarget);
+                    if (diff < minDiff) {
+                      minDiff = diff;
+                      newClosest = idx;
+                    }
+                  });
+
+                  const stepThreshold = 160;
+                  if (minDiff < stepThreshold) {
+                    if (newClosest !== -1 && newClosest !== activeStepRef.current) {
+                      activeStepRef.current = newClosest;
+                      stepEls.forEach((el, idx) => {
+                        const isActive = idx === newClosest;
+                        el.setAttribute("data-active", isActive ? "true" : "false");
+                        if (isActive) {
+                          el.classList.add("is-active");
+                        } else {
+                          el.classList.remove("is-active");
+                        }
+                      });
+                    }
+                  } else if (activeStepRef.current !== -1) {
+                    activeStepRef.current = -1;
+                    stepEls.forEach((el) => {
+                      el.setAttribute("data-active", "false");
+                      el.classList.remove("is-active");
+                    });
+                  }
                 }
               }
             },
@@ -557,100 +629,121 @@ export function ProcessSection() {
           );
         }
 
-        // ─────────────────────────────────────────────────────────────────
-        // PHASE 5b: ServiceHome smoothly fades in ONLY AFTER Process completely fades out (t = 9.75 -> 10.65)
-        // ─────────────────────────────────────────────────────────────────
-        if (serviceLayer) {
-          tl.fromTo(
-            serviceLayer,
-            { opacity: 0, scale: 0.96 },
-            { opacity: 1, scale: 1.0, duration: 0.9, ease: "power1.inOut", force3D: true },
-            9.75
-          );
-        }
+        if (!HIDE_SERVICE_SECTION) {
+          // PHASE 5b: ServiceHome smoothly fades in ONLY AFTER Process completely fades out (t = 9.75 -> 10.65)
+          if (serviceLayer) {
+            tl.fromTo(
+              serviceLayer,
+              { opacity: 0, scale: 0.96 },
+              { opacity: 1, scale: 1.0, duration: 0.9, ease: "power1.inOut", force3D: true },
+              9.75
+            );
+          }
 
-        // ─────────────────────────────────────────────────────────────────
-        // PHASE 6: Desktop ServiceHome horizontal cards move right-to-left as user scrolls down (t = 10.65 -> 16.15)
-        // ─────────────────────────────────────────────────────────────────
-        const desktopServiceProxy = { progress: 0 };
-        tl.fromTo(
-          desktopServiceProxy,
-          { progress: 0 },
-          {
-            progress: 1,
-            duration: 5.5,
-            ease: "none",
-            onUpdate: () => {
-              desktopServiceScrollRef.current = desktopServiceProxy.progress;
+          // PHASE 6: Desktop ServiceHome horizontal cards move right-to-left as user scrolls down (t = 10.65 -> 16.15)
+          const desktopServiceProxy = { progress: 0 };
+          tl.fromTo(
+            desktopServiceProxy,
+            { progress: 0 },
+            {
+              progress: 1,
+              duration: 5.5,
+              ease: "none",
+              onUpdate: () => {
+                desktopServiceScrollRef.current = desktopServiceProxy.progress;
+              },
             },
-          },
-          10.65
-        );
-
-        // 8b. Reading hold on the final cards (t = 16.15 -> 16.85)
-        tl.to({}, { duration: 0.7 }, 16.15);
-
-        // ─────────────────────────────────────────────────────────────────
-        // PHASE 7a: ServiceHome cleanly & smoothly fades out after all cards are shown (t = 16.85 -> 17.65)
-        // ─────────────────────────────────────────────────────────────────
-        if (serviceLayer) {
-          tl.to(
-            serviceLayer,
-            { opacity: 0, scale: 0.94, duration: 0.8, ease: "power1.inOut", force3D: true },
-            16.85
+            10.65
           );
+
+          // 8b. Reading hold on the final cards (t = 16.15 -> 16.85)
+          tl.to({}, { duration: 0.7 }, 16.15);
+
+          // PHASE 7a: ServiceHome cleanly & smoothly fades out after all cards are shown (t = 16.85 -> 17.65)
+          if (serviceLayer) {
+            tl.to(
+              serviceLayer,
+              { opacity: 0, scale: 0.94, duration: 0.8, ease: "power1.inOut", force3D: true },
+              16.85
+            );
+          }
+
+          // PHASE 7b: MissionVision smoothly fades in ONLY AFTER ServiceHome completely fades out (t = 17.75 -> 18.65)
+          if (missionLayer) {
+            tl.fromTo(
+              missionLayer,
+              { opacity: 0, scale: 0.96 },
+              { opacity: 1, scale: 1.0, duration: 0.9, ease: "power1.inOut", force3D: true },
+              17.75
+            );
+          }
+
+          // PHASE 7c: MissionVision reading hold (t = 18.65 -> 21.15)
+          tl.to({}, { duration: 2.5 }, 18.65);
+
+          // PHASE 7d: MissionVision cleanly & smoothly fades out (t = 21.15 -> 21.95)
+          if (missionLayer) {
+            tl.to(
+              missionLayer,
+              { opacity: 0, scale: 0.94, duration: 0.8, ease: "power1.inOut", force3D: true },
+              21.15
+            );
+          }
+
+          // PHASE 7e: ContactForm smoothly fades in ONLY AFTER MissionVision completely fades out (t = 22.05 -> 22.95)
+          if (contactLayer) {
+            tl.fromTo(
+              contactLayer,
+              { opacity: 0, scale: 0.96 },
+              { opacity: 1, scale: 1.0, duration: 0.9, ease: "power1.inOut", force3D: true },
+              22.05
+            );
+          }
+
+          // PHASE 8: ContactForm reading & interaction hold (t = 22.95 -> 25.85)
+          tl.to({}, { duration: 2.9 }, 22.95);
+
+          // PHASE 9: Buffer before smooth unpinning directly to Footer (t = 25.85 -> 26.25)
+          tl.to({}, { duration: 0.4 }, 25.85);
+        } else {
+          // PHASE 7b: MissionVision smoothly fades in directly after ProcessSection completely dissolves (t = 9.75 -> 10.65)
+          if (missionLayer) {
+            tl.fromTo(
+              missionLayer,
+              { opacity: 0, scale: 0.96 },
+              { opacity: 1, scale: 1.0, duration: 0.9, ease: "power1.inOut", force3D: true },
+              9.75
+            );
+          }
+
+          // PHASE 7c: MissionVision reading hold (t = 10.65 -> 13.15)
+          tl.to({}, { duration: 2.5 }, 10.65);
+
+          // PHASE 7d: MissionVision cleanly & smoothly fades out (t = 13.15 -> 13.95)
+          if (missionLayer) {
+            tl.to(
+              missionLayer,
+              { opacity: 0, scale: 0.94, duration: 0.8, ease: "power1.inOut", force3D: true },
+              13.15
+            );
+          }
+
+          // PHASE 7e: ContactForm smoothly fades in ONLY AFTER MissionVision completely fades out (t = 14.05 -> 14.95)
+          if (contactLayer) {
+            tl.fromTo(
+              contactLayer,
+              { opacity: 0, scale: 0.96 },
+              { opacity: 1, scale: 1.0, duration: 0.9, ease: "power1.inOut", force3D: true },
+              14.05
+            );
+          }
+
+          // PHASE 8: ContactForm reading & interaction hold (t = 14.95 -> 17.85)
+          tl.to({}, { duration: 2.9 }, 14.95);
+
+          // PHASE 9: Buffer before smooth unpinning directly to Footer (t = 17.85 -> 18.25)
+          tl.to({}, { duration: 0.4 }, 17.85);
         }
-
-        // ─────────────────────────────────────────────────────────────────
-        // PHASE 7b: MissionVision smoothly fades in ONLY AFTER ServiceHome completely fades out (t = 17.75 -> 18.65)
-        // ─────────────────────────────────────────────────────────────────
-        if (missionLayer) {
-          tl.fromTo(
-            missionLayer,
-            { opacity: 0, scale: 0.96 },
-            { opacity: 1, scale: 1.0, duration: 0.9, ease: "power1.inOut", force3D: true },
-            17.75
-          );
-        }
-
-        // ─────────────────────────────────────────────────────────────────
-        // PHASE 7c: MissionVision reading hold (t = 18.65 -> 21.15)
-        // ─────────────────────────────────────────────────────────────────
-        tl.to({}, { duration: 2.5 }, 18.65);
-
-        // ─────────────────────────────────────────────────────────────────
-        // PHASE 7d: MissionVision cleanly & smoothly fades out (t = 21.15 -> 21.95)
-        // ─────────────────────────────────────────────────────────────────
-        if (missionLayer) {
-          tl.to(
-            missionLayer,
-            { opacity: 0, scale: 0.94, duration: 0.8, ease: "power1.inOut", force3D: true },
-            21.15
-          );
-        }
-
-        // ─────────────────────────────────────────────────────────────────
-        // PHASE 7e: ContactForm smoothly fades in ONLY AFTER MissionVision completely fades out (t = 22.05 -> 22.95)
-        // ─────────────────────────────────────────────────────────────────
-        if (contactLayer) {
-          tl.fromTo(
-            contactLayer,
-            { opacity: 0, scale: 0.96 },
-            { opacity: 1, scale: 1.0, duration: 0.9, ease: "power1.inOut", force3D: true },
-            22.05
-          );
-        }
-
-        // ─────────────────────────────────────────────────────────────────
-        // PHASE 8: ContactForm reading & interaction hold (t = 22.95 -> 25.85)
-        // ContactForm remains visible and interactive without fading out
-        // ─────────────────────────────────────────────────────────────────
-        tl.to({}, { duration: 2.9 }, 22.95);
-
-        // ─────────────────────────────────────────────────────────────────
-        // PHASE 9: Buffer before smooth unpinning directly to Footer (t = 25.85 -> 26.25)
-        // ─────────────────────────────────────────────────────────────────
-        tl.to({}, { duration: 0.4 }, 25.85);
 
         // Trigger auto reveal immediately ONLY if actually active on mount (e.g. reload or anchor)
         if (typeof window !== "undefined" && section) {
@@ -935,7 +1028,7 @@ export function ProcessSection() {
         }
 
         // Master pinned mobile stage: CTA intro -> Process -> ServiceHome -> MissionVision -> ContactForm (holds until Footer unpin)
-        const mobileScrollDist = 8100;
+        const mobileScrollDist = HIDE_SERVICE_SECTION ? 4860 : 8100;
         // Reset dirty-check refs on mobile init
         mobileActiveStepRef.current = -1;
         mobileActiveColRef.current = -1;
@@ -964,128 +1057,193 @@ export function ProcessSection() {
               } else if (self.progress < 0.010 && self.direction === -1) {
                 playMobileAutoCtaIntro();
               }
-              if (ctaLayer && processContent && serviceLayer && missionLayer && contactLayer) {
-                if (self.progress < 0.035) {
-                  ctaLayer.style.pointerEvents = "auto";
-                  processContent.style.pointerEvents = "none";
-                  serviceLayer.style.pointerEvents = "none";
-                  missionLayer.style.pointerEvents = "none";
-                  contactLayer.style.pointerEvents = "none";
-                } else if (self.progress >= 0.035 && self.progress < 0.26) {
-                  ctaLayer.style.pointerEvents = "none";
-                  processContent.style.pointerEvents = "auto";
-                  serviceLayer.style.pointerEvents = "none";
-                  missionLayer.style.pointerEvents = "none";
-                  contactLayer.style.pointerEvents = "none";
-                } else if (self.progress >= 0.26 && self.progress < 0.66) {
-                  ctaLayer.style.pointerEvents = "none";
-                  processContent.style.pointerEvents = "none";
-                  serviceLayer.style.pointerEvents = "auto";
-                  missionLayer.style.pointerEvents = "none";
-                  contactLayer.style.pointerEvents = "none";
-                } else if (self.progress >= 0.66 && self.progress < 0.83) {
-                  ctaLayer.style.pointerEvents = "none";
-                  processContent.style.pointerEvents = "none";
-                  serviceLayer.style.pointerEvents = "none";
-                  missionLayer.style.pointerEvents = "auto";
-                  contactLayer.style.pointerEvents = "none";
-                } else {
-                  ctaLayer.style.pointerEvents = "none";
-                  processContent.style.pointerEvents = "none";
-                  serviceLayer.style.pointerEvents = "none";
-                  missionLayer.style.pointerEvents = "none";
-                  contactLayer.style.pointerEvents = "auto";
+              if (HIDE_SERVICE_SECTION) {
+                if (ctaLayer && processContent && missionLayer && contactLayer) {
+                  if (self.progress < 0.035) {
+                    ctaLayer.style.pointerEvents = "auto";
+                    processContent.style.pointerEvents = "none";
+                    missionLayer.style.pointerEvents = "none";
+                    contactLayer.style.pointerEvents = "none";
+                  } else if (self.progress >= 0.035 && self.progress < 0.44) {
+                    ctaLayer.style.pointerEvents = "none";
+                    processContent.style.pointerEvents = "auto";
+                    missionLayer.style.pointerEvents = "none";
+                    contactLayer.style.pointerEvents = "none";
+                  } else if (self.progress >= 0.44 && self.progress < 0.73) {
+                    ctaLayer.style.pointerEvents = "none";
+                    processContent.style.pointerEvents = "none";
+                    missionLayer.style.pointerEvents = "auto";
+                    contactLayer.style.pointerEvents = "none";
+                  } else {
+                    ctaLayer.style.pointerEvents = "none";
+                    processContent.style.pointerEvents = "none";
+                    missionLayer.style.pointerEvents = "none";
+                    contactLayer.style.pointerEvents = "auto";
+                  }
                 }
-              }
 
-              // Mobile step highlighting with dirty-check guard
-              if (self.progress < 0.035 || self.progress > 0.25) {
-                if (mobileActiveStepRef.current !== -1) {
-                  mobileActiveStepRef.current = -1;
-                  for (let idx = 0; idx < mobileSteps.length; idx++) {
-                    mobileSteps[idx].classList.remove("is-active");
+                if (self.progress < 0.035 || self.progress > 0.44) {
+                  if (mobileActiveStepRef.current !== -1) {
+                    mobileActiveStepRef.current = -1;
+                    for (let idx = 0; idx < mobileSteps.length; idx++) {
+                      mobileSteps[idx].classList.remove("is-active");
+                    }
+                  }
+                } else {
+                  const currentY = Number(gsap.getProperty(mobileTrack, "y")) || 0;
+                  let newClosest = -1;
+                  let minDiff = Infinity;
+                  for (let idx = 0; idx < mobileStepCenters.length; idx++) {
+                    const stepViewportY = currentY + mobileStepCenters[idx];
+                    const diff = Math.abs(stepViewportY - centerTarget);
+                    if (diff < minDiff) {
+                      minDiff = diff;
+                      newClosest = idx;
+                    }
+                  }
+
+                  if (minDiff < 100) {
+                    if (newClosest !== -1 && newClosest !== mobileActiveStepRef.current) {
+                      mobileActiveStepRef.current = newClosest;
+                      for (let idx = 0; idx < mobileSteps.length; idx++) {
+                        if (idx === newClosest) {
+                          mobileSteps[idx].classList.add("is-active");
+                        } else {
+                          mobileSteps[idx].classList.remove("is-active");
+                        }
+                      }
+                    }
+                  } else if (mobileActiveStepRef.current !== -1) {
+                    mobileActiveStepRef.current = -1;
+                    for (let idx = 0; idx < mobileSteps.length; idx++) {
+                      mobileSteps[idx].classList.remove("is-active");
+                    }
                   }
                 }
               } else {
-                const currentY = Number(gsap.getProperty(mobileTrack, "y")) || 0;
-                let newClosest = -1;
-                let minDiff = Infinity;
-                for (let idx = 0; idx < mobileStepCenters.length; idx++) {
-                  const stepViewportY = currentY + mobileStepCenters[idx];
-                  const diff = Math.abs(stepViewportY - centerTarget);
-                  if (diff < minDiff) {
-                    minDiff = diff;
-                    newClosest = idx;
+                if (ctaLayer && processContent && serviceLayer && missionLayer && contactLayer) {
+                  if (self.progress < 0.035) {
+                    ctaLayer.style.pointerEvents = "auto";
+                    processContent.style.pointerEvents = "none";
+                    serviceLayer.style.pointerEvents = "none";
+                    missionLayer.style.pointerEvents = "none";
+                    contactLayer.style.pointerEvents = "none";
+                  } else if (self.progress >= 0.035 && self.progress < 0.26) {
+                    ctaLayer.style.pointerEvents = "none";
+                    processContent.style.pointerEvents = "auto";
+                    serviceLayer.style.pointerEvents = "none";
+                    missionLayer.style.pointerEvents = "none";
+                    contactLayer.style.pointerEvents = "none";
+                  } else if (self.progress >= 0.26 && self.progress < 0.66) {
+                    ctaLayer.style.pointerEvents = "none";
+                    processContent.style.pointerEvents = "none";
+                    serviceLayer.style.pointerEvents = "auto";
+                    missionLayer.style.pointerEvents = "none";
+                    contactLayer.style.pointerEvents = "none";
+                  } else if (self.progress >= 0.66 && self.progress < 0.83) {
+                    ctaLayer.style.pointerEvents = "none";
+                    processContent.style.pointerEvents = "none";
+                    serviceLayer.style.pointerEvents = "none";
+                    missionLayer.style.pointerEvents = "auto";
+                    contactLayer.style.pointerEvents = "none";
+                  } else {
+                    ctaLayer.style.pointerEvents = "none";
+                    processContent.style.pointerEvents = "none";
+                    serviceLayer.style.pointerEvents = "none";
+                    missionLayer.style.pointerEvents = "none";
+                    contactLayer.style.pointerEvents = "auto";
                   }
                 }
 
-                if (minDiff < 100) {
-                  if (newClosest !== -1 && newClosest !== mobileActiveStepRef.current) {
-                    mobileActiveStepRef.current = newClosest;
+                // Mobile step highlighting with dirty-check guard
+                if (self.progress < 0.035 || self.progress > 0.25) {
+                  if (mobileActiveStepRef.current !== -1) {
+                    mobileActiveStepRef.current = -1;
                     for (let idx = 0; idx < mobileSteps.length; idx++) {
-                      if (idx === newClosest) {
-                        mobileSteps[idx].classList.add("is-active");
+                      mobileSteps[idx].classList.remove("is-active");
+                    }
+                  }
+                } else {
+                  const currentY = Number(gsap.getProperty(mobileTrack, "y")) || 0;
+                  let newClosest = -1;
+                  let minDiff = Infinity;
+                  for (let idx = 0; idx < mobileStepCenters.length; idx++) {
+                    const stepViewportY = currentY + mobileStepCenters[idx];
+                    const diff = Math.abs(stepViewportY - centerTarget);
+                    if (diff < minDiff) {
+                      minDiff = diff;
+                      newClosest = idx;
+                    }
+                  }
+
+                  if (minDiff < 100) {
+                    if (newClosest !== -1 && newClosest !== mobileActiveStepRef.current) {
+                      mobileActiveStepRef.current = newClosest;
+                      for (let idx = 0; idx < mobileSteps.length; idx++) {
+                        if (idx === newClosest) {
+                          mobileSteps[idx].classList.add("is-active");
+                        } else {
+                          mobileSteps[idx].classList.remove("is-active");
+                        }
+                      }
+                    }
+                  } else if (mobileActiveStepRef.current !== -1) {
+                    mobileActiveStepRef.current = -1;
+                    for (let idx = 0; idx < mobileSteps.length; idx++) {
+                      mobileSteps[idx].classList.remove("is-active");
+                    }
+                  }
+                }
+
+                // Dynamic 2-card column active color focus on mobile ServiceHome
+                if (
+                  self.progress >= 0.29 &&
+                  self.progress <= 0.65 &&
+                  mobileTopCards &&
+                  mobileBottomCards &&
+                  mobileTopCards.length > 0 &&
+                  mobileServiceTrack
+                ) {
+                  const currentTrackX = gsap.getProperty(mobileServiceTrack, "x") as number;
+                  let closestCol = 0;
+                  let minDiff = Infinity;
+                  for (let i = 0; i < totalServiceCols; i++) {
+                    const diff = Math.abs(currentTrackX - getColumnCenterTrackX(i));
+                    if (diff < minDiff) {
+                      minDiff = diff;
+                      closestCol = i;
+                    }
+                  }
+
+                  // Only toggle classes when active column actually changed
+                  if (closestCol !== mobileActiveColRef.current) {
+                    mobileActiveColRef.current = closestCol;
+                    for (let idx = 0; idx < mobileTopCards.length; idx++) {
+                      if (idx === closestCol) {
+                        mobileTopCards[idx].classList.add("is-active");
                       } else {
-                        mobileSteps[idx].classList.remove("is-active");
+                        mobileTopCards[idx].classList.remove("is-active");
+                      }
+                    }
+                    for (let idx = 0; idx < mobileBottomCards.length; idx++) {
+                      if (idx === closestCol) {
+                        mobileBottomCards[idx].classList.add("is-active");
+                      } else {
+                        mobileBottomCards[idx].classList.remove("is-active");
                       }
                     }
                   }
-                } else if (mobileActiveStepRef.current !== -1) {
-                  mobileActiveStepRef.current = -1;
-                  for (let idx = 0; idx < mobileSteps.length; idx++) {
-                    mobileSteps[idx].classList.remove("is-active");
-                  }
-                }
-              }
-
-              // Dynamic 2-card column active color focus on mobile ServiceHome
-              if (
-                self.progress >= 0.29 &&
-                self.progress <= 0.65 &&
-                mobileTopCards &&
-                mobileBottomCards &&
-                mobileTopCards.length > 0 &&
-                mobileServiceTrack
-              ) {
-                const currentTrackX = gsap.getProperty(mobileServiceTrack, "x") as number;
-                let closestCol = 0;
-                let minDiff = Infinity;
-                for (let i = 0; i < totalServiceCols; i++) {
-                  const diff = Math.abs(currentTrackX - getColumnCenterTrackX(i));
-                  if (diff < minDiff) {
-                    minDiff = diff;
-                    closestCol = i;
-                  }
-                }
-
-                // Only toggle classes when active column actually changed
-                if (closestCol !== mobileActiveColRef.current) {
-                  mobileActiveColRef.current = closestCol;
-                  for (let idx = 0; idx < mobileTopCards.length; idx++) {
-                    if (idx === closestCol) {
-                      mobileTopCards[idx].classList.add("is-active");
-                    } else {
-                      mobileTopCards[idx].classList.remove("is-active");
+                } else if (self.progress < 0.29) {
+                  if (mobileActiveColRef.current !== 0 && mobileTopCards && mobileBottomCards) {
+                    mobileActiveColRef.current = 0;
+                    for (let idx = 0; idx < mobileTopCards.length; idx++) {
+                      if (idx === 0) mobileTopCards[idx].classList.add("is-active");
+                      else mobileTopCards[idx].classList.remove("is-active");
                     }
-                  }
-                  for (let idx = 0; idx < mobileBottomCards.length; idx++) {
-                    if (idx === closestCol) {
-                      mobileBottomCards[idx].classList.add("is-active");
-                    } else {
-                      mobileBottomCards[idx].classList.remove("is-active");
+                    for (let idx = 0; idx < mobileBottomCards.length; idx++) {
+                      if (idx === 0) mobileBottomCards[idx].classList.add("is-active");
+                      else mobileBottomCards[idx].classList.remove("is-active");
                     }
-                  }
-                }
-              } else if (self.progress < 0.29) {
-                if (mobileActiveColRef.current !== 0 && mobileTopCards && mobileBottomCards) {
-                  mobileActiveColRef.current = 0;
-                  for (let idx = 0; idx < mobileTopCards.length; idx++) {
-                    if (idx === 0) mobileTopCards[idx].classList.add("is-active");
-                    else mobileTopCards[idx].classList.remove("is-active");
-                  }
-                  for (let idx = 0; idx < mobileBottomCards.length; idx++) {
-                    if (idx === 0) mobileBottomCards[idx].classList.add("is-active");
-                    else mobileBottomCards[idx].classList.remove("is-active");
                   }
                 }
               }
@@ -1184,104 +1342,144 @@ export function ProcessSection() {
           );
         }
 
-        // 7b. Phase 5b: Mobile ServiceHome smoothly fades in ONLY AFTER Process completely fades out (t = 6.6 -> 7.4)
-        if (serviceLayer) {
-          mobileTl.fromTo(
-            serviceLayer,
-            { opacity: 0, scale: 0.96 },
-            { opacity: 1, scale: 1.0, duration: 0.8, ease: "power1.inOut", force3D: true },
-            6.6
-          );
-        }
-
-        // 8. Phase 6: Mobile ServiceHome horizontal cards track - stepped movement where each card stops in the center (t = 7.4 -> 15.5)
-        if (mobileServiceTrack) {
-          // Explicitly lock x to Column 0 when ServiceHome fades in so Column 0 is centered from the start
-          mobileTl.set(
-            mobileServiceTrack,
-            { x: () => getColumnCenterTrackX(0), force3D: true },
-            6.6
-          );
-
-          const moveDuration = 0.55;
-          const normalHold = 0.5;
-          const finalHold = 0.75;
-          let currentT = 7.4;
-
-          // Initial hold for Column 0 (already centered on fade-in)
-          mobileTl.to({}, { duration: normalHold }, currentT);
-          currentT += normalHold;
-
-          // Step through columns 1 to totalServiceCols - 1
-          for (let col = 1; col < totalServiceCols; col++) {
-            const isLast = col === totalServiceCols - 1;
-            const holdTime = isLast ? finalHold : normalHold;
-
-            mobileTl.to(
-              mobileServiceTrack,
-              {
-                x: () => getColumnCenterTrackX(col),
-                duration: moveDuration,
-                ease: "power2.inOut",
-                force3D: true,
-              },
-              currentT
+        if (!HIDE_SERVICE_SECTION) {
+          // 7b. Phase 5b: Mobile ServiceHome smoothly fades in ONLY AFTER Process completely fades out (t = 6.6 -> 7.4)
+          if (serviceLayer) {
+            mobileTl.fromTo(
+              serviceLayer,
+              { opacity: 0, scale: 0.96 },
+              { opacity: 1, scale: 1.0, duration: 0.8, ease: "power1.inOut", force3D: true },
+              6.6
             );
-            currentT += moveDuration;
-
-            // Reading pause while column `col` is centered
-            mobileTl.to({}, { duration: holdTime }, currentT);
-            currentT += holdTime;
           }
+
+          // 8. Phase 6: Mobile ServiceHome horizontal cards track - stepped movement where each card stops in the center (t = 7.4 -> 15.5)
+          if (mobileServiceTrack) {
+            // Explicitly lock x to Column 0 when ServiceHome fades in so Column 0 is centered from the start
+            mobileTl.set(
+              mobileServiceTrack,
+              { x: () => getColumnCenterTrackX(0), force3D: true },
+              6.6
+            );
+
+            const moveDuration = 0.55;
+            const normalHold = 0.5;
+            const finalHold = 0.75;
+            let currentT = 7.4;
+
+            // Initial hold for Column 0 (already centered on fade-in)
+            mobileTl.to({}, { duration: normalHold }, currentT);
+            currentT += normalHold;
+
+            // Step through columns 1 to totalServiceCols - 1
+            for (let col = 1; col < totalServiceCols; col++) {
+              const isLast = col === totalServiceCols - 1;
+              const holdTime = isLast ? finalHold : normalHold;
+
+              mobileTl.to(
+                mobileServiceTrack,
+                {
+                  x: () => getColumnCenterTrackX(col),
+                  duration: moveDuration,
+                  ease: "power2.inOut",
+                  force3D: true,
+                },
+                currentT
+              );
+              currentT += moveDuration;
+
+              // Reading pause while column `col` is centered
+              mobileTl.to({}, { duration: holdTime }, currentT);
+              currentT += holdTime;
+            }
+          }
+
+          // 9a. Phase 7a: Mobile ServiceHome cleanly & smoothly fades out after the end of the cards (t = 15.5 -> 16.3)
+          if (serviceLayer) {
+            mobileTl.to(
+              serviceLayer,
+              { opacity: 0, scale: 0.94, duration: 0.8, ease: "power1.inOut", force3D: true },
+              15.5
+            );
+          }
+
+          // 9b. Phase 7b: Mobile MissionVision smoothly fades in ONLY AFTER ServiceHome completely fades out (t = 16.4 -> 17.2)
+          if (missionLayer) {
+            mobileTl.fromTo(
+              missionLayer,
+              { opacity: 0, scale: 0.96 },
+              { opacity: 1, scale: 1.0, duration: 0.8, ease: "power1.inOut", force3D: true },
+              16.4
+            );
+          }
+
+          // 9c. Phase 7c: Mobile MissionVision reading hold (t = 17.2 -> 19.7)
+          mobileTl.to({}, { duration: 2.5 }, 17.2);
+
+          // 9d. Phase 7d: Mobile MissionVision cleanly & smoothly fades out (t = 19.7 -> 20.5)
+          if (missionLayer) {
+            mobileTl.to(
+              missionLayer,
+              { opacity: 0, scale: 0.94, duration: 0.8, ease: "power1.inOut", force3D: true },
+              19.7
+            );
+          }
+
+          // 9e. Phase 7e: Mobile ContactForm smoothly fades in ONLY AFTER MissionVision completely fades out (t = 20.6 -> 21.4)
+          if (contactLayer) {
+            mobileTl.fromTo(
+              contactLayer,
+              { opacity: 0, scale: 0.96 },
+              { opacity: 1, scale: 1.0, duration: 0.8, ease: "power1.inOut", force3D: true },
+              20.6
+            );
+          }
+
+          // 9f. Phase 8: Mobile ContactForm reading & interaction hold (t = 21.4 -> 24.1)
+          // ContactForm remains visible and interactive without fading out
+          mobileTl.to({}, { duration: 2.7 }, 21.4);
+
+          // 10. Phase 9: Mobile buffer before smooth unpinning to Footer (t = 24.1 -> 24.5)
+          mobileTl.to({}, { duration: 0.4 }, 24.1);
+        } else {
+          // Phase 7b: Mobile MissionVision smoothly fades in directly after Mobile Process completely dissolves (t = 6.6 -> 7.4)
+          if (missionLayer) {
+            mobileTl.fromTo(
+              missionLayer,
+              { opacity: 0, scale: 0.96 },
+              { opacity: 1, scale: 1.0, duration: 0.8, ease: "power1.inOut", force3D: true },
+              6.6
+            );
+          }
+
+          // Phase 7c: Mobile MissionVision reading hold (t = 7.4 -> 9.9)
+          mobileTl.to({}, { duration: 2.5 }, 7.4);
+
+          // Phase 7d: Mobile MissionVision cleanly & smoothly fades out (t = 9.9 -> 10.7)
+          if (missionLayer) {
+            mobileTl.to(
+              missionLayer,
+              { opacity: 0, scale: 0.94, duration: 0.8, ease: "power1.inOut", force3D: true },
+              9.9
+            );
+          }
+
+          // Phase 7e: Mobile ContactForm smoothly fades in ONLY AFTER MissionVision completely fades out (t = 10.8 -> 11.6)
+          if (contactLayer) {
+            mobileTl.fromTo(
+              contactLayer,
+              { opacity: 0, scale: 0.96 },
+              { opacity: 1, scale: 1.0, duration: 0.8, ease: "power1.inOut", force3D: true },
+              10.8
+            );
+          }
+
+          // Phase 8: Mobile ContactForm reading & interaction hold (t = 11.6 -> 14.3)
+          mobileTl.to({}, { duration: 2.7 }, 11.6);
+
+          // Phase 9: Mobile buffer before smooth unpinning to Footer (t = 14.3 -> 14.7)
+          mobileTl.to({}, { duration: 0.4 }, 14.3);
         }
-
-        // 9a. Phase 7a: Mobile ServiceHome cleanly & smoothly fades out after the end of the cards (t = 15.5 -> 16.3)
-        if (serviceLayer) {
-          mobileTl.to(
-            serviceLayer,
-            { opacity: 0, scale: 0.94, duration: 0.8, ease: "power1.inOut", force3D: true },
-            15.5
-          );
-        }
-
-        // 9b. Phase 7b: Mobile MissionVision smoothly fades in ONLY AFTER ServiceHome completely fades out (t = 16.4 -> 17.2)
-        if (missionLayer) {
-          mobileTl.fromTo(
-            missionLayer,
-            { opacity: 0, scale: 0.96 },
-            { opacity: 1, scale: 1.0, duration: 0.8, ease: "power1.inOut", force3D: true },
-            16.4
-          );
-        }
-
-        // 9c. Phase 7c: Mobile MissionVision reading hold (t = 17.2 -> 19.7)
-        mobileTl.to({}, { duration: 2.5 }, 17.2);
-
-        // 9d. Phase 7d: Mobile MissionVision cleanly & smoothly fades out (t = 19.7 -> 20.5)
-        if (missionLayer) {
-          mobileTl.to(
-            missionLayer,
-            { opacity: 0, scale: 0.94, duration: 0.8, ease: "power1.inOut", force3D: true },
-            19.7
-          );
-        }
-
-        // 9e. Phase 7e: Mobile ContactForm smoothly fades in ONLY AFTER MissionVision completely fades out (t = 20.6 -> 21.4)
-        if (contactLayer) {
-          mobileTl.fromTo(
-            contactLayer,
-            { opacity: 0, scale: 0.96 },
-            { opacity: 1, scale: 1.0, duration: 0.8, ease: "power1.inOut", force3D: true },
-            20.6
-          );
-        }
-
-        // 9f. Phase 8: Mobile ContactForm reading & interaction hold (t = 21.4 -> 24.1)
-        // ContactForm remains visible and interactive without fading out
-        mobileTl.to({}, { duration: 2.7 }, 21.4);
-
-        // 10. Phase 9: Mobile buffer before smooth unpinning to Footer (t = 24.1 -> 24.5)
-        mobileTl.to({}, { duration: 0.4 }, 24.1);
 
         // Trigger auto reveal immediately ONLY if actually active on mount
         if (typeof window !== "undefined" && section) {
@@ -1569,13 +1767,15 @@ export function ProcessSection() {
       </div>
 
       {/* Pinned Service Home Layer - In-place center crossfade */}
-      <div
-        ref={serviceLayerRef}
-        className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none h-screen w-full overflow-hidden"
-        style={{ opacity: 0, transformOrigin: "50% 50%", willChange: "transform, opacity" }}
-      >
-        <ServiceHome isStageMode scrollProgressRef={desktopServiceScrollRef} />
-      </div>
+      {!HIDE_SERVICE_SECTION && (
+        <div
+          ref={serviceLayerRef}
+          className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none h-screen w-full overflow-hidden"
+          style={{ opacity: 0, transformOrigin: "50% 50%", willChange: "transform, opacity" }}
+        >
+          <ServiceHome isStageMode scrollProgressRef={desktopServiceScrollRef} />
+        </div>
+      )}
 
       {/* Pinned Mission Vision Layer - In-place center crossfade */}
       <div

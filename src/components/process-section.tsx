@@ -59,7 +59,7 @@ const DESC_LINES = [
   "design, installation, and long-term support solutions.",
 ];
 
-const HIDE_SERVICE_SECTION = true;
+const HIDE_SERVICE_SECTION = false;
 
 export function ProcessSection() {
   const sectionRef = useRef<HTMLElement>(null);

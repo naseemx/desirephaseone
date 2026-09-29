@@ -328,16 +328,17 @@ export function ProcessSection() {
         // Phase 4.6: Step 04 reading hold (7.85 -> 8.85s)
         // Phase 5a: ProcessSection clean fade-out (8.85 -> 9.65s)
         // Phase 5b: ServiceHome smooth fade-in after Process completely dissolves (9.75 -> 10.65s)
-        // Phase 6: ServiceHome scroll-driven cards showcase (10.65 -> 16.15s)
-        // Phase 6b: Final cards reading hold (16.15 -> 16.85s)
-        // Phase 7a: ServiceHome clean fade-out (16.85 -> 17.65s)
-        // Phase 7b: MissionVision smooth fade-in after ServiceHome completely dissolves (17.75 -> 18.65s)
-        // Phase 7c: MissionVision reading hold (18.65 -> 21.15s)
-        // Phase 7d: MissionVision clean fade-out (21.15 -> 21.95s)
-        // Phase 7e: ContactForm smooth fade-in after MissionVision completely dissolves
-        // Phase 8: ContactForm reading & interaction hold until unpinning to Footer
-        // Phase 9: Buffer before Footer unpin
-        const scrollDistance = HIDE_SERVICE_SECTION ? 6650 : 9550;
+        // Phase 5c: ServiceHome initial arrival reading pause / hold (10.65 -> 11.85s)
+        // Phase 6: ServiceHome scroll-driven cards showcase (11.85 -> 17.35s)
+        // Phase 6b: Final cards reading hold (17.35 -> 18.05s)
+        // Phase 7a: ServiceHome clean fade-out (18.05 -> 18.85s)
+        // Phase 7b: MissionVision smooth fade-in after ServiceHome completely dissolves (18.95 -> 19.85s)
+        // Phase 7c: MissionVision reading hold (19.85 -> 22.35s)
+        // Phase 7d: MissionVision clean fade-out (22.35 -> 23.15s)
+        // Phase 7e: ContactForm smooth fade-in after MissionVision completely dissolves (23.25 -> 24.15s)
+        // Phase 8: ContactForm reading & interaction hold until unpinning to Footer (24.15 -> 27.05s)
+        // Phase 9: Buffer before Footer unpin (27.05 -> 27.45s)
+        const scrollDistance = HIDE_SERVICE_SECTION ? 6650 : 9980;
 
         const tl = gsap.timeline({
           defaults: { immediateRender: false },
@@ -640,7 +641,11 @@ export function ProcessSection() {
             );
           }
 
-          // PHASE 6: Desktop ServiceHome horizontal cards move right-to-left as user scrolls down (t = 10.65 -> 16.15)
+          // PHASE 5c: ServiceHome initial arrival reading pause / hold (t = 10.65 -> 11.85)
+          // Holds the section completely static so user absorbs the header and initial cards before horizontal scrolling starts
+          tl.to({}, { duration: 1.2 }, 10.65);
+
+          // PHASE 6: Desktop ServiceHome horizontal cards move right-to-left as user scrolls down (t = 11.85 -> 17.35)
           const desktopServiceProxy = { progress: 0 };
           tl.fromTo(
             desktopServiceProxy,
@@ -648,63 +653,63 @@ export function ProcessSection() {
             {
               progress: 1,
               duration: 5.5,
-              ease: "none",
+              ease: "power1.inOut",
               onUpdate: () => {
                 desktopServiceScrollRef.current = desktopServiceProxy.progress;
               },
             },
-            10.65
+            11.85
           );
 
-          // 8b. Reading hold on the final cards (t = 16.15 -> 16.85)
-          tl.to({}, { duration: 0.7 }, 16.15);
+          // 8b. Reading hold on the final cards (t = 17.35 -> 18.05)
+          tl.to({}, { duration: 0.7 }, 17.35);
 
-          // PHASE 7a: ServiceHome cleanly & smoothly fades out after all cards are shown (t = 16.85 -> 17.65)
+          // PHASE 7a: ServiceHome cleanly & smoothly fades out after all cards are shown (t = 18.05 -> 18.85)
           if (serviceLayer) {
             tl.to(
               serviceLayer,
               { opacity: 0, scale: 0.94, duration: 0.8, ease: "power1.inOut", force3D: true },
-              16.85
+              18.05
             );
           }
 
-          // PHASE 7b: MissionVision smoothly fades in ONLY AFTER ServiceHome completely fades out (t = 17.75 -> 18.65)
+          // PHASE 7b: MissionVision smoothly fades in ONLY AFTER ServiceHome completely fades out (t = 18.95 -> 19.85)
           if (missionLayer) {
             tl.fromTo(
               missionLayer,
               { opacity: 0, scale: 0.96 },
               { opacity: 1, scale: 1.0, duration: 0.9, ease: "power1.inOut", force3D: true },
-              17.75
+              18.95
             );
           }
 
-          // PHASE 7c: MissionVision reading hold (t = 18.65 -> 21.15)
-          tl.to({}, { duration: 2.5 }, 18.65);
+          // PHASE 7c: MissionVision reading hold (t = 19.85 -> 22.35)
+          tl.to({}, { duration: 2.5 }, 19.85);
 
-          // PHASE 7d: MissionVision cleanly & smoothly fades out (t = 21.15 -> 21.95)
+          // PHASE 7d: MissionVision cleanly & smoothly fades out (t = 22.35 -> 23.15)
           if (missionLayer) {
             tl.to(
               missionLayer,
               { opacity: 0, scale: 0.94, duration: 0.8, ease: "power1.inOut", force3D: true },
-              21.15
+              22.35
             );
           }
 
-          // PHASE 7e: ContactForm smoothly fades in ONLY AFTER MissionVision completely fades out (t = 22.05 -> 22.95)
+          // PHASE 7e: ContactForm smoothly fades in ONLY AFTER MissionVision completely fades out (t = 23.25 -> 24.15)
           if (contactLayer) {
             tl.fromTo(
               contactLayer,
               { opacity: 0, scale: 0.96 },
               { opacity: 1, scale: 1.0, duration: 0.9, ease: "power1.inOut", force3D: true },
-              22.05
+              23.25
             );
           }
 
-          // PHASE 8: ContactForm reading & interaction hold (t = 22.95 -> 25.85)
-          tl.to({}, { duration: 2.9 }, 22.95);
+          // PHASE 8: ContactForm reading & interaction hold (t = 24.15 -> 27.05)
+          tl.to({}, { duration: 2.9 }, 24.15);
 
-          // PHASE 9: Buffer before smooth unpinning directly to Footer (t = 25.85 -> 26.25)
-          tl.to({}, { duration: 0.4 }, 25.85);
+          // PHASE 9: Buffer before smooth unpinning directly to Footer (t = 27.05 -> 27.45)
+          tl.to({}, { duration: 0.4 }, 27.05);
         } else {
           // PHASE 7b: MissionVision smoothly fades in directly after ProcessSection completely dissolves (t = 9.75 -> 10.65)
           if (missionLayer) {
@@ -1553,12 +1558,13 @@ export function ProcessSection() {
     const st = timelineRef.current?.scrollTrigger;
     if (!st || typeof window === "undefined") return;
 
-    // Midpoint of each step hold at the star on master 26.25s timeline
+    // Midpoint of each step hold at the star on master timeline
+    const totalDuration = timelineRef.current?.duration() || 27.45;
     const stepProgressBenchmarks = [
-      1.85 / 26.25,  // Step 01 pause center at the star
-      4.10 / 26.25,  // Step 02 pause center at the star
-      6.30 / 26.25,  // Step 03 pause center at the star
-      8.35 / 26.25,  // Step 04 pause center at the star
+      1.85 / totalDuration,  // Step 01 pause center at the star
+      4.10 / totalDuration,  // Step 02 pause center at the star
+      6.30 / totalDuration,  // Step 03 pause center at the star
+      8.35 / totalDuration,  // Step 04 pause center at the star
     ];
     const targetScroll =
       st.start + (stepProgressBenchmarks[idx] ?? 0.19) * (st.end - st.start);

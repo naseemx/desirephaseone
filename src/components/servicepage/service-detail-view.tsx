@@ -6,7 +6,8 @@ import Link from "next/link";
 import { ServiceItem, getAdjacentServices } from "@/data/service";
 import { AmbientStars } from "@/components/ui/ambient-stars";
 import { Footer } from "@/components/footer";
-import { ArrowLeft, ArrowRight, MessageCircle, Check } from "lucide-react";
+import { Navbar } from "@/components/navbar";
+import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 
 interface ServiceDetailViewProps {
   service: ServiceItem;
@@ -14,10 +15,6 @@ interface ServiceDetailViewProps {
 
 export function ServiceDetailView({ service }: ServiceDetailViewProps) {
   const { prev, next } = getAdjacentServices(service.id);
-
-  const whatsappMessage = encodeURIComponent(
-    `Hello Desire Advertising team! I am interested in inquiring about your "${service.title}" service.`
-  );
 
   return (
     <div className="relative min-h-screen bg-[#09090b] text-zinc-100 selection:bg-[var(--brand-cyan)] selection:text-black overflow-x-hidden">
@@ -34,65 +31,14 @@ export function ServiceDetailView({ service }: ServiceDetailViewProps) {
       <AmbientStars count={75} />
 
       {/* ─────────────────────────────────────────────────────────────────── */}
-      {/* FLOATING ORGANIC HEADER NAVIGATION                                  */}
+      {/* GLOBAL NAVBAR (Matching Home Page)                                 */}
       {/* ─────────────────────────────────────────────────────────────────── */}
-      <header className="sticky top-0 inset-x-0 z-50 backdrop-blur-xl bg-[#09090b]/80 border-b border-white/[0.08] transition-all">
-        <div className="mx-auto max-w-7xl px-3.5 sm:px-6 lg:px-10 h-16 sm:h-20 flex items-center justify-between gap-2">
-          {/* Brand & Company Logo */}
-          <Link
-            href="/"
-            className="flex items-center gap-2 sm:gap-3 transition-opacity hover:opacity-90 active:scale-[0.98] shrink-0"
-            aria-label="Home"
-          >
-            <div className="relative h-[22px] sm:h-[30px] w-[56px] sm:w-[76px] shrink-0">
-              <Image
-                src="/companylogo.png"
-                alt="Desire Advertising"
-                fill
-                className="object-contain"
-                priority
-              />
-            </div>
-            <div className="h-[14px] sm:h-[18px] w-[1px] bg-white/20 shrink-0" />
-            <div className="relative h-[14px] sm:h-[18px] w-[78px] sm:w-[105px] shrink-0">
-              <Image
-                src="/brandlogo.png"
-                alt="Dzyr Digital"
-                fill
-                className="object-contain"
-                priority
-              />
-            </div>
-          </Link>
-
-          {/* Action links */}
-          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
-            <Link
-              href="/#servicehome"
-              className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-medium text-zinc-300 bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-[#00b5e2]/40 transition-all duration-300"
-            >
-              <ArrowLeft className="w-3.5 h-3.5 text-[#00b5e2]" />
-              <span className="hidden sm:inline">Back to</span> Services
-            </Link>
-
-            <a
-              href={`https://wa.me/971501234567?text=${whatsappMessage}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 sm:gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-semibold text-black bg-[#00b5e2] hover:bg-[#00b5e2]/90 shadow-[0_0_18px_rgba(0,181,226,0.4)] transition-all duration-300 active:scale-95 cursor-pointer shrink-0"
-            >
-              <MessageCircle className="w-3.5 h-3.5 fill-current" />
-              <span>Inquire</span>
-              <span className="hidden sm:inline">Now</span>
-            </a>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       {/* ─────────────────────────────────────────────────────────────────── */}
       {/* MAIN CONTENT                                                       */}
       {/* ─────────────────────────────────────────────────────────────────── */}
-      <main className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-10 pt-6 sm:pt-12 lg:pt-16 pb-16 sm:pb-24 lg:pb-28">
+      <main className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-10 pt-24 sm:pt-32 lg:pt-36 pb-16 sm:pb-24 lg:pb-28">
         {/* Breadcrumbs */}
         <div className="flex flex-wrap items-center gap-1.5 sm:gap-3 mb-4 sm:mb-6">
           <Link

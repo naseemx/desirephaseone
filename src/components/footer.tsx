@@ -158,20 +158,148 @@ export function Footer({ isStageMode = false }: FooterProps = {}) {
             : "mx-auto max-w-7xl px-6 py-10 sm:py-14 lg:px-10"
         }
       >
-        {/* Main 3-Section Layout: Brand & Col 1 Services | Our Services (Cols 2-4) | Quick Contact & Social Media */}
+        {/* Mobile & Tablet (< lg): 2-Column Responsive Layout */}
         <div
-          className={
+          className={`lg:hidden ${
             isStageMode
-              ? "grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-12 lg:gap-8 pb-3 sm:pb-4"
-              : "grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-12 lg:gap-8 pb-8"
-          }
+              ? "grid grid-cols-1 gap-6 sm:grid-cols-2 pb-3 sm:pb-4"
+              : "grid grid-cols-1 gap-8 sm:grid-cols-2 pb-8"
+          }`}
         >
-          {/* Col 1: Logo & First Column of Services (on desktop) */}
+          {/* Logo */}
+          <div className="order-1 flex flex-col items-start space-y-3">
+            <a
+              href="#hero"
+              className="flex items-center gap-2.5 sm:gap-3 transition-opacity hover:opacity-90 active:scale-[0.98]"
+              aria-label="Home"
+            >
+              <div
+                className={`relative shrink-0 ${
+                  isStageMode
+                    ? "h-[24px] sm:h-[26px] w-[62px] sm:w-[68px]"
+                    : "h-[26px] sm:h-[30px] w-[66px] sm:w-[76px]"
+                }`}
+              >
+                <Image
+                  src="/companylogo.png"
+                  alt="Desire Advertising"
+                  fill
+                  className="object-contain"
+                />
+              </div>
+
+              <div className="h-3.5 sm:h-4 w-[1px] bg-white/20 shrink-0" />
+
+              <div
+                className={`relative shrink-0 ${
+                  isStageMode
+                    ? "h-[15px] sm:h-[16px] w-[85px] sm:w-[92px]"
+                    : "h-[16px] sm:h-[18px] w-[90px] sm:w-[102px]"
+                }`}
+              >
+                <Image
+                  src="/brandlogo.png"
+                  alt="Dzyr Digital"
+                  fill
+                  className="object-contain"
+                />
+              </div>
+            </a>
+          </div>
+
+          {/* Quick Contact & Social Media */}
           <div
-            className={`sm:col-span-1 lg:col-span-3 order-1 flex flex-col items-start ${
+            className={`order-2 flex flex-col ${
               isStageMode ? "space-y-2.5" : "space-y-3.5"
             }`}
           >
+            {/* Social Media icons */}
+            <div className="flex items-center flex-nowrap gap-2 pt-0.5">
+              {socialLinks.map((social) => (
+                <a
+                  key={social.name}
+                  href={social.href}
+                  target={social.href.startsWith("http") ? "_blank" : undefined}
+                  rel={social.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                  aria-label={social.name}
+                  title={social.name}
+                  className={`rounded-full border border-white/15 bg-white/[0.04] text-zinc-300 flex items-center justify-center shrink-0 transition-all duration-300 hover:bg-[#00b5e2] hover:text-black hover:border-[#00b5e2] hover:shadow-[0_0_15px_rgba(0,181,226,0.45)] hover:-translate-y-0.5 active:scale-95 cursor-pointer ${
+                    isStageMode ? "w-7.5 h-7.5" : "w-8 h-8"
+                  }`}
+                >
+                  {social.icon}
+                </a>
+              ))}
+            </div>
+
+            <div
+              className={`flex flex-col text-zinc-400 ${
+                isStageMode ? "space-y-1.5 text-xs sm:text-[12.5px]" : "space-y-2 text-xs sm:text-[13px]"
+              }`}
+            >
+              <div>
+                <p className="text-white font-semibold">Desire Advertising LLC</p>
+                <p className="text-zinc-400 text-[11.5px] sm:text-xs">Dubai, UAE</p>
+              </div>
+
+              <div className="pt-0.5 flex flex-col space-y-1.5">
+                <a
+                  href="mailto:digital@desire.ae"
+                  className="inline-flex items-center gap-1.5 text-zinc-300 hover:text-[#00b5e2] transition-colors"
+                >
+                  <Mail className="w-3.5 h-3.5 text-[#00b5e2] shrink-0" />
+                  <span>digital@desire.ae</span>
+                </a>
+
+                <a
+                  href="tel:+971559944475"
+                  className="inline-flex items-center gap-1.5 text-zinc-300 hover:text-[#00b5e2] transition-colors"
+                >
+                  <Phone className="w-3.5 h-3.5 text-[#00b5e2] shrink-0" />
+                  <span>+971 55 994 4475</span>
+                </a>
+
+                <a
+                  href="https://wa.me/971569905842"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-zinc-300 hover:text-[#00b5e2] transition-colors"
+                >
+                  <svg className="w-3.5 h-3.5 text-[#00b5e2] shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.225 8.225 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.196 8.196 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24m4.52 11.64c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.25-.75-.67-1.26-1.5-1.4-1.75-.15-.25-.02-.39.11-.51.11-.11.25-.29.37-.44.13-.14.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.49-.4-.42-.56-.43h-.48c-.16 0-.43.06-.66.31-.22.25-.86.84-.86 2.05s.88 2.38 1 2.55c.13.17 1.73 2.64 4.19 3.7.59.25 1.05.4 1.41.51.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.07-.1-.23-.17-.48-.29" />
+                  </svg>
+                  <span>+971 56 990 5842</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          {/* Tablet (md to < lg): Services 4-Column Grid below Logo & Contact (Hidden on mobile < md) */}
+          <div className="hidden md:grid sm:col-span-2 grid-cols-4 gap-x-4 gap-y-2 text-xs md:text-[12.5px] pt-2">
+            {serviceColumns.map((col, colIdx) => (
+              <div key={colIdx} className="flex flex-col space-y-2">
+                {col.map((service) => (
+                  <Link
+                    key={service.id}
+                    href={`/servicepage/${service.id}`}
+                    className="text-zinc-400 hover:text-white transition-colors leading-snug"
+                  >
+                    {service.navbarTitle || service.title}
+                  </Link>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Desktop Layout (lg+): Perfectly Aligned 5-Column Grid */}
+        <div
+          className={`hidden lg:flex flex-col ${
+            isStageMode ? "space-y-3.5 pb-3 sm:pb-4" : "space-y-4 pb-8"
+          }`}
+        >
+          {/* Top Bar: Logo on Left, Social Media on Right */}
+          <div className="flex items-center justify-between">
             <a
               href="#hero"
               className="flex items-center gap-2.5 sm:gap-3 transition-opacity hover:opacity-90 active:scale-[0.98]"
@@ -210,69 +338,8 @@ export function Footer({ isStageMode = false }: FooterProps = {}) {
               </div>
             </a>
 
-            {/* Desktop: First column of services placed directly under the logo */}
-            <div className="hidden lg:flex flex-col space-y-2 text-xs sm:text-[12.5px] pt-0.5">
-              {serviceColumns[0].map((service) => (
-                <Link
-                  key={service.id}
-                  href={`/servicepage/${service.id}`}
-                  className="text-zinc-400 hover:text-white transition-colors leading-snug"
-                >
-                  {service.navbarTitle || service.title}
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          {/* Col 2: Services (Remaining 3 columns on desktop, all 4 on mobile/tablet) */}
-          <div
-            className={`sm:col-span-2 lg:col-span-6 order-2 sm:order-3 lg:order-2 flex flex-col ${
-              isStageMode ? "space-y-2.5 lg:pt-[36px]" : "space-y-3.5 lg:pt-[44px]"
-            }`}
-          >
-            {/* Mobile / Tablet (< lg): Display all 4 columns */}
-            <div className="lg:hidden grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-3 sm:gap-y-2 text-xs sm:text-[12.5px]">
-              {serviceColumns.map((col, colIdx) => (
-                <div key={colIdx} className="flex flex-col space-y-2">
-                  {col.map((service) => (
-                    <Link
-                      key={service.id}
-                      href={`/servicepage/${service.id}`}
-                      className="text-zinc-400 hover:text-white transition-colors leading-snug"
-                    >
-                      {service.navbarTitle || service.title}
-                    </Link>
-                  ))}
-                </div>
-              ))}
-            </div>
-
-            {/* Desktop (lg+): Display the remaining 3 columns */}
-            <div className="hidden lg:grid grid-cols-3 gap-x-6 gap-y-2 text-xs sm:text-[12.5px]">
-              {serviceColumns.slice(1).map((col, colIdx) => (
-                <div key={colIdx} className="flex flex-col space-y-2">
-                  {col.map((service) => (
-                    <Link
-                      key={service.id}
-                      href={`/servicepage/${service.id}`}
-                      className="text-zinc-400 hover:text-white transition-colors leading-snug"
-                    >
-                      {service.navbarTitle || service.title}
-                    </Link>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Col 3: Quick Contact with Social Media on top of Desire Advertising LLC in a single line (3 cols on desktop) */}
-          <div
-            className={`sm:col-span-1 lg:col-span-3 order-3 sm:order-2 lg:order-3 flex flex-col ${
-              isStageMode ? "space-y-2.5" : "space-y-3.5"
-            }`}
-          >
-            {/* Social Media icons in a single line on top of Desire Advertising LLC */}
-            <div className="flex items-center flex-nowrap gap-2 pt-0.5">
+            {/* Social Media icons in a single line on top right */}
+            <div className="flex items-center flex-nowrap gap-2">
               {socialLinks.map((social) => (
                 <a
                   key={social.name}
@@ -289,7 +356,25 @@ export function Footer({ isStageMode = false }: FooterProps = {}) {
                 </a>
               ))}
             </div>
+          </div>
 
+          {/* Lower Grid: 5 Equal Columns - 4 Service Columns (100% aligned) + 1 Contact Column */}
+          <div className="grid grid-cols-5 gap-x-6 lg:gap-x-8 text-xs sm:text-[12.5px] items-start pt-1">
+            {serviceColumns.map((col, colIdx) => (
+              <div key={colIdx} className="flex flex-col space-y-2">
+                {col.map((service) => (
+                  <Link
+                    key={service.id}
+                    href={`/servicepage/${service.id}`}
+                    className="text-zinc-400 hover:text-white transition-colors leading-snug"
+                  >
+                    {service.navbarTitle || service.title}
+                  </Link>
+                ))}
+              </div>
+            ))}
+
+            {/* Column 5: Contact Info */}
             <div
               className={`flex flex-col text-zinc-400 ${
                 isStageMode ? "space-y-1.5 text-xs sm:text-[12.5px]" : "space-y-2 text-xs sm:text-[13px]"
@@ -300,7 +385,6 @@ export function Footer({ isStageMode = false }: FooterProps = {}) {
                 <p className="text-zinc-400 text-[11.5px] sm:text-xs">Dubai, UAE</p>
               </div>
 
-              {/* Contact links with inline icons */}
               <div className="pt-0.5 flex flex-col space-y-1.5">
                 <a
                   href="mailto:digital@desire.ae"

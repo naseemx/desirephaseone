@@ -43,7 +43,14 @@ export function ServiceDrawer({
         return () => cancelAnimationFrame(r2);
       });
 
-      return () => cancelAnimationFrame(r1);
+      // Cleanup: reset global scroll-lock state on unmount (e.g. navigating away via Link)
+      return () => {
+        cancelAnimationFrame(r1);
+        (window as unknown as { serviceDrawerOpen?: boolean }).serviceDrawerOpen = false;
+        (window as unknown as { lenis?: { stop: () => void; start: () => void } }).lenis?.start();
+        document.body.style.overflow = "";
+        document.documentElement.style.overflow = "";
+      };
     } else {
       // Trigger slide-out & backdrop fade-out
       setIsVisible(false);

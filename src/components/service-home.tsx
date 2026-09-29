@@ -208,12 +208,15 @@ export function ServiceHome({
         isMobile,
       } = layout;
 
-      // Starting positions: comfortably away from the left edge so Card 0 is completely visible
+      // Starting positions: comfortably away from the left edge tab so Card 0 in Line 1 and Line 2 is completely visible
+      // Across all desktop screen widths (from 768px/1024px laptops up to 1920px+ monitors),
+      // ensure the first card has at least 110px of clearance from the left edge (well past the ~45px EdgeGlassCard tab).
       const totalWidth = viewportHalfWidth * 2;
-      const horizontalMargin = Math.max(48, Math.min(84, Math.round(totalWidth * 0.045)));
+      const horizontalMargin = Math.max(110, Math.min(180, Math.round(totalWidth * 0.095)));
       const cardLeftEdge = -viewportHalfWidth + horizontalMargin;
       const startX = cardLeftEdge + cardWidth * 0.5;
-      const bottomStartX = startX + (totalWidth > 1600 ? Math.round(pitch * 0.10) : 36);
+      const bottomStagger = totalWidth > 1600 ? Math.round(pitch * 0.09) : 40;
+      const bottomStartX = startX + bottomStagger;
 
       // Calculate the exact travel distance so the carousel stops with the final cards (Image 1 reference)
       // cleanly framed across the screen, with the last card stopping at the right margin.
@@ -409,7 +412,7 @@ export function ServiceHome({
         {/* Left Edge Vignette Mask (z-10): Fades the 3D ribbon cards behind EdgeGlassCard */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute top-0 bottom-0 left-0 z-10 w-8 sm:w-16 md:w-20 lg:w-28 transition-opacity duration-300"
+          className="pointer-events-none absolute top-0 bottom-0 left-0 z-10 w-8 sm:w-14 md:w-16 lg:w-20 transition-opacity duration-300"
           style={{
             background:
               "linear-gradient(90deg, rgba(9, 9, 11, 0.95) 0%, rgba(9, 9, 11, 0.4) 50%, transparent 100%)",
@@ -419,7 +422,7 @@ export function ServiceHome({
         {/* Right Edge Vignette Mask (z-10): Fades the 3D ribbon cards on right boundary */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute top-0 bottom-0 right-0 z-10 w-8 sm:w-16 md:w-20 lg:w-28 transition-opacity duration-300"
+          className="pointer-events-none absolute top-0 bottom-0 right-0 z-10 w-8 sm:w-14 md:w-16 lg:w-20 transition-opacity duration-300"
           style={{
             background:
               "linear-gradient(270deg, rgba(9, 9, 11, 0.95) 0%, rgba(9, 9, 11, 0.4) 50%, transparent 100%)",

@@ -165,7 +165,7 @@ export function CustomCursor() {
           const len = history.length;
           const cx = springPosRef.current.x;
           const cy = springPosRef.current.y;
-          const minRadius = 13; // Bounding radius of triangle cursor to keep interior 100% empty
+          const minRadius = 9; // Bounding radius of smaller triangle cursor to keep interior 100% empty
 
           if (len > 1) {
             for (let i = 0; i < len - 1; i++) {
@@ -202,7 +202,7 @@ export function CustomCursor() {
 
               // Luminous Electric Tech Cyan #00b5e2 with smooth tapering opacity & width
               ctx.strokeStyle = `rgba(0, 181, 226, ${(frac * 0.45).toFixed(3)})`;
-              ctx.lineWidth = Math.max(0.6, frac * 3.0);
+              ctx.lineWidth = Math.max(0.5, frac * 2.4);
               ctx.lineCap = "round";
               ctx.lineJoin = "round";
               ctx.beginPath();
@@ -314,18 +314,18 @@ export function CustomCursor() {
           <svg
             viewBox="0 0 24 24"
             fill="none"
-            className={`w-[22px] h-[22px] transition-all duration-200 text-[#00b5e2] ${
+            className={`w-[15px] h-[15px] transition-all duration-200 text-[#00b5e2] ${
               isHovering
-                ? "drop-shadow-[0_0_12px_rgba(0,181,226,0.95)] drop-shadow-[0_0_20px_rgba(0,181,226,0.5)] fill-transparent"
+                ? "drop-shadow-[0_0_10px_rgba(0,181,226,0.95)] drop-shadow-[0_0_16px_rgba(0,181,226,0.5)] fill-transparent"
                 : isPointerDown
-                ? "drop-shadow-[0_0_6px_rgba(0,181,226,0.8)] fill-transparent"
-                : "drop-shadow-[0_0_8px_rgba(0,181,226,0.7)] fill-transparent"
+                ? "drop-shadow-[0_0_5px_rgba(0,181,226,0.8)] fill-transparent"
+                : "drop-shadow-[0_0_7px_rgba(0,181,226,0.7)] fill-transparent"
             }`}
           >
             <path
               d="M13.73 4a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"
               stroke="currentColor"
-              strokeWidth="2.4"
+              strokeWidth="2.2"
               strokeLinecap="round"
               strokeLinejoin="round"
             />

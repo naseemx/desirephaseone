@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { getLine1Services, getLine2Services } from "@/data/service";
 
 const SHOW_SERVICES = false;
@@ -12,6 +13,11 @@ interface NavbarProps {
 }
 
 export function Navbar({ visible = true }: NavbarProps) {
+  const pathname = usePathname();
+  const isHome = pathname === "/";
+  const homeHref = isHome ? "#hero" : "/#hero";
+  const contactHref = isHome ? "#contact" : "/#contact";
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileServiceOpen, setMobileServiceOpen] = useState(false);
   const [serviceDropdownOpen, setServiceDropdownOpen] = useState(false);
@@ -67,11 +73,29 @@ export function Navbar({ visible = true }: NavbarProps) {
           : "opacity-0 -translate-y-4 pointer-events-none"
       }`}
     >
+      {/* Top Fade Black Vignette Effect */}
+      {/* Mobile / Tablet (< md): Balanced softer intensity */}
+      <div
+        className="md:hidden pointer-events-none absolute top-0 inset-x-0 h-28 sm:h-36 -z-10"
+        style={{
+          background:
+            "linear-gradient(to bottom, rgba(0, 0, 0, 0.80) 0%, rgba(0, 0, 0, 0.50) 35%, rgba(0, 0, 0, 0.18) 70%, rgba(0, 0, 0, 0) 100%)",
+        }}
+      />
+      {/* Desktop (md+): Enhanced intensity and deeper reach */}
+      <div
+        className="hidden md:block pointer-events-none absolute top-0 inset-x-0 h-40 lg:h-48 -z-10"
+        style={{
+          background:
+            "linear-gradient(to bottom, rgba(0, 0, 0, 0.88) 0%, rgba(0, 0, 0, 0.65) 30%, rgba(0, 0, 0, 0.32) 65%, rgba(0, 0, 0, 0) 100%)",
+        }}
+      />
+
       <nav className="flex h-16 sm:h-24 w-full items-center justify-between px-9 sm:px-10 lg:px-12">
         {/* Left: Brand Logo & Company Logo */}
         <div className="flex items-center gap-3 sm:gap-4">
           <a
-            href="#hero"
+            href={homeHref}
             className="flex items-center gap-2.5 sm:gap-4 transition-opacity hover:opacity-90 active:scale-[0.98]"
             aria-label="Home"
           >
@@ -105,7 +129,7 @@ export function Navbar({ visible = true }: NavbarProps) {
         {/* Desktop: Text Links with Drop Shadow at the right-most side */}
         <div className="hidden sm:flex items-center gap-7 lg:gap-9">
           <a
-            href="#hero"
+            href={homeHref}
             className="text-sm lg:text-[15px] font-medium text-white/90 transition-colors hover:text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)] tracking-wide"
           >
             Home
@@ -204,7 +228,7 @@ export function Navbar({ visible = true }: NavbarProps) {
           )}
 
           <a
-            href="#contact"
+            href={contactHref}
             className="text-sm lg:text-[15px] font-medium text-white/90 transition-colors hover:text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)] tracking-wide"
           >
             Contact
@@ -272,7 +296,7 @@ export function Navbar({ visible = true }: NavbarProps) {
           {/* Navigation Links Right-Aligned */}
           <nav className="flex flex-col items-end space-y-3.5 text-right">
             <a
-              href="#hero"
+              href={homeHref}
               onClick={() => setMenuOpen(false)}
               className="text-sm font-normal text-zinc-300 transition-colors hover:text-white"
             >
@@ -325,7 +349,7 @@ export function Navbar({ visible = true }: NavbarProps) {
             )}
 
             <a
-              href="#contact"
+              href={contactHref}
               onClick={() => setMenuOpen(false)}
               className="text-sm font-normal text-zinc-300 transition-colors hover:text-white"
             >

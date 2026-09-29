@@ -252,9 +252,27 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
     imagesRef.current = images;
     window.addEventListener("resize", handleResize);
 
+    // Handle bfcache restoration: canvas is blanked but images remain in memory
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) {
+        // Reset container visibility
+        if (containerRef.current) {
+          containerRef.current.style.visibility = "visible";
+        }
+        // Force canvas resize and redraw
+        handleResize();
+        const frameToRestore = currentFrameRef.current >= 0 ? currentFrameRef.current : 0;
+        currentFrameRef.current = -1; // Force redraw
+        drawFrame(frameToRestore);
+      }
+    };
+
+    window.addEventListener("pageshow", handlePageShow);
+
     return () => {
       isCancelled = true;
       window.removeEventListener("resize", handleResize);
+      window.removeEventListener("pageshow", handlePageShow);
     };
   }, [isMobile, drawFrame, handleResize, onProgress, onLoaded]);
 
@@ -293,6 +311,12 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
           cooldownTimer = null;
         }, durationMs);
       };
+
+      // Force scroll to top on mount so the hero always starts fresh at phase 0.
+      // Without this, back navigation restores the previous scroll position (e.g., deep in
+      // the process section), causing checkScrollPosition to unlock scroll and try to render
+      // unloaded frames, resulting in a dark/black page.
+      window.scrollTo(0, 0);
 
       // Initial scroll lock
       document.body.style.overflow = "hidden";
@@ -644,28 +668,26 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
 
       window.addEventListener("keydown", handleKeyDown);
 
-      // ── Browser Back / Mid-Page Restoration Handler ─────────────────────
-      const checkScrollPosition = () => {
-        if (window.scrollY > 50) {
-          scrollLocked = false;
-          (window as unknown as { heroScrollLocked?: boolean }).heroScrollLocked = false;
-          (window as unknown as { lenis?: { start: () => void } }).lenis?.start();
-          document.body.style.overflow = "auto";
-          document.documentElement.style.overflow = "auto";
-          observer.disable();
-
-          currentPhase = 4;
-          virtualTime = totalDuration;
-          playState = 0;
-          render();
-          addReentryListeners();
-          updateHeroVisibility();
+      // ── Browser Back / Async Scroll Restoration Guard ─────────────────────
+      // The browser or Next.js may asynchronously restore the previous scroll position
+      // after our initial scrollTo(0, 0). If that happens, scroll back to top and
+      // re-lock so the hero always starts cleanly at phase 0.
+      const guardScrollRestoration = () => {
+        if (window.scrollY > 5) {
+          window.scrollTo(0, 0);
+          // Re-lock scroll in case it was briefly unlocked
+          scrollLocked = true;
+          document.body.style.overflow = "hidden";
+          document.documentElement.style.overflow = "hidden";
+          (window as unknown as { heroScrollLocked?: boolean }).heroScrollLocked = true;
+          (window as unknown as { lenis?: { stop: () => void } }).lenis?.stop();
         }
       };
 
-      checkScrollPosition();
-      const t1 = setTimeout(checkScrollPosition, 50);
-      const t2 = setTimeout(checkScrollPosition, 150);
+      guardScrollRestoration();
+      const t1 = setTimeout(guardScrollRestoration, 50);
+      const t2 = setTimeout(guardScrollRestoration, 150);
+      const t3 = setTimeout(guardScrollRestoration, 300);
 
       // ── Cleanup ─────────────────────────────────────────────────────────
       return () => {
@@ -685,11 +707,17 @@ export function HeroCanvas({ onProgress, onLoaded }: HeroCanvasProps = {}) {
         }
         clearTimeout(t1);
         clearTimeout(t2);
+        clearTimeout(t3);
 
         document.body.style.overflow = "auto";
         document.documentElement.style.overflow = "auto";
         (window as unknown as { heroScrollLocked?: boolean }).heroScrollLocked = false;
         (window as unknown as { lenis?: { start: () => void } }).lenis?.start();
+
+        // Reset hero container visibility in case it was hidden by scroll-based optimization
+        if (containerRef.current) {
+          containerRef.current.style.visibility = "visible";
+        }
       };
     },
     { scope: containerRef, dependencies: [isMobile] }

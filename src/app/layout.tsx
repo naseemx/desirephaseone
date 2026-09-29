@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Quicksand } from "next/font/google";
 import { SmoothScroll } from "@/components/providers/smooth-scroll";
+import { FloatingContact } from "@/components/floating-contact";
 import "./globals.css";
 
 const quicksand = Quicksand({
@@ -65,7 +66,10 @@ export default function RootLayout({
       className={`${quicksand.variable} dark antialiased`}
     >
       <body className={`${quicksand.className} font-sans min-h-screen bg-[#09090b] text-[var(--brand-grey-20)] selection:bg-[var(--brand-cyan)] selection:text-black`}>
-        <SmoothScroll>{children}</SmoothScroll>
+        <SmoothScroll>
+          {children}
+          <FloatingContact />
+        </SmoothScroll>
       </body>
     </html>
   );

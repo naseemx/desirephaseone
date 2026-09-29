@@ -55,7 +55,26 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
     // Ensure ScrollTrigger is calculated properly
     ScrollTrigger.refresh();
 
+    // Handle browser bfcache restoration (back/forward navigation)
+    // When bfcache restores the page, stale overflow:hidden and scroll-lock flags
+    // can leave the page stuck dark/unscrollable
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) {
+        // Reset stale global flags
+        (window as unknown as { serviceDrawerOpen?: boolean }).serviceDrawerOpen = false;
+        // Reset body overflow to allow scrolling
+        document.body.style.overflow = "";
+        document.documentElement.style.overflow = "";
+        // Restart Lenis if it exists
+        lenis.start();
+        ScrollTrigger.refresh();
+      }
+    };
+
+    window.addEventListener("pageshow", handlePageShow);
+
     return () => {
+      window.removeEventListener("pageshow", handlePageShow);
       gsap.ticker.remove(updateTicker);
       lenis.destroy();
     };

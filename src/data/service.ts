@@ -595,7 +595,7 @@ export const SERVICES: ServiceItem[] = [
     navbarTitle: "Exhibition Booths",
     line: 2,
     row: 2,
-    image: DEFAULT_SERVICE_IMAGE,
+    image: "/servicehome/L_EXHIBITS.jpg.jpeg",
     category: "Exhibition Booths",
     description:
       "Transform your event presence with high-impact exhibition booths and custom kiosk manufacturing engineered for maximum visibility, delivering complete end-to-end event branding from structural fabrication to scalable, reusable booth solutions built for future events that elevate your brand image, engage target audiences effectively, and significantly boost your overall campaign return on investment across every trade show or corporate showcase through innovative, durable, and visually compelling structural design solutions tailored specifically to meet your unique commercial objectives and architectural specifications seamlessly.",
@@ -628,7 +628,7 @@ export const SERVICES: ServiceItem[] = [
     navbarTitle: "High Impact Graphics",
     line: 2,
     row: 2,
-    image: DEFAULT_SERVICE_IMAGE,
+    image: "/servicehome/ImapctGraphics.jpeg",
     category: "Impact Graphics",
     description:
       "Elevate your brand image through striking custom offerings like front-lit, back-lit halo-effect, digital, 3D channel letters, flex face, and non-illuminated options engineered with cutting-edge UV printing, precision engraving, light boxes, and gondola brandings designed to transform your space into an extraordinary brand environment that captures consumer focus, reinforces your messaging across every customer touchpoint, and projects a sleek, contemporary identity across both interior commercial spaces and outdoor retail environments.",
@@ -639,7 +639,7 @@ export const SERVICES: ServiceItem[] = [
     navbarTitle: "Corporate Brand Solutions",
     line: 2,
     row: 2,
-    image: DEFAULT_SERVICE_IMAGE,
+    image: "/servicehome/coorperate.jpeg",
     category: "Corporate Branding",
     description:
       "We transform business identities into powerful visual experiences through comprehensive internal and external branding solutions, utilizing premium materials like high-grade vinyl and durable acrylic for bespoke fabrication, dimensional lettering, and architectural graphics engineered to elevate brand presence and engage target audiences effectively across every environment, ensuring your unique value proposition is communicated clearly, consistently, and impressively across all corporate assets, office spaces, retail storefronts, and customer interaction points.",
@@ -672,7 +672,7 @@ export const SERVICES: ServiceItem[] = [
     navbarTitle: "Custom Metal Fabrications",
     line: 2,
     row: 2,
-    image: DEFAULT_SERVICE_IMAGE,
+    image: "/servicehome/L_FABRICATION.jpg.jpeg",
     category: "Metal Fabrications",
     description:
       "Utilizing premium aluminum, high-grade acrylic, structural metals, and quality wooden elements, our expert team combines advanced manufacturing techniques with specialized metal fabrication to produce heavy-duty signage, 3D channel letters, sign board frames, event build-ups, and architectural features tailored to your unique vision, ensuring exceptional structural durability, flawless finishing, and complete customization across complex engineering projects that demand exact tolerances, high aesthetic standards, and long-lasting performance in any commercial setting.",

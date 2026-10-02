@@ -606,7 +606,7 @@ export const SERVICES: ServiceItem[] = [
     navbarTitle: "Dynamic Visual Displays",
     line: 2,
     row: 2,
-    image: DEFAULT_SERVICE_IMAGE,
+    image: "/servicehome/L_DISPLAYS.jpeg",
     category: "Dynamic Displays",
     description:
       "Select from versatile straight, L-shaped, or U-shaped backdrops paired with premium roll-up banners, flags, POS setups, and high-definition pop-up elements designed for fast, seamless assembly that effectively engage trade show visitors and leave a lasting impression at every corporate venue, ensuring your brand message stands out with high-resolution visual clarity, exceptional durability, and effortless portability built to support continuous promotional campaigns across diverse commercial environments while maintaining a sleek, modern aesthetic that captures immediate attention everywhere.",
@@ -617,7 +617,7 @@ export const SERVICES: ServiceItem[] = [
     navbarTitle: "Precision Architectural Signage",
     line: 2,
     row: 2,
-    image: DEFAULT_SERVICE_IMAGE,
+    image: "/servicehome/L_SIGN.jpeg",
     category: "Architectural Signage",
     description:
       "We design, fabricate, and install premium internal and external signage tailored precisely to your vision, ranging from durable directional markers to bold exterior entry points built with high-quality acrylic, galvanized iron, stainless steel, and aluminum to ensure maximum durability, superior weather resistance, and long-lasting visual impact that strengthens your company identity, guides visitors seamlessly through physical spaces, and reflects the highest standards of professional quality across all public-facing elements of your corporate infrastructure.",
@@ -650,7 +650,7 @@ export const SERVICES: ServiceItem[] = [
     navbarTitle: "Promotional Marketing Displays",
     line: 2,
     row: 2,
-    image: DEFAULT_SERVICE_IMAGE,
+    image: "/servicehome/Dynamic Promotional Marketing.jpeg",
     category: "Promotional Displays",
     description:
       "Turn fleet vehicles into mobile billboards with custom vehicle graphics while maximizing visibility through high-impact outdoor hoardings, dynamic floor wraps, interactive window decals, sandblast films, and targeted one-way vision graphics designed to boost brand recognition and capture immediate customer attention from initial concept through to final installation, driving maximum engagement, increasing audience reach, and converting everyday visual touchpoints into powerful marketing drivers for your rapidly growing business across high-traffic urban areas.",

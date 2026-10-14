@@ -1,11 +1,15 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 import Lenis from "lenis";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 export function SmoothScroll({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const lenisRef = useRef<Lenis | null>(null);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -26,14 +30,19 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
         if (node instanceof HTMLElement && node.closest("[data-lenis-prevent]")) {
           return true;
         }
-        // Prevent all Lenis scrolling when hero section is active / locked
-        return (window as unknown as { heroScrollLocked?: boolean }).heroScrollLocked !== false;
+        // Prevent all Lenis scrolling only when hero section is actively locked
+        return (window as unknown as { heroScrollLocked?: boolean }).heroScrollLocked === true;
       },
     });
 
+    lenisRef.current = lenis;
+
     // If hero starts in locked state, immediately halt Lenis virtual scroll
-    if ((window as unknown as { heroScrollLocked?: boolean }).heroScrollLocked !== false) {
+    if ((window as unknown as { heroScrollLocked?: boolean }).heroScrollLocked === true) {
       lenis.stop();
+    } else {
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
     }
 
     // Expose lenis instance globally for scroll-lock coordination
@@ -77,10 +86,26 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
       window.removeEventListener("pageshow", handlePageShow);
       gsap.ticker.remove(updateTicker);
       lenis.destroy();
+      lenisRef.current = null;
     };
   }, []);
+
+  // When navigating routes, ensure non-home pages have scrolling completely enabled
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    if (pathname !== "/") {
+      (window as unknown as { heroScrollLocked?: boolean }).heroScrollLocked = false;
+      (window as unknown as { serviceDrawerOpen?: boolean }).serviceDrawerOpen = false;
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+      lenisRef.current?.start();
+      ScrollTrigger.refresh();
+    }
+  }, [pathname]);
 
   return <>{children}</>;
 }
 
 export default SmoothScroll;
+

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ServiceItem, getAdjacentServices } from "@/data/service";
@@ -15,6 +15,16 @@ interface ServiceDetailViewProps {
 
 export function ServiceDetailView({ service }: ServiceDetailViewProps) {
   const { prev, next } = getAdjacentServices(service.id);
+
+  // Ensure scroll is unlocked and active on direct page visits / new tabs
+  useEffect(() => {
+    (window as unknown as { heroScrollLocked?: boolean }).heroScrollLocked = false;
+    (window as unknown as { serviceDrawerOpen?: boolean }).serviceDrawerOpen = false;
+    document.body.style.overflow = "";
+    document.documentElement.style.overflow = "";
+    const lenis = (window as unknown as { lenis?: { start: () => void } }).lenis;
+    lenis?.start();
+  }, []);
 
   return (
     <div className="relative min-h-screen bg-[#09090b] text-zinc-100 selection:bg-[var(--brand-cyan)] selection:text-black overflow-x-hidden">

@@ -212,16 +212,29 @@ export function ServiceDrawer({
             </h2>
           </div>
 
-          {/* Showcase Image Frame */}
+          {/* Showcase Media Frame */}
           <div className="relative aspect-[16/9] sm:aspect-[21/9] w-full rounded-xl sm:rounded-2xl overflow-hidden border border-white/15 bg-gradient-to-b from-white/[0.05] to-black/60 shadow-[0_0_40px_rgba(0,181,226,0.1)]">
-            <Image
-              src={activeService.image}
-              alt={activeService.title}
-              fill
-              className="object-cover object-center"
-              sizes="(max-width: 640px) 100vw, 600px"
-              priority
-            />
+            {activeService.video ? (
+              <video
+                src={activeService.video}
+                poster={activeService.image}
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="auto"
+                className="w-full h-full object-cover object-center"
+              />
+            ) : (
+              <Image
+                src={activeService.image}
+                alt={activeService.title}
+                fill
+                className="object-cover object-center"
+                sizes="(max-width: 640px) 100vw, 600px"
+                priority
+              />
+            )}
             {/* Ambient vignette overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-[#09090b] via-black/20 to-transparent pointer-events-none" />
           </div>

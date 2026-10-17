@@ -49,44 +49,36 @@ export function ServiceDetailView({ service }: ServiceDetailViewProps) {
       {/* MAIN CONTENT                                                       */}
       {/* ─────────────────────────────────────────────────────────────────── */}
       <main className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-10 pt-24 sm:pt-32 lg:pt-36 pb-16 sm:pb-24 lg:pb-28">
-        {/* Breadcrumbs */}
-        <div className="flex flex-wrap items-center gap-1.5 sm:gap-3 mb-4 sm:mb-6">
-          <Link
-            href="/"
-            className="text-[11px] sm:text-xs text-zinc-400 hover:text-white transition-colors"
-          >
-            Home
-          </Link>
-          <span className="text-zinc-600 text-xs">/</span>
-          <Link
-            href="/#servicehome"
-            className="text-[11px] sm:text-xs text-zinc-400 hover:text-white transition-colors"
-          >
-            Services
-          </Link>
-          <span className="text-zinc-600 text-xs">/</span>
-          <span className="text-[11px] sm:text-xs text-[#00b5e2] font-medium">
-            {service.category || "Solution"}
-          </span>
-        </div>
-
         {/* Master Title */}
         <h1 className="text-2xl sm:text-4xl lg:text-5xl font-semibold text-white tracking-tight leading-[1.15] mb-8 sm:mb-12 lg:mb-14 max-w-4xl">
-          {service.title}
+          {service.pageHeading || service.title}
         </h1>
 
         {/* ───────────────────────────────────────────────────────────────── */}
-        {/* SHOWCASE IMAGE FRAME                                              */}
+        {/* SHOWCASE MEDIA FRAME                                              */}
         {/* ───────────────────────────────────────────────────────────────── */}
         <div className="relative mb-8 sm:mb-12 lg:mb-16">
           <div className="relative aspect-[16/10] sm:aspect-[21/9] w-full rounded-xl sm:rounded-3xl overflow-hidden border border-white/15 bg-gradient-to-b from-white/[0.05] to-black/60 shadow-[0_0_60px_rgba(0,181,226,0.12)]">
-            <Image
-              src={service.image}
-              alt={service.title}
-              fill
-              className="object-cover object-center"
-              priority
-            />
+            {service.video ? (
+              <video
+                src={service.video}
+                poster={service.image}
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="auto"
+                className="w-full h-full object-cover object-center"
+              />
+            ) : (
+              <Image
+                src={service.image}
+                alt={service.title}
+                fill
+                className="object-cover object-center"
+                priority
+              />
+            )}
             {/* Ambient vignette overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-[#09090b] via-black/20 to-transparent pointer-events-none" />
           </div>
@@ -200,64 +192,81 @@ export function ServiceDetailView({ service }: ServiceDetailViewProps) {
         })()}
 
         {/* ───────────────────────────────────────────────────────────────── */}
-        {/* KEY CAPABILITIES: HEADING & 3 BOXES (Desktop: 1 row of 3 boxes)   */}
+        {/* KEY CAPABILITIES: HEADING & BOXES                                */}
+        {/* Supports 2-box centered layout (aligned to middle) or 3-box grid  */}
         {/* ───────────────────────────────────────────────────────────────── */}
         {service.features && service.features.length > 0 && (
           <div className="mb-10 sm:mb-16 lg:mb-24">
-            {/* Heading above the boxes */}
-            <div className="max-w-3xl mb-6 sm:mb-8 lg:mb-10">
-              <h2 className="text-xl sm:text-3xl lg:text-4xl font-semibold tracking-tight text-white leading-tight">
-                {service.featuresHeading || "Core Engineering Capabilities"}
-              </h2>
-            </div>
+            <div className={service.features.length === 2 ? "max-w-5xl mx-auto" : ""}>
+              {/* Heading above the boxes */}
+              <div className="max-w-3xl mb-6 sm:mb-8 lg:mb-10">
+                <h2 className="text-xl sm:text-3xl lg:text-4xl font-semibold tracking-tight text-white leading-tight">
+                  {service.featuresHeading || "Core Engineering Capabilities"}
+                </h2>
+              </div>
 
-            {/* Desktop: exactly 3 boxes in a row (grid-cols-1 md:grid-cols-3) */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 items-stretch">
-              {service.features.map((feature, idx) => (
-                <div
-                  key={idx}
-                  className="relative rounded-xl sm:rounded-2xl lg:rounded-3xl bg-white/[0.02] border border-white/[0.08] hover:border-[#00b5e2]/40 p-4 sm:p-6 lg:p-8 flex flex-col justify-between transition-all duration-300 backdrop-blur-sm group hover:-translate-y-1 hover:shadow-[0_12px_36px_rgba(0,181,226,0.12)] overflow-hidden h-full"
-                >
-                  {/* Subtle top edge glass hairline highlight */}
-                  <div className="pointer-events-none absolute inset-x-5 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:via-[#00b5e2]/50 transition-colors duration-300" />
+              {/* Desktop: 2 boxes centered or 3 boxes in a row */}
+              <div
+                className={`grid gap-4 sm:gap-6 lg:gap-8 items-stretch ${
+                  service.features.length === 2
+                    ? "grid-cols-1 md:grid-cols-2"
+                    : "grid-cols-1 md:grid-cols-3"
+                }`}
+              >
+                {service.features.map((feature, idx) => (
+                  <div
+                    key={idx}
+                    className={`relative rounded-xl sm:rounded-2xl lg:rounded-3xl bg-white/[0.02] border border-white/[0.08] hover:border-[#00b5e2]/40 flex flex-col justify-between transition-all duration-300 backdrop-blur-sm group hover:-translate-y-1 hover:shadow-[0_12px_36px_rgba(0,181,226,0.12)] overflow-hidden h-full ${
+                      service.features && service.features.length === 2
+                        ? "p-5 sm:p-7 lg:p-9"
+                        : "p-4 sm:p-6 lg:p-8"
+                    }`}
+                  >
+                    {/* Subtle top edge glass hairline highlight */}
+                    <div className="pointer-events-none absolute inset-x-5 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:via-[#00b5e2]/50 transition-colors duration-300" />
 
-                  <div className="flex flex-col flex-1">
-                    {/* Box Title in Quicksand SemiBold */}
-                    <h3 className="text-sm sm:text-base lg:text-[19px] font-semibold text-white tracking-tight leading-snug mb-3.5 sm:mb-5 pb-2.5 sm:pb-3 border-b border-white/10 group-hover:text-cyan-100 transition-colors">
-                      {feature.title}
-                    </h3>
+                    <div className="flex flex-col flex-1">
+                      {/* Box Title in Quicksand SemiBold */}
+                      <h3 className="text-sm sm:text-base lg:text-[19px] font-semibold text-white tracking-tight leading-snug mb-3.5 sm:mb-5 pb-2.5 sm:pb-3 border-b border-white/10 group-hover:text-cyan-100 transition-colors">
+                        {feature.title}
+                      </h3>
 
-                    {/* Content: List items or description */}
-                    {feature.items && feature.items.length > 0 ? (
-                      <div className="flex flex-col flex-1">
-                        {feature.items.map((item, itemIdx) => (
-                          <div
-                            key={itemIdx}
-                            className="flex items-start gap-2.5 sm:gap-3.5 py-2.5 sm:py-3 border-b border-white/[0.07] last:border-b-0"
-                          >
-                            {feature.type === "numbered" ? (
-                              <span className="w-5 h-5 sm:w-6.5 sm:h-6.5 rounded-full bg-[#00b5e2] text-black font-semibold text-[11px] sm:text-xs flex items-center justify-center shrink-0 shadow-[0_0_10px_rgba(0,181,226,0.35)] mt-0.5">
-                                {itemIdx + 1}
+                      {/* Content: List items or description */}
+                      {feature.items && feature.items.length > 0 ? (
+                        <div className="flex flex-col flex-1">
+                          {feature.items.map((item, itemIdx) => (
+                            <div
+                              key={itemIdx}
+                              className={`flex items-start gap-2.5 sm:gap-3.5 border-b border-white/[0.07] last:border-b-0 ${
+                                service.features && service.features.length === 2
+                                  ? "py-3 sm:py-3.5"
+                                  : "py-2.5 sm:py-3"
+                              }`}
+                            >
+                              {feature.type === "numbered" ? (
+                                <span className="w-5 h-5 sm:w-6.5 sm:h-6.5 rounded-full bg-[#00b5e2] text-black font-semibold text-[11px] sm:text-xs flex items-center justify-center shrink-0 shadow-[0_0_10px_rgba(0,181,226,0.35)] mt-0.5">
+                                  {itemIdx + 1}
+                                </span>
+                              ) : (
+                                <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[#00b5e2]/15 border border-[#00b5e2]/30 flex items-center justify-center shrink-0 mt-0.5">
+                                  <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#00b5e2]" strokeWidth={2.5} />
+                                </div>
+                              )}
+                              <span className="text-xs sm:text-[13.5px] text-zinc-200 font-normal leading-relaxed pt-0.5">
+                                {item}
                               </span>
-                            ) : (
-                              <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[#00b5e2]/15 border border-[#00b5e2]/30 flex items-center justify-center shrink-0 mt-0.5">
-                                <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#00b5e2]" strokeWidth={2.5} />
-                              </div>
-                            )}
-                            <span className="text-xs sm:text-[13.5px] text-zinc-200 font-normal leading-relaxed pt-0.5">
-                              {item}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    ) : feature.description ? (
-                      <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed font-normal">
-                        {feature.description}
-                      </p>
-                    ) : null}
+                            </div>
+                          ))}
+                        </div>
+                      ) : feature.description ? (
+                        <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed font-normal">
+                          {feature.description}
+                        </p>
+                      ) : null}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         )}

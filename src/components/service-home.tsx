@@ -623,9 +623,20 @@ function MobileServiceCard({
       {/* Subtle brand glow on active */}
       <div className="pointer-events-none absolute -inset-[1px] rounded-[14px] opacity-0 group-[.is-active]:opacity-100 transition-opacity duration-400 bg-gradient-to-br from-[#00b5e2]/30 via-transparent to-transparent" />
 
-      {/* Media Frame (Image) */}
+      {/* Media Frame (Image or Video) */}
       <div className="relative z-10 w-full aspect-[16/9] max-h-[102px] sm:max-h-[112px] rounded-[8px] overflow-hidden bg-black/50 shrink-0 border border-white/5 pointer-events-none">
-        {hasImage ? (
+        {card.video ? (
+          <video
+            src={card.video}
+            poster={card.image}
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
+            className="mobile-card-img w-full h-full object-cover object-center pointer-events-none"
+          />
+        ) : hasImage ? (
           <img
             src={card.image}
             alt={card.title}
@@ -744,9 +755,24 @@ function CardContent({
         aria-hidden="true"
       />
 
-      {/* Media Frame (Image) */}
+      {/* Media Frame (Image or Video) */}
       <div className="relative z-10 w-full aspect-[16/10] max-h-[90px] sm:max-h-none rounded-[8px] sm:rounded-[10px] overflow-hidden bg-black/40 shrink-0 border border-white/5 pointer-events-none">
-        {hasImage ? (
+        {card.video ? (
+          <video
+            src={card.video}
+            poster={card.image}
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
+            className={`w-full h-full object-cover object-center pointer-events-none transition-all duration-500 ease-out ${
+              isHovered
+                ? "grayscale-0 scale-[1.04]"
+                : "grayscale-0 sm:grayscale sm:group-hover:grayscale-0"
+            }`}
+          />
+        ) : hasImage ? (
           <img
             src={card.image}
             alt={card.title}

@@ -23,13 +23,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
+  const displayTitle = service.pageHeading || service.title;
+
   return {
-    title: `${service.title} | Desire Digital UAE`,
+    title: `${displayTitle} | Desire Digital UAE`,
     description: service.description
       ? service.description.slice(0, 160)
       : "Desire Advertising specialized digital display and fabrication solutions.",
     openGraph: {
-      title: `${service.title} | Desire Digital UAE`,
+      title: `${displayTitle} | Desire Digital UAE`,
       description: service.description?.slice(0, 160),
       images: service.image ? [{ url: service.image }] : undefined,
     },

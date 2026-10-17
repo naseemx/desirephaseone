@@ -39,9 +39,11 @@ export interface ServiceItem {
   slug?: string;
   title: string;
   navbarTitle?: string; // Text displayed when hovered in the navbar dropdown
+  pageHeading?: string; // Dedicated page H1 heading override
   line?: 1 | 2;         // 1 for First Line (Top Row), 2 for Second Line (Bottom Row)
   row?: 1 | 2;          // Alias for line
   image: string;
+  video?: string;
   category?: string;
   description?: string;
   featuresHeading?: string;
@@ -59,13 +61,15 @@ export const SERVICES: ServiceItem[] = [
   {
     id: "customized-led-screens-solutions",
     title: "Customized LED Screens Solutions",
+    pageHeading: "Customized LED Display Solutions – Built to Your Vision",
     navbarTitle: "Customized LED Screens",
     line: 1,
     row: 1,
     image: "/servicehome/firstCard.jpeg",
+    video: "/video/customisedLedScreenSolutions.webm",
     category: "Custom Solutions",
     description:
-      "Transform your space with our fully customized LED display solutions. We offer full-cycle delivery, from conceptualization through fabrication, structural design, installation, and ongoing optimization which makes LED displays accessible for every architectural environment. Every custom-designed screen adapts to your unique space, whether indoor, outdoor, or specialized environments. Our expertise delivers unlimited visual customization, precise pixel pitches, advanced refresh rates, and innovative structural framing solutions.",
+      "At Desire, we don’t just supply displays—we engineer bespoke, high-impact visual experiences tailored precisely to your unique project requirements. Whether you need sleek interactive kiosks for indoor retail, vibrant transparent mesh displays, or massive outdoor high-beam billboards and hoardings, we deliver end-to-end perfection. Every installation is backed by fully customized, heavy-duty structural engineering, custom metal fabrication, and weather-resistant mounting frames designed to suit any architectural layout. From initial site survey and 3D visualization to custom cabinet fabrication, seamless installation, and long-term maintenance, we turn complex visual concepts into reliable, ultra-bright digital realities built to perform impeccably in any environment.",
     featuresHeading: "Customized LED Display Specifications & Applications",
     features: [
       {
@@ -76,6 +80,8 @@ export const SERVICES: ServiceItem[] = [
           "Flexible Design and Configuration",
           "Professional Grade Components",
           "AV and Control System Compatibility",
+          "High Brightness and Contrast Output",
+          "Energy Efficient Long Lasting Performance",
         ],
       },
       {
@@ -90,22 +96,7 @@ export const SERVICES: ServiceItem[] = [
           "Event venues and premium indoor environments",
         ],
       },
-      {
-        title: "Turnkey Engineering & Technical Assurance",
-        type: "checklist",
-        items: [
-          "In-House Precision CNC Metal Fabrication",
-          "Structural Load & UAE Civil Defense Compliance",
-          "Ultra-High 3840Hz+ Refresh Rate Calibration",
-          "Intelligent Thermal Management & Redundant Power",
-          "Modular Front & Rear Service Access",
-          "Direct UAE Warranty & 24/7 Technical Support",
-        ],
-      },
     ],
-    secondaryOverviewTitle: "Overview",
-    secondaryOverview:
-      "Our customized LED display solutions are engineered from the ground up to eliminate standard manufacturing constraints. From initial 3D site scanning, structural load calculations, and electrical schematics to custom CNC metal framing, installation, and ongoing color calibration, Desire Advertising manages every stage under one roof in the UAE. We collaborate directly with architects, interior designers, commercial developers, and brand managers to transform complex architectural concepts into high-reliability, show-stopping visual landmarks.",
   },
   {
     id: "smart-designed-flexible-displays",
@@ -601,9 +592,9 @@ export const SERVICES: ServiceItem[] = [
       "Transform your event presence with high-impact exhibition booths and custom kiosk manufacturing engineered for maximum visibility, delivering complete end-to-end event branding from structural fabrication to scalable, reusable booth solutions built for future events that elevate your brand image, engage target audiences effectively, and significantly boost your overall campaign return on investment across every trade show or corporate showcase through innovative, durable, and visually compelling structural design solutions tailored specifically to meet your unique commercial objectives and architectural specifications seamlessly.",
   },
   {
-    id: "interactive-dynamic-visual-displays",
-    title: "Interactive Dynamic Visual Displays",
-    navbarTitle: "Dynamic Visual Displays",
+    id: "Conference-display-counters",
+    title: "Conference Display Counters",
+    navbarTitle: "Conference Display Counters",
     line: 2,
     row: 2,
     image: "/servicehome/L_DISPLAYS.jpeg",
@@ -612,9 +603,9 @@ export const SERVICES: ServiceItem[] = [
       "Select from versatile straight, L-shaped, or U-shaped backdrops paired with premium roll-up banners, flags, POS setups, and high-definition pop-up elements designed for fast, seamless assembly that effectively engage trade show visitors and leave a lasting impression at every corporate venue, ensuring your brand message stands out with high-resolution visual clarity, exceptional durability, and effortless portability built to support continuous promotional campaigns across diverse commercial environments while maintaining a sleek, modern aesthetic that captures immediate attention everywhere.",
   },
   {
-    id: "custom-precision-architectural-signage",
-    title: "Custom Precision Architectural Signage",
-    navbarTitle: "Precision Architectural Signage",
+    id: "illuminated-outdoor-and-indoor-signs",
+    title: "Illuminated Outdoor and Indoor Signs",
+    navbarTitle: "Illuminated Outdoor and Indoor Signs",
     line: 2,
     row: 2,
     image: "/servicehome/L_SIGN.jpeg",
